@@ -1,0 +1,39 @@
+const express = require("express");
+const cors = require("cors");
+const morgan = require("morgan");
+const errorMiddleware = require("./middlewares/errorMiddleware");
+
+// Importar rutas
+const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
+const orderRoutes = require("./routes/orderRoutes");
+const kitchenRoutes = require("./routes/kitchenRoutes");
+
+const app = express();
+
+// Middlewares
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
+
+// Health check
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", message: "POTETOS ERP API is running" });
+});
+
+// Rutas API
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/kitchen", kitchenRoutes);
+
+// Manejo de errores
+app.use(errorMiddleware);
+
+module.exports = app;
