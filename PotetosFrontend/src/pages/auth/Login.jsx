@@ -8,8 +8,6 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { login, loading } = useAuthStore();
   const [formData, setFormData] = useState({
-    email: "admin@potetos.com",
-    password: "admin123",
   });
 
   const handleChange = (e) => {
@@ -33,7 +31,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background Image Overlay */}
       <div
         className="absolute inset-0 opacity-20"
@@ -42,25 +40,7 @@ export default function LoginPage() {
         }}
       />
 
-      {/* Logo Corner */}
-      <div className="absolute top-8 right-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-500 rounded-full shadow-lg">
-          <span className="text-3xl">🥔</span>
-        </div>
-      </div>
-
-      {/* Header Top Left */}
-      <div className="absolute top-8 left-8">
-        <h1 className="text-white text-3xl font-bold">Potetos</h1>
-      </div>
-
       <div className="w-full max-w-md relative z-10">
-        {/* Main Title */}
-        <div className="text-center mb-12">
-          <h2 className="text-5xl font-bold text-white mb-2">INICIAR SESIÓN</h2>
-          <div className="h-1 w-24 bg-orange-500 mx-auto rounded-full"></div>
-        </div>
-
         {/* Form Card */}
         <div className="bg-linear-to-b from-slate-800 to-slate-900 rounded-2xl shadow-2xl p-8 border border-slate-700 backdrop-blur-sm">
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -118,45 +98,7 @@ export default function LoginPage() {
               {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
             </button>
           </form>
-
-          <div className="mt-6 pt-6 border-t border-slate-600">
-            <p className="text-xs font-semibold text-gray-400 mb-4 text-center">
-              CREDENCIALES DE PRUEBA
-            </p>
-            <div className="space-y-3">
-              <div className="bg-blue-950 bg-opacity-50 p-3 rounded-lg border border-blue-700">
-                <p className="text-xs font-semibold text-blue-200">
-                  👤 Administrador
-                </p>
-                <p className="text-xs text-blue-300 font-mono">
-                  admin@potetos.com
-                </p>
-                <p className="text-xs text-blue-300 font-mono">admin123</p>
-              </div>
-              <div className="bg-green-950 bg-opacity-50 p-3 rounded-lg border border-green-700">
-                <p className="text-xs font-semibold text-green-200">
-                  🍽️ Mesero
-                </p>
-                <p className="text-xs text-green-300 font-mono">
-                  mesero@potetos.com
-                </p>
-                <p className="text-xs text-green-300 font-mono">mesero123</p>
-              </div>
-              <div className="bg-red-950 bg-opacity-50 p-3 rounded-lg border border-red-700">
-                <p className="text-xs font-semibold text-red-200">👨‍🍳 Chef</p>
-                <p className="text-xs text-red-300 font-mono">
-                  chef@potetos.com
-                </p>
-                <p className="text-xs text-red-300 font-mono">chef123</p>
-              </div>
-            </div>
-          </div>
         </div>
-
-        {/* Footer */}
-        <p className="text-center text-xs text-gray-500 mt-6">
-          © 2025 POTETOS. Todos los derechos reservados.
-        </p>
       </div>
     </div>
   );
