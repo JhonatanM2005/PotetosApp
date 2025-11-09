@@ -3,55 +3,49 @@ import { Star } from "lucide-react";
 export default function ProductCard({ product }) {
   return (
     <div className="group">
-      {/* Image Container */}
-      <div className="relative mb-4 rounded-2xl overflow-hidden h-64 bg-linear-to-br flex items-center justify-center">
-        <img
-          src={product.image || "/placeholder.svg"}
-          alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-        />
-      </div>
-
-      {/* Card Content - alternating backgrounds */}
+      {/* Unified Card container: image + content look like a single card */}
       <div
-        className={`p-6 rounded-xl ${
-          product.id % 2 === 0
-            ? "bg-linear-to-br from-orange-500 to-orange-600 text-white"
-            : "bg-linear-to-br from-gray-50 to-gray-100 text-gray-900"
+        className={`mx-auto rounded-2xl overflow-hidden transform transition-shadow duration-200 ${
+          product.id === 2 ? "-translate-y-6 z-20 shadow-2xl" : "shadow-lg"
         }`}
+        style={{ maxWidth: 360 }}
       >
-        <h3 className="font-bold text-lg mb-2">{product.name}</h3>
+        {/* Image Container (top, rounded top corners preserved by parent) */}
+        <div className={`h-64 flex items-center justify-center bg-gray-100`}>
+          <img
+            src={product.image || "/placeholder.svg"}
+            alt={product.name}
+            className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 ${
+              product.id === 2 ? "scale-100" : ""
+            }`}
+          />
+        </div>
 
-        <p
-          className={`text-sm mb-4 leading-relaxed ${
-            product.id % 2 === 0 ? "text-white/90" : "text-gray-600"
+        {/* Card Content - primary/secondary based on id. Bottom corners preserved by parent */}
+        <div
+          className={`p-6 ${
+            product.id === 2
+              ? "bg-linear-to-br from-secondary to-secondary text-primary"
+              : "bg-linear-to-br from-primary to-primary text-secondary"
           }`}
         >
-          {product.description}
-        </p>
+          <h3 className={`font-bold text-lg mb-2`}>{product.name}</h3>
 
-        <div className="flex items-center justify-between">
-          <span
-            className={`text-2xl font-bold ${
-              product.id % 2 === 0 ? "text-white" : "text-orange-500"
-            }`}
-          >
-            ${product.price}
-          </span>
+          <p className={`text-sm mb-4 leading-relaxed text-white/90`}>
+            {product.description}
+          </p>
 
-          {/* Rating Stars */}
-          <div className="flex gap-1">
-            {Array.from({ length: product.rating }).map((_, i) => (
-              <Star
-                key={i}
-                size={16}
-                className={
-                  product.id % 2 === 0
-                    ? "fill-white text-white"
-                    : "fill-orange-500 text-orange-500"
-                }
-              />
-            ))}
+          <div className="flex items-center justify-between">
+            <span className={`text-2xl font-bold text-white`}>
+              ${product.price}
+            </span>
+
+            {/* Rating Stars */}
+            <div className="flex gap-1">
+              {Array.from({ length: product.rating }).map((_, i) => (
+                <Star key={i} size={16} className={"fill-white text-white"} />
+              ))}
+            </div>
           </div>
         </div>
       </div>

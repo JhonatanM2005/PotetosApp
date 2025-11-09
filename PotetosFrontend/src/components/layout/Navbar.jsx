@@ -64,11 +64,11 @@ export default function Navbar() {
           </nav>
 
           {/* Right Section - User & Actions */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 text-secondary">
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition"
+              className="md:hidden p-2 hover:bg-secondary hover:text-primary rounded-lg transition"
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -118,8 +118,8 @@ export default function Navbar() {
                   to={item.href}
                   className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                     isActive(item.href)
-                      ? "text-orange-600 bg-orange-50 border-l-4 border-orange-600"
-                      : "text-gray-700 hover:text-orange-600 hover:bg-orange-50"
+                      ? "text-primary bg-orange-50 border-l-4 border-orange-600"
+                      : "text-gray-700 hover:text-orange-600 hover:bg-secondary/10"
                   }`}
                   onClick={() => setIsOpen(false)}
                 >
