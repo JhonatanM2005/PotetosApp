@@ -29,7 +29,7 @@ export default function Navbar() {
         { href: "/", label: "Inicio" },
         { href: "/menu", label: "Menú" },
         { href: "/reservations", label: "Reservas" },
-        { href: "#contact", label: "Nosotros" },
+        { href: "/about", label: "Nosotros" },
       ];
 
   const handleLogout = () => {

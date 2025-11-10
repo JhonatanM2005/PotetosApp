@@ -15,6 +15,7 @@ import Layout from "./components/layout/Layout";
 import Home from "./pages/public/Home";
 import MenuPage from "./pages/public/Menu";
 import ReservationsPage from "./pages/public/Reservations";
+import AboutPage from "./pages/public/About";
 
 // Auth Pages
 import LoginPage from "./pages/auth/Login";
@@ -56,6 +57,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/reservations" element={<ReservationsPage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/login" element={<LoginPage />} />
 
           {/* Protected Routes */}
