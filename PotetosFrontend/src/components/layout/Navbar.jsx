@@ -42,7 +42,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         <div className="flex justify-between items-center h-24">
           {/* Logo */}
-          <Link to="/dashboard" className="flex items-center gap-2 group">
+          <Link to="/" className="flex items-center gap-2 group">
             <img src={logo} alt="Potetos" className="h-14 w-auto" />
           </Link>
 
