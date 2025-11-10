@@ -28,8 +28,8 @@ export default function Navbar() {
     : [
         { href: "/", label: "Inicio" },
         { href: "/menu", label: "Menú" },
-        { href: "#about", label: "Nosotros" },
-        { href: "#contact", label: "Contacto" },
+        { href: "/reservations", label: "Reservas" },
+        { href: "#contact", label: "Nosotros" },
       ];
 
   const handleLogout = () => {

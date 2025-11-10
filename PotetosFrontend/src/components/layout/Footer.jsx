@@ -6,7 +6,7 @@ import tiktokSvg from "@/assets/images/TikTok.svg";
 
 export default function Footer() {
   return (
-    <footer className="bg-primary mt-20">
+    <footer className="bg-primary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* About */}
@@ -17,15 +17,9 @@ export default function Footer() {
             <p className="text-sm text-white mb-2">
               "Crujientes por fuera, irresistibles por dentro"
             </p>
-            <p className="text-xs text-white mb-2">
-              Medellín, Colombia
-            </p>
-            <p className="text-xs text-white mb-2">
-              +57 300 658 7200
-            </p>
-            <p className="text-xs text-white">
-              info@potatos.co
-            </p>
+            <p className="text-xs text-white mb-2">Medellín, Colombia</p>
+            <p className="text-xs text-white mb-2">+57 300 658 7200</p>
+            <p className="text-xs text-white">info@potatos.co</p>
           </div>
 
           {/* Explore */}
@@ -71,9 +65,21 @@ export default function Footer() {
             <h3 className="font-semibold text-secondary mb-4">Síguenos en</h3>
             <div className="flex gap-4">
               {[
-                { src: facebookSvg, href: "https://www.facebook.com", alt: "Facebook" },
-                { src: instagramSvg, href: "https://www.instagram.com", alt: "Instagram" },
-                { src: tiktokSvg, href: "https://www.tiktok.com", alt: "TikTok" },
+                {
+                  src: facebookSvg,
+                  href: "https://www.facebook.com",
+                  alt: "Facebook",
+                },
+                {
+                  src: instagramSvg,
+                  href: "https://www.instagram.com",
+                  alt: "Instagram",
+                },
+                {
+                  src: tiktokSvg,
+                  href: "https://www.tiktok.com",
+                  alt: "TikTok",
+                },
               ].map(({ src, href, alt }, index) => (
                 <a
                   key={index}

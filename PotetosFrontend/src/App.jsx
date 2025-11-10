@@ -14,6 +14,7 @@ import Layout from "./components/layout/Layout";
 // Public Pages
 import Home from "./pages/public/Home";
 import MenuPage from "./pages/public/Menu";
+import ReservationsPage from "./pages/public/Reservations";
 
 // Auth Pages
 import LoginPage from "./pages/auth/Login";
@@ -54,6 +55,7 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<MenuPage />} />
+          <Route path="/reservations" element={<ReservationsPage />} />
           <Route path="/login" element={<LoginPage />} />
 
           {/* Protected Routes */}
