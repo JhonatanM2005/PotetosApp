@@ -3,7 +3,7 @@ import imgHero from "@/assets/images/papas-fritas-crujientes-mano.png";
 
 export default function HeroSection() {
   return (
-    <section className="relative h-96 md:h-[500px] bg-linear-to-r from-gray-50 via-gray-50 to-gray-100 overflow-hidden">
+    <section className="relative h-96 md:h-[920px] bg-linear-to-r from-gray-50 via-gray-50 to-gray-100 overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img

@@ -1,6 +1,58 @@
 @import "tailwindcss";
 
+/* Poppins Font Faces */
+@font-face {
+  font-family: "Poppins";
+  src: url(./assets/fonts/Poppins-Light.woff2) format("woff2");
+  font-weight: 300;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url(./assets/fonts/Poppins-Regular.woff2) format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url(./assets/fonts/Poppins-Medium.woff2) format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url(./assets/fonts/Poppins-SemiBold.woff2) format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url(./assets/fonts/Poppins-Bold.woff2) format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url(./assets/fonts/Poppins-ExtraBold.woff2) format("woff2");
+  font-weight: 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url(./assets/fonts/Poppins-Black.woff2) format("woff2");
+  font-weight: 900;
+  font-display: swap;
+}
+
 @theme {
-    --color-primary: #060133;
-    --color-secondary: #F2BA52;
+  --color-primary: #060133;
+  --color-secondary: #f2ba52;
+
+  --font-sans: "Poppins", sans-serif;
 }

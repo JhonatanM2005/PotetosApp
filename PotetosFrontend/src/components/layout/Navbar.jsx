@@ -43,7 +43,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-24">
           {/* Logo */}
           <Link to="/dashboard" className="flex items-center gap-2 group">
-            <img src={logo} alt="PoTaTos" className="h-14 w-auto" />
+            <img src={logo} alt="Potetos" className="h-14 w-auto" />
           </Link>
 
           {/* Navigation - Desktop */}
