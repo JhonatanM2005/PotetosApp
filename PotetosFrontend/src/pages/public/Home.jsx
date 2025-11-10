@@ -7,8 +7,6 @@ export default function Home() {
     {
       id: 1,
       name: "POTETO RANCHERA",
-      description:
-        "Crujientes y doradas papas con queso mozzarella, salchicho ranchero, lactosa, mozzarella y sour cream",
       price: "26.000",
       rating: 5,
       image: rancheraImg,
@@ -16,8 +14,6 @@ export default function Home() {
     {
       id: 2,
       name: "POTETO RANCHERA",
-      description:
-        "Crujientes y doradas papas con queso mozzarella, salchicho ranchero, lactosa, mozzarella y sour cream",
       price: "26.000",
       rating: 5,
       image: rancheraImg,
@@ -25,8 +21,6 @@ export default function Home() {
     {
       id: 3,
       name: "POTETO RANCHERA",
-      description:
-        "Crujientes y doradas papas con queso mozzarella, salchicho ranchero, lactosa, mozzarella y sour cream",
       price: "26.000",
       rating: 5,
       image: rancheraImg,
