@@ -3,6 +3,7 @@ import { useAuthStore } from "../../store/authStore";
 import { User, Menu, X, LogOut, Settings } from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/images/logo.png";
+import userIcon from "@/assets/images/User.svg";
 
 export default function Navbar() {
   const location = useLocation();
@@ -26,7 +27,7 @@ export default function Navbar() {
       ]
     : [
         { href: "/", label: "Inicio" },
-        { href: "#menu", label: "Menú" },
+        { href: "/menu", label: "Menú" },
         { href: "#about", label: "Nosotros" },
         { href: "#contact", label: "Contacto" },
       ];
@@ -76,13 +77,17 @@ export default function Navbar() {
             {isAuthenticated ? (
               <>
                 {/* User Info - Desktop */}
-                <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-orange-50 rounded-lg">
-                  <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-                    <User size={16} className="text-white" />
+                <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-secondary rounded-lg">
+                  <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
+                    <img
+                      src={userIcon}
+                      alt="User"
+                      className="w-8 h-8 rounded-full"
+                    />
                   </div>
                   <div className="flex flex-col">
-                    <p className="text-xs text-gray-500">Hola</p>
-                    <p className="text-sm font-semibold text-gray-800">
+                    <p className="text-xs text-primary">Hola</p>
+                    <p className="text-sm font-semibold text-primary">
                       {user?.name}
                     </p>
                   </div>
@@ -100,9 +105,9 @@ export default function Navbar() {
             ) : (
               <Link
                 to="/login"
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-orange-600 text-white hover:bg-orange-700 transition-colors shadow-md hover:shadow-lg"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary text-primary hover:opacity-90 transition-colors shadow-md hover:shadow-lg"
               >
-                <User size={18} />
+                <img src={userIcon} alt="User" className="w-6 h-6" />
               </Link>
             )}
           </div>

@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Home from "@/pages/public/Home";
+import MenuPage from "@/pages/public/Menu";
 import Layout from "@/components/layout/Layout";
 
 export default function AppRoutes() {
@@ -7,8 +8,8 @@ export default function AppRoutes() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
+        <Route path="/menu" element={<MenuPage />} />
         {/* Rutas públicas adicionales */}
-        {/* <Route path="/menu" element={<Menu />} /> */}
         {/* <Route path="/about" element={<About />} /> */}
       </Route>
 

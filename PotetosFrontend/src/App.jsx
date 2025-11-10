@@ -13,6 +13,7 @@ import Layout from "./components/layout/Layout";
 
 // Public Pages
 import Home from "./pages/public/Home";
+import MenuPage from "./pages/public/Menu";
 
 // Auth Pages
 import LoginPage from "./pages/auth/Login";
@@ -22,7 +23,6 @@ import DashboardPage from "./pages/dashboard/Dashboard";
 import KitchenPage from "./pages/dashboard/Kitchen";
 import UsersPage from "./pages/dashboard/Users";
 import OrdersPage from "./pages/dashboard/Orders";
-import MenuPage from "./pages/dashboard/Menu";
 
 // Protected Route
 const ProtectedRoute = ({ children, requiredRole = null }) => {
@@ -53,6 +53,7 @@ function App() {
         <Route element={<Layout />}>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
+          <Route path="/menu" element={<MenuPage />} />
           <Route path="/login" element={<LoginPage />} />
 
           {/* Protected Routes */}
@@ -88,15 +89,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <OrdersPage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/menu"
-            element={
-              <ProtectedRoute>
-                <MenuPage />
               </ProtectedRoute>
             }
           />
