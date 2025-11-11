@@ -94,7 +94,10 @@ export default function LoginPage() {
 
             {/* Forgot Password */}
             <div className="text-left px-2">
-              <Link to="/forgot-password" className="text-sm text-white hover:underline">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-white hover:underline"
+              >
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
