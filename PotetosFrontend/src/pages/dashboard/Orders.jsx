@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Plus, Search, Eye, Trash2, Edit2 } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Eye,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { orderService, dishService, tableService } from "../../services";
 import toast from "react-hot-toast";
@@ -11,6 +18,8 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewingOrder, setViewingOrder] = useState(null);
@@ -208,6 +217,25 @@ export default function OrdersPage() {
     return matchesStatus && matchesSearch;
   });
 
+  // Paginación
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentOrders = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const nextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+  const prevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  // Reset a página 1 cuando cambian los filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
+
   const statusColors = {
     pending: "bg-yellow-100 text-yellow-800",
     preparing: "bg-orange-100 text-orange-800",
@@ -238,21 +266,24 @@ export default function OrdersPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-primary">ÓRDENES</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-primary">
+            ÓRDENES
+          </h1>
           <button
             onClick={openCreateModal}
-            className="bg-primary text-secondary px-6 py-3 rounded-full font-bold hover:opacity-90 transition flex items-center gap-2"
+            className="bg-primary text-secondary px-4 md:px-6 py-2 md:py-3 rounded-full font-bold hover:opacity-90 transition flex items-center gap-2 w-full sm:w-auto justify-center"
           >
             <Plus size={20} />
-            Nueva Orden
+            <span className="hidden sm:inline">Nueva Orden</span>
+            <span className="sm:hidden">Nueva</span>
           </button>
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
+        <div className="bg-white rounded-2xl shadow-md p-4 md:p-6 mb-6 md:mb-8">
           {/* Search */}
           <div className="relative mb-4">
             <Search size={20} className="absolute left-3 top-3 text-gray-400" />
@@ -261,7 +292,7 @@ export default function OrdersPage() {
               placeholder="Buscar por número de orden o mesa..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
+              className="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none text-sm md:text-base"
             />
           </div>
 
@@ -269,7 +300,7 @@ export default function OrdersPage() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setStatusFilter(null)}
-              className={`px-4 py-2 rounded-full font-semibold transition ${
+              className={`px-3 md:px-4 py-2 rounded-full font-semibold transition text-sm md:text-base ${
                 statusFilter === null
                   ? "bg-secondary text-primary"
                   : "bg-gray-200 text-gray-800 hover:bg-gray-300"
@@ -281,7 +312,7 @@ export default function OrdersPage() {
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
-                className={`px-4 py-2 rounded-full font-semibold transition ${
+                className={`px-3 md:px-4 py-2 rounded-full font-semibold transition text-sm md:text-base ${
                   statusFilter === status
                     ? "bg-secondary text-primary"
                     : "bg-gray-200 text-gray-800 hover:bg-gray-300"
@@ -295,91 +326,162 @@ export default function OrdersPage() {
 
         {/* Orders Table */}
         <div className="bg-white rounded-2xl shadow-md overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-primary text-white">
-              <tr>
-                <th className="px-6 py-4 text-left"># Orden</th>
-                <th className="px-6 py-4 text-left">Mesa</th>
-                <th className="px-6 py-4 text-left">Items</th>
-                <th className="px-6 py-4 text-left">Total</th>
-                <th className="px-6 py-4 text-left">Estado</th>
-                <th className="px-6 py-4 text-left">Fecha</th>
-                <th className="px-6 py-4 text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[800px]">
+              <thead className="bg-primary text-white">
                 <tr>
-                  <td colSpan="7" className="text-center py-8 text-gray-500">
-                    Cargando...
-                  </td>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-sm md:text-base">
+                    # Orden
+                  </th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-sm md:text-base">
+                    Mesa
+                  </th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-sm md:text-base">
+                    Items
+                  </th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-sm md:text-base">
+                    Total
+                  </th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-sm md:text-base">
+                    Estado
+                  </th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-sm md:text-base">
+                    Fecha
+                  </th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-center text-sm md:text-base">
+                    Acciones
+                  </th>
                 </tr>
-              ) : filteredOrders.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="text-center py-8 text-gray-500">
-                    No hay órdenes disponibles
-                  </td>
-                </tr>
-              ) : (
-                filteredOrders.map((order) => (
-                  <tr key={order.id} className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-bold text-primary">
-                      #{order.order_number}
-                    </td>
-                    <td className="px-6 py-4 font-semibold">
-                      Mesa {order.table?.table_number || "N/A"}
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">
-                      {order.items?.length || 0} item(s)
-                    </td>
-                    <td className="px-6 py-4 font-bold text-secondary">
-                      ${parseFloat(order.total_amount || 0).toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <select
-                        value={order.status}
-                        onChange={(e) =>
-                          handleStatusChange(order.id, e.target.value)
-                        }
-                        className={`px-3 py-1 rounded-full text-xs font-semibold outline-none cursor-pointer ${
-                          statusColors[order.status] ||
-                          "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {statuses.map((status) => (
-                          <option key={status} value={status}>
-                            {statusLabels[status]}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">
-                      {new Date(order.created_at).toLocaleDateString("es-ES")}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() => openViewModal(order)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                          title="Ver detalles"
-                        >
-                          <Eye size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(order.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                          title="Eliminar"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td
+                      colSpan="7"
+                      className="text-center py-8 text-gray-500 text-sm md:text-base"
+                    >
+                      Cargando...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : currentOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="text-center py-8 text-gray-500">
+                      No hay órdenes disponibles
+                    </td>
+                  </tr>
+                ) : (
+                  currentOrders.map((order) => (
+                    <tr key={order.id} className="border-b hover:bg-gray-50">
+                      <td className="px-6 py-4 font-bold text-primary">
+                        #{order.order_number}
+                      </td>
+                      <td className="px-6 py-4 font-semibold">
+                        Mesa {order.table?.table_number || "N/A"}
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">
+                        {order.items?.length || 0} item(s)
+                      </td>
+                      <td className="px-6 py-4 font-bold text-secondary">
+                        ${parseFloat(order.total_amount || 0).toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4">
+                        <select
+                          value={order.status}
+                          onChange={(e) =>
+                            handleStatusChange(order.id, e.target.value)
+                          }
+                          className={`px-3 py-1 rounded-full text-xs font-semibold outline-none cursor-pointer ${
+                            statusColors[order.status] ||
+                            "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {statuses.map((status) => (
+                            <option key={status} value={status}>
+                              {statusLabels[status]}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">
+                        {new Date(order.created_at).toLocaleDateString("es-ES")}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-center gap-2">
+                          <button
+                            onClick={() => openViewModal(order)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                            title="Ver detalles"
+                          >
+                            <Eye size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(order.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                            title="Eliminar"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
+
+        {/* Paginación */}
+        {filteredOrders.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-md p-3 md:p-4 mt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-xs md:text-sm text-gray-600 text-center sm:text-left">
+                Mostrando {indexOfFirstItem + 1} a{" "}
+                {Math.min(indexOfLastItem, filteredOrders.length)} de{" "}
+                {filteredOrders.length} órdenes
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
+                  className={`p-2 rounded-lg transition ${
+                    currentPage === 1
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-primary hover:bg-gray-100"
+                  }`}
+                >
+                  <ChevronLeft size={18} className="md:w-5 md:h-5" />
+                </button>
+                <div className="flex gap-1">
+                  {[...Array(totalPages)].map((_, index) => (
+                    <button
+                      key={index + 1}
+                      onClick={() => paginate(index + 1)}
+                      className={`px-2 md:px-3 py-1 rounded-lg text-xs md:text-sm font-semibold transition ${
+                        currentPage === index + 1
+                          ? "bg-primary text-secondary"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={nextPage}
+                  disabled={currentPage === totalPages}
+                  className={`p-2 rounded-lg transition ${
+                    currentPage === totalPages
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-primary hover:bg-gray-100"
+                  }`}
+                >
+                  <ChevronRight size={18} className="md:w-5 md:h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Create Order Modal */}
         {showCreateModal && (

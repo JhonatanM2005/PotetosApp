@@ -81,39 +81,49 @@ export default function KitchenPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
-              <ChefHat size={32} />
-              ESTACIÓN DE COCINA
+            <h1 className="text-2xl md:text-3xl font-bold text-primary flex items-center gap-2">
+              <ChefHat size={28} className="md:w-8 md:h-8" />
+              <span className="hidden sm:inline">ESTACIÓN DE COCINA</span>
+              <span className="sm:hidden">COCINA</span>
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-sm md:text-base text-gray-600 mt-1">
               Gestiona las órdenes en preparación
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full lg:w-auto">
             <button
               onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2 ${
+              className={`px-3 md:px-4 py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2 text-sm md:text-base ${
                 autoRefresh
                   ? "bg-green-100 text-green-800"
                   : "bg-gray-200 text-gray-800"
               }`}
             >
               <RefreshCw
-                size={18}
-                className={autoRefresh ? "animate-spin" : ""}
+                size={16}
+                className={`md:w-[18px] md:h-[18px] ${
+                  autoRefresh ? "animate-spin" : ""
+                }`}
               />
-              {autoRefresh ? "Auto-actualización ON" : "Auto-actualización OFF"}
+              <span className="hidden md:inline">
+                {autoRefresh
+                  ? "Auto-actualización ON"
+                  : "Auto-actualización OFF"}
+              </span>
+              <span className="md:hidden">
+                Auto {autoRefresh ? "ON" : "OFF"}
+              </span>
             </button>
             <button
               onClick={fetchKitchenOrders}
-              className="bg-primary text-secondary px-6 py-3 rounded-full font-bold hover:opacity-90 transition flex items-center gap-2"
+              className="bg-primary text-secondary px-4 md:px-6 py-2 md:py-3 rounded-full font-bold hover:opacity-90 transition flex items-center justify-center gap-2"
             >
-              <RefreshCw size={20} />
-              Actualizar
+              <RefreshCw size={18} className="md:w-5 md:h-5" />
+              <span>Actualizar</span>
             </button>
           </div>
         </div>

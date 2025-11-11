@@ -11,6 +11,8 @@ import {
   ChefHat,
   Wallet,
   UserCircle,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { userService } from "../../services";
@@ -24,6 +26,8 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(8);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -159,6 +163,25 @@ export default function UsersPage() {
     return matchesRole && matchesSearch;
   });
 
+  // Paginación
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const nextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+  const prevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  // Reset a página 1 cuando cambian los filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, roleFilter]);
+
   const getRoleInfo = (role) => {
     const roles = {
       admin: {
@@ -191,21 +214,24 @@ export default function UsersPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-primary">USUARIOS</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-primary">
+            USUARIOS
+          </h1>
           <button
             onClick={() => openModal()}
-            className="bg-primary text-secondary px-6 py-3 rounded-full font-bold hover:opacity-90 transition flex items-center gap-2"
+            className="bg-primary text-secondary px-4 md:px-6 py-2 md:py-3 rounded-full font-bold hover:opacity-90 transition flex items-center gap-2 w-full sm:w-auto justify-center"
           >
             <Plus size={20} />
-            Nuevo Usuario
+            <span className="hidden sm:inline">Nuevo Usuario</span>
+            <span className="sm:hidden">Nuevo</span>
           </button>
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
+        <div className="bg-white rounded-2xl shadow-md p-4 md:p-6 mb-6 md:mb-8">
           {/* Search */}
           <div className="relative mb-4">
             <Search size={20} className="absolute left-3 top-3 text-gray-400" />
@@ -214,7 +240,7 @@ export default function UsersPage() {
               placeholder="Buscar usuarios por nombre o email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
+              className="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none text-sm md:text-base"
             />
           </div>
 
@@ -222,7 +248,7 @@ export default function UsersPage() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setRoleFilter(null)}
-              className={`px-4 py-2 rounded-full font-semibold transition ${
+              className={`px-3 md:px-4 py-2 rounded-full font-semibold transition text-sm md:text-base ${
                 roleFilter === null
                   ? "bg-secondary text-primary"
                   : "bg-gray-200 text-gray-800 hover:bg-gray-300"
@@ -253,105 +279,179 @@ export default function UsersPage() {
 
         {/* Users Table */}
         <div className="bg-white rounded-2xl shadow-md overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-primary text-white">
-              <tr>
-                <th className="px-6 py-4 text-left">Nombre</th>
-                <th className="px-6 py-4 text-left">Email</th>
-                <th className="px-6 py-4 text-left">Rol</th>
-                <th className="px-6 py-4 text-left">Teléfono</th>
-                <th className="px-6 py-4 text-left">Estado</th>
-                <th className="px-6 py-4 text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[700px]">
+              <thead className="bg-primary text-white">
                 <tr>
-                  <td colSpan="6" className="text-center py-8 text-gray-500">
-                    Cargando...
-                  </td>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-sm md:text-base">
+                    Nombre
+                  </th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-sm md:text-base">
+                    Email
+                  </th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-sm md:text-base">
+                    Rol
+                  </th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-sm md:text-base hidden lg:table-cell">
+                    Teléfono
+                  </th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-left text-sm md:text-base hidden sm:table-cell">
+                    Estado
+                  </th>
+                  <th className="px-4 md:px-6 py-3 md:py-4 text-center text-sm md:text-base">
+                    Acciones
+                  </th>
                 </tr>
-              ) : filteredUsers.length === 0 ? (
-                <tr>
-                  <td colSpan="6" className="text-center py-8 text-gray-500">
-                    No hay usuarios disponibles
-                  </td>
-                </tr>
-              ) : (
-                filteredUsers.map((user) => {
-                  const roleInfo = getRoleInfo(user.role);
-                  const RoleIcon = roleInfo.icon;
-                  return (
-                    <tr key={user.id} className="border-b hover:bg-gray-50">
-                      <td className="px-6 py-4 font-semibold">
-                        {user.name}
-                        {user.id === currentUser?.id && (
-                          <span className="ml-2 text-xs bg-secondary text-primary px-2 py-1 rounded-full font-bold">
-                            TÚ
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-gray-600">{user.email}</td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 w-fit ${roleInfo.color}`}
-                        >
-                          <RoleIcon size={14} />
-                          {roleInfo.name}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-gray-600">
-                        {user.phone || "—"}
-                      </td>
-                      <td className="px-6 py-4">
-                        <button
-                          onClick={() =>
-                            handleToggleStatus(user.id, user.is_active)
-                          }
-                          disabled={user.id === currentUser?.id}
-                          className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 transition ${
-                            user.is_active
-                              ? "bg-green-100 text-green-800 hover:bg-green-200"
-                              : "bg-red-100 text-red-800 hover:bg-red-200"
-                          } disabled:opacity-50 disabled:cursor-not-allowed`}
-                        >
-                          {user.is_active ? (
-                            <>
-                              <Check size={14} /> Activo
-                            </>
-                          ) : (
-                            <>
-                              <X size={14} /> Inactivo
-                            </>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td
+                      colSpan="6"
+                      className="text-center py-8 text-gray-500 text-sm md:text-base"
+                    >
+                      Cargando...
+                    </td>
+                  </tr>
+                ) : currentUsers.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="6"
+                      className="text-center py-8 text-gray-500 text-sm md:text-base"
+                    >
+                      No hay usuarios disponibles
+                    </td>
+                  </tr>
+                ) : (
+                  currentUsers.map((user) => {
+                    const roleInfo = getRoleInfo(user.role);
+                    const RoleIcon = roleInfo.icon;
+                    return (
+                      <tr key={user.id} className="border-b hover:bg-gray-50">
+                        <td className="px-4 md:px-6 py-3 md:py-4 font-semibold text-sm md:text-base">
+                          {user.name}
+                          {user.id === currentUser?.id && (
+                            <span className="ml-2 text-xs bg-secondary text-primary px-2 py-1 rounded-full font-bold">
+                              TÚ
+                            </span>
                           )}
-                        </button>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-center gap-2">
-                          <button
-                            onClick={() => openModal(user)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                            title="Editar"
+                        </td>
+                        <td className="px-6 py-4 text-gray-600">
+                          {user.email}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 w-fit ${roleInfo.color}`}
                           >
-                            <Edit2 size={18} />
-                          </button>
+                            <RoleIcon size={14} />
+                            {roleInfo.name}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600">
+                          {user.phone || "—"}
+                        </td>
+                        <td className="px-6 py-4">
                           <button
-                            onClick={() => handleDelete(user.id)}
+                            onClick={() =>
+                              handleToggleStatus(user.id, user.is_active)
+                            }
                             disabled={user.id === currentUser?.id}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Eliminar"
+                            className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 transition ${
+                              user.is_active
+                                ? "bg-green-100 text-green-800 hover:bg-green-200"
+                                : "bg-red-100 text-red-800 hover:bg-red-200"
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
                           >
-                            <Trash2 size={18} />
+                            {user.is_active ? (
+                              <>
+                                <Check size={14} /> Activo
+                              </>
+                            ) : (
+                              <>
+                                <X size={14} /> Inactivo
+                              </>
+                            )}
                           </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center gap-2">
+                            <button
+                              onClick={() => openModal(user)}
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                              title="Editar"
+                            >
+                              <Edit2 size={18} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(user.id)}
+                              disabled={user.id === currentUser?.id}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Eliminar"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
+
+        {/* Paginación */}
+        {filteredUsers.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-md p-3 md:p-4 mt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-xs md:text-sm text-gray-600 text-center sm:text-left">
+                Mostrando {indexOfFirstItem + 1} a{" "}
+                {Math.min(indexOfLastItem, filteredUsers.length)} de{" "}
+                {filteredUsers.length} usuarios
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
+                  className={`p-2 rounded-lg transition ${
+                    currentPage === 1
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-primary hover:bg-gray-100"
+                  }`}
+                >
+                  <ChevronLeft size={18} className="md:w-5 md:h-5" />
+                </button>
+                <div className="flex gap-1">
+                  {[...Array(totalPages)].map((_, index) => (
+                    <button
+                      key={index + 1}
+                      onClick={() => paginate(index + 1)}
+                      className={`px-2 md:px-3 py-1 rounded-lg text-xs md:text-sm font-semibold transition ${
+                        currentPage === index + 1
+                          ? "bg-primary text-secondary"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={nextPage}
+                  disabled={currentPage === totalPages}
+                  className={`p-2 rounded-lg transition ${
+                    currentPage === totalPages
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-primary hover:bg-gray-100"
+                  }`}
+                >
+                  <ChevronRight size={18} className="md:w-5 md:h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Modal */}
         {showModal && (

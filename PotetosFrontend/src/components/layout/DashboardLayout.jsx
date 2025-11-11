@@ -58,14 +58,14 @@ export default function DashboardLayout({ children }) {
   return (
     <div className="flex min-h-screen bg-white">
       {/* Sidebar */}
-      <aside className="w-16 bg-primary flex flex-col items-center py-6 gap-6">
+      <aside className="w-16 bg-primary flex flex-col items-center py-6 gap-6 fixed h-screen z-40">
         {/* Logo */}
         <div className="mb-4">
           <img src={logo} alt="Potetos" className="h-10 w-10 rounded-lg" />
         </div>
 
         {/* Menu Items */}
-        <nav className="flex flex-col gap-4 flex-1">
+        <nav className="flex flex-col gap-4 flex-1 overflow-y-auto scrollbar-hide">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -88,7 +88,7 @@ export default function DashboardLayout({ children }) {
         {/* Logout Button */}
         <button
           onClick={() => setShowLogoutModal(true)}
-          className="p-3 rounded-lg transition-all text-secondary hover:bg-red-600 hover:text-white"
+          className="p-3 rounded-lg transition-all text-secondary hover:bg-red-600 hover:text-white mt-auto"
           title="Cerrar Sesión"
         >
           <LogOut size={24} />
@@ -96,7 +96,7 @@ export default function DashboardLayout({ children }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 ml-16 overflow-x-hidden">{children}</main>
 
       {/* Logout Confirmation Modal */}
       {showLogoutModal && (
