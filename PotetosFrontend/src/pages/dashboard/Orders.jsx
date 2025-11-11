@@ -58,7 +58,9 @@ export default function OrdersPage() {
     } catch (error) {
       console.error("Error completo:", error);
       console.error("Error response:", error.response?.data);
-      toast.error(error.response?.data?.message || "Error al eliminar la orden");
+      toast.error(
+        error.response?.data?.message || "Error al eliminar la orden"
+      );
     }
   };
 
@@ -72,7 +74,9 @@ export default function OrdersPage() {
     } catch (error) {
       console.error("Error completo:", error);
       console.error("Error response:", error.response?.data);
-      toast.error(error.response?.data?.message || "Error al actualizar el estado");
+      toast.error(
+        error.response?.data?.message || "Error al actualizar el estado"
+      );
     }
   };
 
@@ -323,7 +327,7 @@ export default function OrdersPage() {
                       #{order.order_number}
                     </td>
                     <td className="px-6 py-4 font-semibold">
-                      Mesa {order.table?.table_number || 'N/A'}
+                      Mesa {order.table?.table_number || "N/A"}
                     </td>
                     <td className="px-6 py-4 text-gray-600">
                       {order.items?.length || 0} item(s)
@@ -379,7 +383,10 @@ export default function OrdersPage() {
 
         {/* Create Order Modal */}
         {showCreateModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
+          <div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4"
+            style={{ zIndex: 9999 }}
+          >
             <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto relative">
               <h2 className="text-2xl font-bold text-primary mb-6">
                 Nueva Orden
@@ -444,7 +451,8 @@ export default function OrdersPage() {
                         <option value="">Seleccionar plato</option>
                         {dishes.map((dish) => (
                           <option key={dish.id} value={dish.id}>
-                            {dish.name} - ${parseFloat(dish.price || 0).toFixed(2)}
+                            {dish.name} - $
+                            {parseFloat(dish.price || 0).toFixed(2)}
                           </option>
                         ))}
                       </select>
@@ -494,12 +502,16 @@ export default function OrdersPage() {
                           <div className="flex-1">
                             <p className="font-semibold">{item.name}</p>
                             <p className="text-sm text-gray-600">
-                              ${parseFloat(item.price || 0).toFixed(2)} x {item.quantity}
+                              ${parseFloat(item.price || 0).toFixed(2)} x{" "}
+                              {item.quantity}
                             </p>
                           </div>
                           <div className="flex items-center gap-4">
                             <p className="font-bold text-secondary">
-                              ${(parseFloat(item.price || 0) * item.quantity).toFixed(2)}
+                              $
+                              {(
+                                parseFloat(item.price || 0) * item.quantity
+                              ).toFixed(2)}
                             </p>
                             <button
                               type="button"
@@ -548,7 +560,10 @@ export default function OrdersPage() {
 
         {/* View Order Modal */}
         {showViewModal && viewingOrder && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
+          <div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4"
+            style={{ zIndex: 9999 }}
+          >
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto relative">
               <h2 className="text-2xl font-bold text-primary mb-6">
                 Detalles de Orden #{viewingOrder.order_number}
@@ -560,7 +575,7 @@ export default function OrdersPage() {
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Mesa</p>
                     <p className="font-bold text-lg">
-                      Mesa {viewingOrder.table?.table_number || 'N/A'}
+                      Mesa {viewingOrder.table?.table_number || "N/A"}
                     </p>
                   </div>
                   <div>
@@ -606,7 +621,10 @@ export default function OrdersPage() {
                           </p>
                         </div>
                         <p className="font-bold text-secondary">
-                          ${(parseFloat(item.price || 0) * item.quantity).toFixed(2)}
+                          $
+                          {(
+                            parseFloat(item.price || 0) * item.quantity
+                          ).toFixed(2)}
                         </p>
                       </div>
                     ))}
