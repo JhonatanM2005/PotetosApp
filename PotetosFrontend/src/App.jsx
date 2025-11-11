@@ -29,6 +29,7 @@ import KitchenPage from "./pages/dashboard/Kitchen";
 import UsersPage from "./pages/dashboard/Users";
 import OrdersPage from "./pages/dashboard/Orders";
 import MenuManagementPage from "./pages/dashboard/MenuManagement";
+import SettingsPage from "./pages/dashboard/Settings";
 
 // Protected Route
 const ProtectedRoute = ({ children, requiredRole = null }) => {
@@ -110,6 +111,15 @@ function App() {
           element={
             <ProtectedRoute>
               <MenuManagementPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
             </ProtectedRoute>
           }
         />

@@ -1,0 +1,446 @@
+import { useState, useEffect } from "react";
+import { useAuthStore } from "../../store/authStore";
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Lock,
+  Bell,
+  LogOut,
+  Edit2,
+  Shield,
+} from "lucide-react";
+import DashboardLayout from "../../components/layout/DashboardLayout";
+import api from "../../services/api";
+import toast from "react-hot-toast";
+
+export default function SettingsPage() {
+  const { user, logout } = useAuthStore();
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [userStats, setUserStats] = useState({
+    totalOrders: 0,
+    completedOrders: 0,
+    pendingOrders: 0,
+  });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  useEffect(() => {
+    fetchUserStats();
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        address: user.address || "",
+      });
+    }
+  }, [user]);
+
+  const fetchUserStats = async () => {
+    try {
+      const response = await api.get("/orders/stats");
+      setUserStats(response.data.stats || {});
+    } catch (error) {
+      console.error("Error al cargar estadísticas", error);
+    }
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    try {
+      await api.put("/users/profile", formData);
+      toast.success("Perfil actualizado correctamente");
+      setShowEditModal(false);
+    } catch (error) {
+      toast.error("Error al actualizar el perfil");
+      console.error(error);
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("Las contraseñas no coinciden");
+      return;
+    }
+    try {
+      await api.put("/users/password", {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+      toast.success("Contraseña actualizada correctamente");
+      setShowPasswordModal(false);
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      toast.error("Error al cambiar la contraseña");
+      console.error(error);
+    }
+  };
+
+  const handleLogout = () => {
+    if (confirm("¿Estás seguro de cerrar sesión?")) {
+      logout();
+    }
+  };
+
+  const getRoleName = (role) => {
+    const roles = {
+      admin: "Administrador Principal",
+      chef: "Chef",
+      waiter: "Mesero",
+    };
+    return roles[role] || role;
+  };
+
+  return (
+    <DashboardLayout>
+      <div className="p-8 bg-[#f5f3eb] min-h-screen">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-primary">MI PERFIL</h1>
+          <p className="text-gray-600">
+            Gestiona tu información personal y configuración
+          </p>
+        </div>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Profile Card */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+              {/* Header with gradient */}
+              <div className="h-32 bg-linear-to-r from-primary to-[#1a0d4d]"></div>
+
+              {/* Profile Info */}
+              <div className="px-8 pb-8">
+                {/* Avatar */}
+                <div className="flex justify-between items-start -mt-16 mb-6">
+                  <div className="bg-secondary rounded-full p-1">
+                    <div className="w-28 h-28 bg-secondary rounded-full flex items-center justify-center text-primary">
+                      <User size={48} strokeWidth={2} />
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowEditModal(true)}
+                    className="mt-20 bg-[#6b4fa0] text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition flex items-center gap-2"
+                  >
+                    <Edit2 size={16} />
+                    Editar Perfil
+                  </button>
+                </div>
+
+                {/* User Info */}
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                    {user?.name || "Usuario"}
+                  </h2>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Shield size={16} className="text-[#6b4fa0]" />
+                    <span className="text-[#6b4fa0] font-semibold">
+                      {getRoleName(user?.role)}
+                    </span>
+                    <span className="text-gray-400">•</span>
+                    <span className="text-gray-500">
+                      Miembro desde{" "}
+                      {user?.created_at
+                        ? new Date(user.created_at).toLocaleDateString("es-ES")
+                        : "2025"}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setShowPasswordModal(true)}
+                    className="text-[#6b4fa0] hover:underline text-sm font-semibold flex items-center gap-1"
+                  >
+                    <Lock size={14} />
+                    Cambiar Contraseña
+                  </button>
+                </div>
+
+                {/* Personal Information */}
+                <div className="bg-[#faf8f3] rounded-xl p-6">
+                  <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <User size={18} />
+                    Información Personal
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm text-gray-500">Nombre Completo</p>
+                      <p className="font-semibold text-gray-800">
+                        {user?.name || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Email</p>
+                      <p className="font-semibold text-gray-800">
+                        {user?.email || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Teléfono</p>
+                      <p className="font-semibold text-gray-800">
+                        {user?.phone || "No especificado"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Dirección</p>
+                      <p className="font-semibold text-gray-800">
+                        {user?.address || "No especificado"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar Cards */}
+          <div className="space-y-6">
+            {/* Estadísticas */}
+            <div className="bg-white rounded-2xl shadow-md p-6">
+              <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                📊 Estadísticas
+              </h3>
+              <div className="space-y-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600">Total Procesadas</p>
+                  <p className="text-3xl font-bold text-blue-600">
+                    {userStats.totalOrders || 1247}
+                  </p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600">Tareas Completadas</p>
+                  <p className="text-3xl font-bold text-green-600">
+                    {userStats.completedOrders || 856}
+                  </p>
+                </div>
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600">Tareas Pendientes</p>
+                  <p className="text-3xl font-bold text-orange-600">
+                    {userStats.pendingOrders || 1848}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Acciones Rápidas */}
+            <div className="bg-white rounded-2xl shadow-md p-6">
+              <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                ⚡ Acciones Rápidas
+              </h3>
+              <div className="space-y-2">
+                <button
+                  onClick={() => setShowEditModal(true)}
+                  className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition text-left"
+                >
+                  <Edit2 size={18} className="text-yellow-600" />
+                  <span className="font-semibold text-gray-700">
+                    Configuración
+                  </span>
+                </button>
+                <button className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition text-left">
+                  <Bell size={18} className="text-blue-600" />
+                  <span className="font-semibold text-gray-700">
+                    Notificaciones
+                  </span>
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 p-3 hover:bg-red-50 rounded-lg transition text-left"
+                >
+                  <LogOut size={18} className="text-red-600" />
+                  <span className="font-semibold text-red-600">
+                    Cerrar Sesión
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Edit Profile Modal */}
+        {showEditModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+              <h2 className="text-2xl font-bold text-primary mb-6">
+                Editar Perfil
+              </h2>
+              <form onSubmit={handleUpdateProfile} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Nombre Completo
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Teléfono
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Dirección
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) =>
+                      setFormData({ ...formData, address: e.target.value })
+                    }
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
+                  />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-primary text-secondary rounded-lg font-semibold hover:opacity-90 transition"
+                  >
+                    Guardar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Change Password Modal */}
+        {showPasswordModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+              <h2 className="text-2xl font-bold text-primary mb-6">
+                Cambiar Contraseña
+              </h2>
+              <form onSubmit={handleChangePassword} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Contraseña Actual
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordData.currentPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        currentPassword: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Nueva Contraseña
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordData.newPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        newPassword: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Confirmar Nueva Contraseña
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
+                    required
+                  />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPasswordModal(false);
+                      setPasswordData({
+                        currentPassword: "",
+                        newPassword: "",
+                        confirmPassword: "",
+                      });
+                    }}
+                    className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-primary text-secondary rounded-lg font-semibold hover:opacity-90 transition"
+                  >
+                    Cambiar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
+  );
+}
