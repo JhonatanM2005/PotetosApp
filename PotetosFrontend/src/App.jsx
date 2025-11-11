@@ -29,6 +29,8 @@ import KitchenPage from "./pages/dashboard/Kitchen";
 import UsersPage from "./pages/dashboard/Users";
 import OrdersPage from "./pages/dashboard/Orders";
 import MenuManagementPage from "./pages/dashboard/MenuManagement";
+import CategoriesPage from "./pages/dashboard/Categories";
+import TablesPage from "./pages/dashboard/Tables";
 import SettingsPage from "./pages/dashboard/Settings";
 
 // Protected Route
@@ -111,6 +113,24 @@ function App() {
           element={
             <ProtectedRoute>
               <MenuManagementPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/categories"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <CategoriesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/tables"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <TablesPage />
             </ProtectedRoute>
           }
         />

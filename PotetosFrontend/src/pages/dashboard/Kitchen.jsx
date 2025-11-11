@@ -1,163 +1,302 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../store/authStore";
-import { ArrowLeft, Clock, CheckCircle } from "lucide-react";
+import {
+  Clock,
+  CheckCircle,
+  ChefHat,
+  AlertCircle,
+  RefreshCw,
+} from "lucide-react";
+import DashboardLayout from "../../components/layout/DashboardLayout";
 import api from "../../services/api";
 import toast from "react-hot-toast";
 
 export default function KitchenPage() {
-  const navigate = useNavigate();
-  const { logout } = useAuthStore();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(true);
 
   useEffect(() => {
     fetchKitchenOrders();
-    // Actualizar cada 5 segundos
-    const interval = setInterval(fetchKitchenOrders, 5000);
-    return () => clearInterval(interval);
-  }, []);
+
+    // Auto-actualizar cada 5 segundos si está activado
+    let interval;
+    if (autoRefresh) {
+      interval = setInterval(fetchKitchenOrders, 5000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [autoRefresh]);
 
   const fetchKitchenOrders = async () => {
     try {
       const response = await api.get("/kitchen/orders");
       setOrders(response.data.orders || []);
+      setLoading(false);
     } catch (error) {
       console.error("Error al obtener órdenes:", error);
-    } finally {
       setLoading(false);
     }
   };
 
   const handleStatusChange = async (itemId, newStatus) => {
     try {
-      await api.patch(`/kitchen/items/${itemId}/status`, { status: newStatus });
-      toast.success("Estado actualizado");
+      await api.put(`/kitchen/items/${itemId}/status`, { status: newStatus });
+      toast.success("Estado actualizado correctamente");
       fetchKitchenOrders();
     } catch (error) {
       toast.error("Error al actualizar estado");
+      console.error(error);
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
+  const getStatusInfo = (status) => {
+    const statuses = {
+      pending: {
+        color: "bg-yellow-100 text-yellow-800",
+        label: "Pendiente",
+        icon: AlertCircle,
+      },
+      preparing: {
+        color: "bg-orange-100 text-orange-800",
+        label: "Preparando",
+        icon: Clock,
+      },
+      ready: {
+        color: "bg-green-100 text-green-800",
+        label: "Listo",
+        icon: CheckCircle,
+      },
+    };
+    return statuses[status] || statuses.pending;
   };
 
-  return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      {/* Header */}
-      <header className="bg-red-800 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            👨‍🍳 Estación de Cocina
-          </h1>
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="bg-white text-red-800 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-100 transition"
-          >
-            <ArrowLeft size={20} />
-            Volver
-          </button>
-        </div>
-      </header>
+  // Filtrar solo órdenes con items pendientes o en preparación
+  const activeOrders = orders.filter((order) =>
+    order.items?.some(
+      (item) => item.status === "pending" || item.status === "preparing"
+    )
+  );
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="text-xl text-gray-300">Cargando órdenes...</p>
-          </div>
-        ) : orders.length === 0 ? (
-          <div className="text-center py-12 bg-gray-800 rounded-lg">
-            <p className="text-xl text-gray-300">
-              ✅ No hay órdenes pendientes
+  return (
+    <DashboardLayout>
+      <div className="p-8">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
+              <ChefHat size={32} />
+              ESTACIÓN DE COCINA
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Gestiona las órdenes en preparación
             </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              className={`px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2 ${
+                autoRefresh
+                  ? "bg-green-100 text-green-800"
+                  : "bg-gray-200 text-gray-800"
+              }`}
+            >
+              <RefreshCw
+                size={18}
+                className={autoRefresh ? "animate-spin" : ""}
+              />
+              {autoRefresh ? "Auto-actualización ON" : "Auto-actualización OFF"}
+            </button>
+            <button
+              onClick={fetchKitchenOrders}
+              className="bg-primary text-secondary px-6 py-3 rounded-full font-bold hover:opacity-90 transition flex items-center gap-2"
+            >
+              <RefreshCw size={20} />
+              Actualizar
+            </button>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-2xl shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Órdenes Activas</p>
+                <p className="text-3xl font-bold text-primary">
+                  {activeOrders.length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <ChefHat size={24} className="text-blue-600" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">En Preparación</p>
+                <p className="text-3xl font-bold text-orange-600">
+                  {orders.reduce(
+                    (sum, order) =>
+                      sum +
+                      (order.items?.filter(
+                        (item) => item.status === "preparing"
+                      ).length || 0),
+                    0
+                  )}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                <Clock size={24} className="text-orange-600" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Pendientes</p>
+                <p className="text-3xl font-bold text-yellow-600">
+                  {orders.reduce(
+                    (sum, order) =>
+                      sum +
+                      (order.items?.filter((item) => item.status === "pending")
+                        .length || 0),
+                    0
+                  )}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                <AlertCircle size={24} className="text-yellow-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Orders Grid */}
+        {loading ? (
+          <div className="bg-white rounded-2xl shadow-md p-12 text-center">
+            <p className="text-gray-500 text-lg">Cargando órdenes...</p>
+          </div>
+        ) : activeOrders.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-md p-12 text-center">
+            <CheckCircle size={64} className="text-green-600 mx-auto mb-4" />
+            <p className="text-xl font-bold text-gray-800 mb-2">¡Todo listo!</p>
+            <p className="text-gray-500">No hay órdenes pendientes en cocina</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {orders.map((order) => (
+            {activeOrders.map((order) => (
               <div
                 key={order.id}
-                className="bg-gray-800 rounded-lg shadow-lg overflow-hidden border-l-4 border-orange-500"
+                className="bg-white rounded-2xl shadow-md overflow-hidden border-l-4 border-orange-500"
               >
-                <div className="p-4 bg-gray-700">
+                {/* Order Header */}
+                <div className="bg-primary text-white p-4">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-sm text-gray-400">
+                      <p className="text-sm text-secondary">
                         Orden #{order.order_number}
                       </p>
-                      <p className="text-lg font-bold">
-                        Mesa {order.table_id || "N/A"}
+                      <p className="text-xl font-bold">
+                        Mesa {order.table_number || "N/A"}
                       </p>
                     </div>
-                    <span className="bg-orange-600 text-white px-3 py-1 rounded text-sm font-semibold">
-                      {order.status}
-                    </span>
+                    <div className="text-right">
+                      <p className="text-xs text-secondary">Tiempo</p>
+                      <p className="text-sm font-semibold">
+                        {new Date(order.created_at).toLocaleTimeString(
+                          "es-ES",
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
+                {/* Order Items */}
                 <div className="p-4 space-y-3">
-                  {order.items?.map((item) => (
-                    <div
-                      key={item.id}
-                      className="bg-gray-700 p-3 rounded border border-gray-600"
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="font-semibold text-white">
-                            {item.dish_name}
-                          </p>
-                          <p className="text-sm text-gray-400">
-                            Cantidad: <strong>{item.quantity}</strong>
-                          </p>
+                  {order.items
+                    ?.filter(
+                      (item) =>
+                        item.status === "pending" || item.status === "preparing"
+                    )
+                    .map((item) => {
+                      const statusInfo = getStatusInfo(item.status);
+                      const StatusIcon = statusInfo.icon;
+
+                      return (
+                        <div
+                          key={item.id}
+                          className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200"
+                        >
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1">
+                              <p className="font-bold text-gray-800 mb-1">
+                                {item.dish_name}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                Cantidad:{" "}
+                                <span className="font-bold text-primary">
+                                  {item.quantity}x
+                                </span>
+                              </p>
+                            </div>
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${statusInfo.color}`}
+                            >
+                              <StatusIcon size={14} />
+                              {statusInfo.label}
+                            </span>
+                          </div>
+
+                          {item.notes && (
+                            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-2 mb-3">
+                              <p className="text-xs text-yellow-800 font-semibold">
+                                📝 Nota: {item.notes}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Action Buttons */}
+                          <div className="flex gap-2">
+                            {item.status === "pending" && (
+                              <button
+                                onClick={() =>
+                                  handleStatusChange(item.id, "preparing")
+                                }
+                                className="flex-1 bg-orange-600 hover:bg-orange-700 text-white py-2 px-3 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2"
+                              >
+                                <Clock size={16} />
+                                Comenzar
+                              </button>
+                            )}
+
+                            {item.status === "preparing" && (
+                              <button
+                                onClick={() =>
+                                  handleStatusChange(item.id, "ready")
+                                }
+                                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2"
+                              >
+                                <CheckCircle size={16} />
+                                Marcar Listo
+                              </button>
+                            )}
+                          </div>
                         </div>
-                        <span
-                          className={`px-2 py-1 rounded text-xs font-semibold ${
-                            item.status === "ready"
-                              ? "bg-green-600"
-                              : "bg-yellow-600"
-                          }`}
-                        >
-                          {item.status}
-                        </span>
-                      </div>
-
-                      {item.notes && (
-                        <p className="text-xs text-gray-300 italic mb-2">
-                          📝 {item.notes}
-                        </p>
-                      )}
-
-                      {item.status === "pending" && (
-                        <button
-                          onClick={() =>
-                            handleStatusChange(item.id, "preparing")
-                          }
-                          className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-1 px-2 rounded text-sm transition"
-                        >
-                          <Clock size={16} className="inline mr-1" />
-                          En preparación
-                        </button>
-                      )}
-
-                      {item.status === "preparing" && (
-                        <button
-                          onClick={() => handleStatusChange(item.id, "ready")}
-                          className="w-full bg-green-600 hover:bg-green-700 text-white py-1 px-2 rounded text-sm transition"
-                        >
-                          <CheckCircle size={16} className="inline mr-1" />
-                          Listo para servir
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                      );
+                    })}
                 </div>
               </div>
             ))}
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

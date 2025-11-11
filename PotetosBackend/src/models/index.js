@@ -4,6 +4,7 @@ const Category = require("./Category");
 const Dish = require("./Dish");
 const Order = require("./Order");
 const OrderItem = require("./OrderItem");
+const Table = require("./Table");
 
 // Relaciones
 // Dish - Category
@@ -13,6 +14,10 @@ Category.hasMany(Dish, { foreignKey: "category_id", as: "dishes" });
 // Order - User (waiter)
 Order.belongsTo(User, { foreignKey: "waiter_id", as: "waiter" });
 User.hasMany(Order, { foreignKey: "waiter_id", as: "orders" });
+
+// Order - Table
+Order.belongsTo(Table, { foreignKey: "table_id", as: "table" });
+Table.hasMany(Order, { foreignKey: "table_id", as: "orders" });
 
 // Order - OrderItems
 Order.hasMany(OrderItem, { foreignKey: "order_id", as: "items" });
@@ -29,4 +34,5 @@ module.exports = {
   Dish,
   Order,
   OrderItem,
+  Table,
 };

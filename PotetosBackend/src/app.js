@@ -8,6 +8,9 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const kitchenRoutes = require("./routes/kitchenRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
+const dishRoutes = require("./routes/dishRoutes");
+const tableRoutes = require("./routes/tableRoutes");
 
 const app = express();
 
@@ -32,6 +35,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/kitchen", kitchenRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/dishes", dishRoutes);
+app.use("/api/tables", tableRoutes);
 
 // Manejo de errores
 app.use(errorMiddleware);

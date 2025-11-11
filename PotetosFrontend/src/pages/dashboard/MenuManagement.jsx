@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit2, Trash2, Search } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, Eye, EyeOff } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
-import api from "../../services/api";
+import { dishService, categoryService } from "../../services";
 import toast from "react-hot-toast";
 
 export default function MenuManagementPage() {
@@ -17,6 +17,7 @@ export default function MenuManagementPage() {
     description: "",
     price: "",
     category_id: "",
+    preparation_time: 15,
     available: true,
   });
 
@@ -26,12 +27,12 @@ export default function MenuManagementPage() {
 
   const fetchData = async () => {
     try {
-      const [dishesRes, categoriesRes] = await Promise.all([
-        api.get("/dishes"),
-        api.get("/categories"),
+      const [dishesData, categoriesData] = await Promise.all([
+        dishService.getAll(),
+        categoryService.getAll(),
       ]);
-      setDishes(dishesRes.data.dishes || []);
-      setCategories(categoriesRes.data.categories || []);
+      setDishes(dishesData.dishes || []);
+      setCategories(categoriesData.categories || []);
     } catch (error) {
       toast.error("Error al cargar datos");
       console.error(error);
@@ -43,17 +44,27 @@ export default function MenuManagementPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const dishData = {
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        category_id: parseInt(formData.category_id),
+        preparation_time: parseInt(formData.preparation_time) || 15,
+        is_available: formData.available,
+        is_active: true,
+      };
+
       if (editingDish) {
-        await api.put(`/dishes/${editingDish.id}`, formData);
+        await dishService.update(editingDish.id, dishData);
         toast.success("Plato actualizado correctamente");
       } else {
-        await api.post("/dishes", formData);
+        await dishService.create(dishData);
         toast.success("Plato creado correctamente");
       }
       fetchData();
       closeModal();
     } catch (error) {
-      toast.error("Error al guardar el plato");
+      toast.error(error.response?.data?.message || "Error al guardar el plato");
       console.error(error);
     }
   };
@@ -61,11 +72,24 @@ export default function MenuManagementPage() {
   const handleDelete = async (id) => {
     if (!confirm("¿Estás seguro de eliminar este plato?")) return;
     try {
-      await api.delete(`/dishes/${id}`);
+      await dishService.delete(id);
       toast.success("Plato eliminado correctamente");
       fetchData();
     } catch (error) {
-      toast.error("Error al eliminar el plato");
+      toast.error(
+        error.response?.data?.message || "Error al eliminar el plato"
+      );
+      console.error(error);
+    }
+  };
+
+  const toggleAvailability = async (id) => {
+    try {
+      await dishService.toggleAvailability(id);
+      toast.success("Disponibilidad actualizada");
+      fetchData();
+    } catch (error) {
+      toast.error("Error al cambiar disponibilidad");
       console.error(error);
     }
   };
@@ -78,7 +102,8 @@ export default function MenuManagementPage() {
         description: dish.description || "",
         price: dish.price,
         category_id: dish.category_id,
-        available: dish.available,
+        preparation_time: dish.preparation_time || 15,
+        available: dish.is_available,
       });
     } else {
       setEditingDish(null);
@@ -87,6 +112,7 @@ export default function MenuManagementPage() {
         description: "",
         price: "",
         category_id: "",
+        preparation_time: 15,
         available: true,
       });
     }
@@ -101,6 +127,7 @@ export default function MenuManagementPage() {
       description: "",
       price: "",
       category_id: "",
+      preparation_time: 15,
       available: true,
     });
   };
@@ -124,7 +151,8 @@ export default function MenuManagementPage() {
             onClick={() => openModal()}
             className="bg-primary text-secondary px-6 py-3 rounded-full font-bold hover:opacity-90 transition flex items-center gap-2"
           >
-            <Plus size={20} />+ Nueva Orden
+            <Plus size={20} />
+            Nuevo Plato
           </button>
         </div>
 
@@ -204,25 +232,45 @@ export default function MenuManagementPage() {
                       {dish.description || "-"}
                     </td>
                     <td className="px-6 py-4 font-bold text-secondary">
-                      ${dish.price?.toFixed(2)}
+                      ${parseFloat(dish.price)?.toLocaleString("es-CO")}
                     </td>
                     <td className="px-6 py-4">
-                      {categories.find((c) => c.id === dish.category_id)
-                        ?.name || "-"}
+                      <span className="inline-flex items-center gap-1">
+                        {dish.category?.icon} {dish.category?.name || "-"}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          dish.available
+                          dish.is_available
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {dish.available ? "Disponible" : "No disponible"}
+                        {dish.is_available ? "Disponible" : "No disponible"}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex justify-center gap-2">
+                        <button
+                          onClick={() => toggleAvailability(dish.id)}
+                          className={`p-2 rounded-lg transition ${
+                            dish.is_available
+                              ? "text-orange-600 hover:bg-orange-50"
+                              : "text-green-600 hover:bg-green-50"
+                          }`}
+                          title={
+                            dish.is_available
+                              ? "Marcar no disponible"
+                              : "Marcar disponible"
+                          }
+                        >
+                          {dish.is_available ? (
+                            <EyeOff size={18} />
+                          ) : (
+                            <Eye size={18} />
+                          )}
+                        </button>
                         <button
                           onClick={() => openModal(dish)}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
@@ -283,20 +331,40 @@ export default function MenuManagementPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Precio
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={(e) =>
-                      setFormData({ ...formData, price: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
-                    required
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Precio ($)
+                    </label>
+                    <input
+                      type="number"
+                      step="100"
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Tiempo Prep. (min)
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.preparation_time}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          preparation_time: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -314,7 +382,7 @@ export default function MenuManagementPage() {
                     <option value="">Seleccionar categoría</option>
                     {categories.map((category) => (
                       <option key={category.id} value={category.id}>
-                        {category.name}
+                        {category.icon} {category.name}
                       </option>
                     ))}
                   </select>
