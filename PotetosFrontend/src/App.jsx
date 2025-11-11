@@ -28,6 +28,7 @@ import DashboardPage from "./pages/dashboard/Dashboard";
 import KitchenPage from "./pages/dashboard/Kitchen";
 import UsersPage from "./pages/dashboard/Users";
 import OrdersPage from "./pages/dashboard/Orders";
+import MenuManagementPage from "./pages/dashboard/MenuManagement";
 
 // Protected Route
 const ProtectedRoute = ({ children, requiredRole = null }) => {
@@ -54,7 +55,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Routes with Layout (Navbar + Footer) */}
+        {/* Routes with Layout (Navbar + Footer) - Public Pages */}
         <Route element={<Layout />}>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
@@ -65,44 +66,53 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/verify-code" element={<VerifyCodePage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
-
-          {/* Protected Routes */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/kitchen"
-            element={
-              <ProtectedRoute requiredRole="chef">
-                <KitchenPage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/users"
-            element={
-              <ProtectedRoute requiredRole="admin">
-                <UsersPage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/orders"
-            element={
-              <ProtectedRoute>
-                <OrdersPage />
-              </ProtectedRoute>
-            }
-          />
         </Route>
+
+        {/* Protected Routes - Without Layout (Dashboard has its own sidebar) */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/kitchen"
+          element={
+            <ProtectedRoute requiredRole="chef">
+              <KitchenPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <UsersPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <OrdersPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/menu"
+          element={
+            <ProtectedRoute>
+              <MenuManagementPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Redirect not found */}
         <Route path="*" element={<Navigate to="/" replace />} />
