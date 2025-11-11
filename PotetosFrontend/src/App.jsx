@@ -19,6 +19,9 @@ import AboutPage from "./pages/public/About";
 
 // Auth Pages
 import LoginPage from "./pages/auth/Login";
+import ForgotPasswordPage from "./pages/auth/ForgotPassword";
+import VerifyCodePage from "./pages/auth/VerifyCode";
+import ResetPasswordPage from "./pages/auth/ResetPassword";
 
 // Protected Pages
 import DashboardPage from "./pages/dashboard/Dashboard";
@@ -59,6 +62,9 @@ function App() {
           <Route path="/reservations" element={<ReservationsPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/verify-code" element={<VerifyCodePage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Protected Routes */}
           <Route
