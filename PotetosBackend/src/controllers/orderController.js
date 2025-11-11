@@ -11,8 +11,13 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Order must have at least one item' });
     }
 
+    // Generar número de orden único
+    const timestamp = Date.now().toString().slice(-8);
+    const orderNumber = `ORD-${timestamp}`;
+
     // Crear orden
     const order = await Order.create({
+      order_number: orderNumber,
       table_id,
       waiter_id: req.user.id,
       customer_name,
@@ -35,18 +40,21 @@ exports.createOrder = async (req, res) => {
         });
       }
 
+      const dishPrice = parseFloat(dish.price);
+      const subtotal = dishPrice * item.quantity;
+
       const orderItem = await OrderItem.create({
         order_id: order.id,
         dish_id: dish.id,
         dish_name: dish.name,
         quantity: item.quantity,
-        unit_price: dish.price,
-        subtotal: dish.price * item.quantity,
+        unit_price: dishPrice,
+        subtotal: subtotal,
         notes: item.notes,
         status: 'pending'
       });
 
-      totalAmount += orderItem.subtotal;
+      totalAmount += subtotal;
       orderItems.push(orderItem);
     }
 
@@ -85,6 +93,36 @@ exports.createOrder = async (req, res) => {
   }
 };
 
+// Obtener todos los pedidos
+exports.getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.findAll({
+      include: [
+        {
+          model: OrderItem,
+          as: 'items',
+          include: [{ model: Dish, as: 'dish' }]
+        },
+        {
+          model: Table,
+          as: 'table'
+        },
+        {
+          model: User,
+          as: 'waiter',
+          attributes: ['id', 'name']
+        }
+      ],
+      order: [['created_at', 'DESC']]
+    });
+
+    res.json({ orders });
+  } catch (error) {
+    console.error('Get all orders error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // Obtener pedidos activos
 exports.getActiveOrders = async (req, res) => {
   try {
@@ -116,6 +154,78 @@ exports.getActiveOrders = async (req, res) => {
     res.json({ orders });
   } catch (error) {
     console.error('Get orders error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Obtener pedido por ID
+exports.getOrderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const order = await Order.findByPk(id, {
+      include: [
+        {
+          model: OrderItem,
+          as: 'items',
+          include: [{ model: Dish, as: 'dish' }]
+        },
+        {
+          model: Table,
+          as: 'table'
+        },
+        {
+          model: User,
+          as: 'waiter',
+          attributes: ['id', 'name']
+        }
+      ]
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    res.json({ order });
+  } catch (error) {
+    console.error('Get order error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Eliminar pedido
+exports.deleteOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const order = await Order.findByPk(id, {
+      include: [{ model: Table, as: 'table' }]
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // No permitir eliminar órdenes completadas o pagadas
+    if (order.status === 'paid' || order.status === 'completed') {
+      return res.status(400).json({ 
+        message: 'Cannot delete completed or paid orders' 
+      });
+    }
+
+    // Liberar mesa si está ocupada
+    if (order.table_id) {
+      await Table.update(
+        { status: 'available', current_order_id: null },
+        { where: { id: order.table_id } }
+      );
+    }
+
+    await order.destroy();
+
+    res.json({ message: 'Order deleted successfully' });
+  } catch (error) {
+    console.error('Delete order error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -160,6 +270,26 @@ exports.updateOrderStatus = async (req, res) => {
     res.json({ message: 'Order status updated', order });
   } catch (error) {
     console.error('Update order error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Obtener estadísticas de órdenes
+exports.getOrderStats = async (req, res) => {
+  try {
+    const stats = {
+      total: await Order.count(),
+      pending: await Order.count({ where: { status: 'pending' } }),
+      preparing: await Order.count({ where: { status: 'preparing' } }),
+      ready: await Order.count({ where: { status: 'ready' } }),
+      delivered: await Order.count({ where: { status: 'delivered' } }),
+      paid: await Order.count({ where: { status: 'paid' } }),
+      cancelled: await Order.count({ where: { status: 'cancelled' } }),
+    };
+
+    res.json({ stats });
+  } catch (error) {
+    console.error('Get order stats error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

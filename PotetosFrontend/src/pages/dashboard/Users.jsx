@@ -13,7 +13,7 @@ import {
   UserCircle,
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
-import api from "../../services/api";
+import { userService } from "../../services";
 import toast from "react-hot-toast";
 
 export default function UsersPage() {
@@ -28,7 +28,7 @@ export default function UsersPage() {
     name: "",
     email: "",
     password: "",
-    role: "waiter",
+    role: "mesero",
     phone: "",
   });
 
@@ -38,8 +38,8 @@ export default function UsersPage() {
 
   const fetchUsers = async () => {
     try {
-      const response = await api.get("/users");
-      setUsers(response.data.users || []);
+      const data = await userService.getAll();
+      setUsers(data.users || []);
     } catch (error) {
       toast.error("Error al cargar usuarios");
       console.error(error);
@@ -64,7 +64,7 @@ export default function UsersPage() {
           updateData.password = formData.password;
         }
 
-        await api.put(`/users/${editingUser.id}`, updateData);
+        await userService.update(editingUser.id, updateData);
         toast.success("Usuario actualizado correctamente");
       } else {
         // Crear
@@ -72,7 +72,7 @@ export default function UsersPage() {
           toast.error("La contraseña es requerida");
           return;
         }
-        await api.post("/users", formData);
+        await userService.create(formData);
         toast.success("Usuario creado correctamente");
       }
 
@@ -99,7 +99,7 @@ export default function UsersPage() {
         name: "",
         email: "",
         password: "",
-        role: "waiter",
+        role: "mesero",
         phone: "",
       });
     }
@@ -113,7 +113,7 @@ export default function UsersPage() {
       name: "",
       email: "",
       password: "",
-      role: "waiter",
+      role: "mesero",
       phone: "",
     });
   };
@@ -126,7 +126,7 @@ export default function UsersPage() {
     if (!confirm("¿Estás seguro de eliminar este usuario?")) return;
 
     try {
-      await api.delete(`/users/${id}`);
+      await userService.delete(id);
       toast.success("Usuario eliminado correctamente");
       fetchUsers();
     } catch (error) {
@@ -142,7 +142,7 @@ export default function UsersPage() {
     }
 
     try {
-      await api.put(`/users/${id}/status`, { is_active: !currentStatus });
+      await userService.toggleStatus(id);
       toast.success(`Usuario ${currentStatus ? "desactivado" : "activado"}`);
       fetchUsers();
     } catch (error) {
@@ -167,12 +167,12 @@ export default function UsersPage() {
         color: "bg-purple-100 text-purple-800",
       },
       chef: { name: "Chef", icon: ChefHat, color: "bg-red-100 text-red-800" },
-      cashier: {
+      cajero: {
         name: "Cajero",
         icon: Wallet,
         color: "bg-green-100 text-green-800",
       },
-      waiter: {
+      mesero: {
         name: "Mesero",
         icon: UserCircle,
         color: "bg-blue-100 text-blue-800",
@@ -187,7 +187,7 @@ export default function UsersPage() {
     );
   };
 
-  const roles = ["admin", "chef", "cashier", "waiter"];
+  const roles = ["admin", "chef", "cajero", "mesero"];
 
   return (
     <DashboardLayout>
@@ -421,9 +421,9 @@ export default function UsersPage() {
                       className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
                       required
                     >
-                      <option value="waiter">Mesero</option>
+                      <option value="mesero">Mesero</option>
                       <option value="chef">Chef</option>
-                      <option value="cashier">Cajero</option>
+                      <option value="cajero">Cajero</option>
                       <option value="admin">Administrador</option>
                     </select>
                   </div>

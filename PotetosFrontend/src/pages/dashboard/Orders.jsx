@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Plus, Search, Eye, Trash2, Edit2 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
-import api from "../../services/api";
+import { orderService, dishService, tableService } from "../../services";
 import toast from "react-hot-toast";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [dishes, setDishes] = useState([]);
+  const [tables, setTables] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
@@ -14,7 +15,7 @@ export default function OrdersPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewingOrder, setViewingOrder] = useState(null);
   const [formData, setFormData] = useState({
-    table_number: "",
+    table_id: "",
     notes: "",
     items: [],
   });
@@ -27,15 +28,20 @@ export default function OrdersPage() {
 
   const fetchData = async () => {
     try {
-      const [ordersRes, dishesRes] = await Promise.all([
-        api.get("/orders"),
-        api.get("/dishes"),
+      console.log("Iniciando carga de datos...");
+      const [ordersData, dishesData, tablesData] = await Promise.all([
+        orderService.getAll(),
+        dishService.getAvailable(),
+        tableService.getAvailable(),
       ]);
-      setOrders(ordersRes.data.orders || []);
-      setDishes(dishesRes.data.dishes?.filter((d) => d.available) || []);
+      console.log("Datos recibidos:", { ordersData, dishesData, tablesData });
+      setOrders(ordersData.orders || []);
+      setDishes(dishesData.dishes || []);
+      setTables(tablesData.tables || []);
+      console.log("Estados actualizados correctamente");
     } catch (error) {
       toast.error("Error al cargar datos");
-      console.error(error);
+      console.error("Error en fetchData:", error);
     } finally {
       setLoading(false);
     }
@@ -44,23 +50,29 @@ export default function OrdersPage() {
   const handleDelete = async (id) => {
     if (!confirm("¿Estás seguro de eliminar esta orden?")) return;
     try {
-      await api.delete(`/orders/${id}`);
+      console.log("Eliminando orden con ID:", id);
+      const result = await orderService.delete(id);
+      console.log("Resultado de eliminación:", result);
       toast.success("Orden eliminada correctamente");
       fetchData();
     } catch (error) {
-      toast.error("Error al eliminar la orden");
-      console.error(error);
+      console.error("Error completo:", error);
+      console.error("Error response:", error.response?.data);
+      toast.error(error.response?.data?.message || "Error al eliminar la orden");
     }
   };
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await api.put(`/orders/${id}`, { status: newStatus });
+      console.log("Actualizando estado de orden:", id, "a:", newStatus);
+      const result = await orderService.updateStatus(id, newStatus);
+      console.log("Resultado de actualización:", result);
       toast.success("Estado actualizado correctamente");
       fetchData();
     } catch (error) {
-      toast.error("Error al actualizar el estado");
-      console.error(error);
+      console.error("Error completo:", error);
+      console.error("Error response:", error.response?.data);
+      toast.error(error.response?.data?.message || "Error al actualizar el estado");
     }
   };
 
@@ -75,8 +87,11 @@ export default function OrdersPage() {
   };
 
   const openCreateModal = () => {
+    console.log("Abriendo modal de nueva orden");
+    console.log("Platos disponibles:", dishes);
+    console.log("Mesas disponibles:", tables);
     setFormData({
-      table_number: "",
+      table_id: "",
       notes: "",
       items: [],
     });
@@ -88,7 +103,7 @@ export default function OrdersPage() {
   const closeCreateModal = () => {
     setShowCreateModal(false);
     setFormData({
-      table_number: "",
+      table_id: "",
       notes: "",
       items: [],
     });
@@ -125,7 +140,7 @@ export default function OrdersPage() {
           {
             dish_id: dish.id,
             name: dish.name,
-            price: dish.price,
+            price: parseFloat(dish.price || 0),
             quantity: quantity,
           },
         ],
@@ -144,8 +159,8 @@ export default function OrdersPage() {
   const handleCreateOrder = async (e) => {
     e.preventDefault();
 
-    if (!formData.table_number) {
-      toast.error("Ingresa el número de mesa");
+    if (!formData.table_id) {
+      toast.error("Selecciona una mesa");
       return;
     }
 
@@ -156,7 +171,7 @@ export default function OrdersPage() {
 
     try {
       const orderData = {
-        table_number: parseInt(formData.table_number),
+        table_id: parseInt(formData.table_id),
         notes: formData.notes,
         items: formData.items.map((item) => ({
           dish_id: item.dish_id,
@@ -164,12 +179,12 @@ export default function OrdersPage() {
         })),
       };
 
-      await api.post("/orders", orderData);
+      await orderService.create(orderData);
       toast.success("Orden creada correctamente");
       fetchData();
       closeCreateModal();
     } catch (error) {
-      toast.error("Error al crear la orden");
+      toast.error(error.response?.data?.message || "Error al crear la orden");
       console.error(error);
     }
   };
@@ -185,29 +200,37 @@ export default function OrdersPage() {
     const matchesStatus = !statusFilter || order.status === statusFilter;
     const matchesSearch =
       order.order_number?.toString().includes(searchTerm) ||
-      order.table_number?.toString().includes(searchTerm);
+      order.table?.table_number?.toString().includes(searchTerm);
     return matchesStatus && matchesSearch;
   });
 
   const statusColors = {
     pending: "bg-yellow-100 text-yellow-800",
-    confirmed: "bg-blue-100 text-blue-800",
     preparing: "bg-orange-100 text-orange-800",
     ready: "bg-green-100 text-green-800",
-    completed: "bg-gray-100 text-gray-800",
+    delivered: "bg-blue-100 text-blue-800",
+    paid: "bg-gray-100 text-gray-800",
     cancelled: "bg-red-100 text-red-800",
   };
 
   const statusLabels = {
     pending: "Pendiente",
-    confirmed: "Confirmada",
     preparing: "Preparando",
     ready: "Lista",
-    completed: "Completada",
+    delivered: "Entregada",
+    paid: "Pagada",
     cancelled: "Cancelada",
   };
 
   const statuses = Object.keys(statusLabels);
+
+  // Debug log
+  console.log("Estado del componente:", {
+    showCreateModal,
+    dishesCount: dishes.length,
+    tablesCount: tables.length,
+    ordersCount: orders.length,
+  });
 
   return (
     <DashboardLayout>
@@ -300,13 +323,13 @@ export default function OrdersPage() {
                       #{order.order_number}
                     </td>
                     <td className="px-6 py-4 font-semibold">
-                      Mesa {order.table_number}
+                      Mesa {order.table?.table_number || 'N/A'}
                     </td>
                     <td className="px-6 py-4 text-gray-600">
                       {order.items?.length || 0} item(s)
                     </td>
                     <td className="px-6 py-4 font-bold text-secondary">
-                      ${order.total?.toFixed(2) || "0.00"}
+                      ${parseFloat(order.total_amount || 0).toFixed(2)}
                     </td>
                     <td className="px-6 py-4">
                       <select
@@ -356,32 +379,38 @@ export default function OrdersPage() {
 
         {/* Create Order Modal */}
         {showCreateModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
+            <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto relative">
               <h2 className="text-2xl font-bold text-primary mb-6">
                 Nueva Orden
               </h2>
 
               <form onSubmit={handleCreateOrder} className="space-y-6">
-                {/* Table Number and Notes */}
+                {/* Table Selection and Notes */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Número de Mesa *
+                      Mesa *
                     </label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={formData.table_number}
+                    <select
+                      value={formData.table_id}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          table_number: e.target.value,
+                          table_id: e.target.value,
                         })
                       }
                       className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
                       required
-                    />
+                    >
+                      <option value="">Seleccionar mesa</option>
+                      {tables.map((table) => (
+                        <option key={table.id} value={table.id}>
+                          Mesa #{table.table_number} - {table.capacity} personas
+                          {table.location ? ` (${table.location})` : ""}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -415,7 +444,7 @@ export default function OrdersPage() {
                         <option value="">Seleccionar plato</option>
                         {dishes.map((dish) => (
                           <option key={dish.id} value={dish.id}>
-                            {dish.name} - ${dish.price?.toFixed(2)}
+                            {dish.name} - ${parseFloat(dish.price || 0).toFixed(2)}
                           </option>
                         ))}
                       </select>
@@ -465,12 +494,12 @@ export default function OrdersPage() {
                           <div className="flex-1">
                             <p className="font-semibold">{item.name}</p>
                             <p className="text-sm text-gray-600">
-                              ${item.price?.toFixed(2)} x {item.quantity}
+                              ${parseFloat(item.price || 0).toFixed(2)} x {item.quantity}
                             </p>
                           </div>
                           <div className="flex items-center gap-4">
                             <p className="font-bold text-secondary">
-                              ${(item.price * item.quantity).toFixed(2)}
+                              ${(parseFloat(item.price || 0) * item.quantity).toFixed(2)}
                             </p>
                             <button
                               type="button"
@@ -519,8 +548,8 @@ export default function OrdersPage() {
 
         {/* View Order Modal */}
         {showViewModal && viewingOrder && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto relative">
               <h2 className="text-2xl font-bold text-primary mb-6">
                 Detalles de Orden #{viewingOrder.order_number}
               </h2>
@@ -531,7 +560,7 @@ export default function OrdersPage() {
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Mesa</p>
                     <p className="font-bold text-lg">
-                      Mesa {viewingOrder.table_number}
+                      Mesa {viewingOrder.table?.table_number || 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -556,7 +585,7 @@ export default function OrdersPage() {
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Total</p>
                     <p className="font-bold text-2xl text-secondary">
-                      ${viewingOrder.total?.toFixed(2) || "0.00"}
+                      ${parseFloat(viewingOrder.total_amount || 0).toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -577,7 +606,7 @@ export default function OrdersPage() {
                           </p>
                         </div>
                         <p className="font-bold text-secondary">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          ${(parseFloat(item.price || 0) * item.quantity).toFixed(2)}
                         </p>
                       </div>
                     ))}

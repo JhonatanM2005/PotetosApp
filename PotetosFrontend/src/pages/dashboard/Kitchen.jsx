@@ -7,7 +7,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
-import api from "../../services/api";
+import { kitchenService } from "../../services";
 import toast from "react-hot-toast";
 
 export default function KitchenPage() {
@@ -31,8 +31,8 @@ export default function KitchenPage() {
 
   const fetchKitchenOrders = async () => {
     try {
-      const response = await api.get("/kitchen/orders");
-      setOrders(response.data.orders || []);
+      const data = await kitchenService.getOrders();
+      setOrders(data.orders || []);
       setLoading(false);
     } catch (error) {
       console.error("Error al obtener órdenes:", error);
@@ -42,7 +42,7 @@ export default function KitchenPage() {
 
   const handleStatusChange = async (itemId, newStatus) => {
     try {
-      await api.put(`/kitchen/items/${itemId}/status`, { status: newStatus });
+      await kitchenService.updateItemStatus(itemId, newStatus);
       toast.success("Estado actualizado correctamente");
       fetchKitchenOrders();
     } catch (error) {
@@ -200,7 +200,7 @@ export default function KitchenPage() {
                         Orden #{order.order_number}
                       </p>
                       <p className="text-xl font-bold">
-                        Mesa {order.table_number || "N/A"}
+                        Mesa {order.table?.table_number || "N/A"}
                       </p>
                     </div>
                     <div className="text-right">

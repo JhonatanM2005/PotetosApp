@@ -154,9 +154,21 @@ export const tableService = {
 // ========== ORDERS ==========
 
 export const orderService = {
+  // Obtener todas las órdenes
+  getAll: async () => {
+    const response = await api.get("/orders");
+    return response.data;
+  },
+
   // Obtener órdenes activas
   getActive: async () => {
     const response = await api.get("/orders/active");
+    return response.data;
+  },
+
+  // Obtener orden por ID
+  getById: async (id) => {
+    const response = await api.get(`/orders/${id}`);
     return response.data;
   },
 
@@ -169,6 +181,18 @@ export const orderService = {
   // Actualizar estado de orden
   updateStatus: async (id, status) => {
     const response = await api.patch(`/orders/${id}/status`, { status });
+    return response.data;
+  },
+
+  // Eliminar orden
+  delete: async (id) => {
+    const response = await api.delete(`/orders/${id}`);
+    return response.data;
+  },
+
+  // Obtener estadísticas
+  getStats: async () => {
+    const response = await api.get("/orders/stats");
     return response.data;
   },
 };
@@ -231,6 +255,18 @@ export const userService = {
   // Activar/Desactivar usuario
   toggleStatus: async (id) => {
     const response = await api.patch(`/users/${id}/toggle-status`);
+    return response.data;
+  },
+
+  // Actualizar perfil del usuario actual
+  updateProfile: async (data) => {
+    const response = await api.patch("/auth/profile", data);
+    return response.data;
+  },
+
+  // Cambiar contraseña del usuario actual
+  changePassword: async (data) => {
+    const response = await api.patch("/auth/change-password", data);
     return response.data;
   },
 };

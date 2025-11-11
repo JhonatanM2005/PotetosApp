@@ -13,7 +13,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
-import api from "../../services/api";
+import { userService, orderService } from "../../services";
 import toast from "react-hot-toast";
 
 export default function SettingsPage() {
@@ -50,8 +50,8 @@ export default function SettingsPage() {
 
   const fetchUserStats = async () => {
     try {
-      const response = await api.get("/orders/stats");
-      setUserStats(response.data.stats || {});
+      const data = await orderService.getStats();
+      setUserStats(data.stats || {});
     } catch (error) {
       console.error("Error al cargar estadísticas", error);
     }
@@ -60,7 +60,7 @@ export default function SettingsPage() {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      await api.put("/users/profile", formData);
+      await userService.updateProfile(formData);
       toast.success("Perfil actualizado correctamente");
       setShowEditModal(false);
     } catch (error) {
@@ -76,7 +76,7 @@ export default function SettingsPage() {
       return;
     }
     try {
-      await api.put("/users/password", {
+      await userService.changePassword({
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });
@@ -101,7 +101,8 @@ export default function SettingsPage() {
     const roles = {
       admin: "Administrador Principal",
       chef: "Chef",
-      waiter: "Mesero",
+      mesero: "Mesero",
+      cajero: "Cajero",
     };
     return roles[role] || role;
   };
