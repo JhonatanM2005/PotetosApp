@@ -3,17 +3,18 @@ import { useAuthStore } from "../../store/authStore";
 import { useState } from "react";
 import {
   Home,
-  ShoppingCart,
-  Menu,
+  NotebookPen,
+  BookOpenText,
   Users,
   UtensilsCrossed,
   Settings,
   LogOut,
   AlertTriangle,
-  LayoutGrid,
-  TableProperties,
+  Grid2x2Plus,
   BarChart3,
+  Icon,
 } from "lucide-react";
+import { chairsTablePlatter } from "@lucide/lab";
 import logo from "@/assets/images/favicon-potetos.svg";
 
 export default function DashboardLayout({ children }) {
@@ -30,24 +31,6 @@ export default function DashboardLayout({ children }) {
       roles: ["admin", "gerente", "mesero", "chef"],
     },
     {
-      path: "/dashboard/orders",
-      icon: ShoppingCart,
-      label: "Órdenes",
-      roles: ["admin", "gerente", "mesero"],
-    },
-    {
-      path: "/dashboard/menu",
-      icon: Menu,
-      label: "Menú",
-      roles: ["admin", "gerente", "mesero"],
-    },
-    {
-      path: "/dashboard/kitchen",
-      icon: UtensilsCrossed,
-      label: "Cocina",
-      roles: ["chef"],
-    },
-    {
       path: "/dashboard/stats",
       icon: BarChart3,
       label: "Estadísticas",
@@ -55,15 +38,34 @@ export default function DashboardLayout({ children }) {
     },
     {
       path: "/dashboard/categories",
-      icon: LayoutGrid,
+      icon: Grid2x2Plus,
       label: "Categorías",
       roles: ["admin"],
     },
     {
+      path: "/dashboard/menu",
+      icon: BookOpenText,
+      label: "Menú",
+      roles: ["admin", "gerente", "mesero"],
+    },
+    {
       path: "/dashboard/tables",
-      icon: TableProperties,
+      icon: chairsTablePlatter,
       label: "Mesas",
       roles: ["admin", "gerente"],
+      isCustomIcon: true,
+    },
+    {
+      path: "/dashboard/orders",
+      icon: NotebookPen,
+      label: "Órdenes",
+      roles: ["admin", "gerente", "mesero"],
+    },
+    {
+      path: "/dashboard/kitchen",
+      icon: UtensilsCrossed,
+      label: "Cocina",
+      roles: ["chef"],
     },
     {
       path: "/dashboard/users",
@@ -76,7 +78,7 @@ export default function DashboardLayout({ children }) {
       icon: Settings,
       label: "Configuración",
       roles: ["admin", "gerente", "mesero", "chef"],
-    },
+    }
   ];
 
   // Filtrar items según el rol del usuario
@@ -103,7 +105,6 @@ export default function DashboardLayout({ children }) {
         {/* Menu Items */}
         <nav className="flex flex-col gap-4 flex-1 overflow-y-auto scrollbar-hide">
           {filteredMenuItems.map((item) => {
-            const Icon = item.icon;
             return (
               <button
                 key={item.path}
@@ -115,7 +116,11 @@ export default function DashboardLayout({ children }) {
                 }`}
                 title={item.label}
               >
-                <Icon size={24} />
+                {item.isCustomIcon ? (
+                  <Icon iconNode={item.icon} size={24} />
+                ) : (
+                  <item.icon size={24} />
+                )}
               </button>
             );
           })}
