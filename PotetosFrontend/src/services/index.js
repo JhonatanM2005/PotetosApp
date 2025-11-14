@@ -287,6 +287,22 @@ export const authService = {
   },
 };
 
+// ========== DASHBOARD ==========
+
+export const dashboardService = {
+  // Obtener estadísticas del dashboard
+  getStats: async (period = "week") => {
+    const response = await api.get("/dashboard/stats", { params: { period } });
+    return response.data;
+  },
+
+  // Obtener estadísticas del día
+  getTodayStats: async () => {
+    const response = await api.get("/dashboard/today");
+    return response.data;
+  },
+};
+
 export default {
   category: categoryService,
   dish: dishService,
@@ -295,4 +311,5 @@ export default {
   kitchen: kitchenService,
   user: userService,
   auth: authService,
+  dashboard: dashboardService,
 };

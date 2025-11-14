@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   LayoutGrid,
   TableProperties,
+  BarChart3,
 } from "lucide-react";
 import logo from "@/assets/images/favicon-potetos.svg";
 
@@ -22,31 +23,21 @@ export default function DashboardLayout({ children }) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const menuItems = [
-    { path: "/dashboard", icon: Home, label: "Dashboard" },
-    { path: "/orders", icon: ShoppingCart, label: "Órdenes" },
-    { path: "/dashboard/menu", icon: Menu, label: "Menú" },
+    { path: "/dashboard", icon: Home, label: "Dashboard", roles: ["admin", "gerente", "mesero", "chef"] },
+    { path: "/dashboard/orders", icon: ShoppingCart, label: "Órdenes", roles: ["admin", "gerente", "mesero"] },
+    { path: "/dashboard/menu", icon: Menu, label: "Menú", roles: ["admin", "gerente", "mesero"] },
+    { path: "/dashboard/kitchen", icon: UtensilsCrossed, label: "Cocina", roles: ["chef"] },
+    { path: "/dashboard/stats", icon: BarChart3, label: "Estadísticas", roles: ["admin", "gerente"] },
+    { path: "/dashboard/categories", icon: LayoutGrid, label: "Categorías", roles: ["admin"] },
+    { path: "/dashboard/tables", icon: TableProperties, label: "Mesas", roles: ["admin", "gerente"] },
+    { path: "/dashboard/users", icon: Users, label: "Usuarios", roles: ["admin"] },
+    { path: "/dashboard/settings", icon: Settings, label: "Configuración", roles: ["admin", "gerente", "mesero", "chef"] },
   ];
 
-  // Agregar item de cocina para chefs
-  if (user?.role === "chef") {
-    menuItems.push({
-      path: "/kitchen",
-      icon: UtensilsCrossed,
-      label: "Cocina",
-    });
-  }
-
-  // Agregar items de gestión para admins
-  if (user?.role === "admin") {
-    menuItems.push(
-      { path: "/dashboard/categories", icon: LayoutGrid, label: "Categorías" },
-      { path: "/dashboard/tables", icon: TableProperties, label: "Mesas" },
-      { path: "/users", icon: Users, label: "Usuarios" }
-    );
-  }
-
-  // Agregar configuración al final
-  menuItems.push({ path: "/settings", icon: Settings, label: "Configuración" });
+  // Filtrar items según el rol del usuario
+  const filteredMenuItems = menuItems.filter(item => 
+    item.roles.includes(user?.role)
+  );
 
   const isActive = (path) => location.pathname === path;
 
@@ -66,7 +57,7 @@ export default function DashboardLayout({ children }) {
 
         {/* Menu Items */}
         <nav className="flex flex-col gap-4 flex-1 overflow-y-auto scrollbar-hide">
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const Icon = item.icon;
             return (
               <button

@@ -11,6 +11,7 @@ const kitchenRoutes = require("./routes/kitchenRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const dishRoutes = require("./routes/dishRoutes");
 const tableRoutes = require("./routes/tableRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use("/api/kitchen", kitchenRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/dishes", dishRoutes);
 app.use("/api/tables", tableRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Manejo de errores
 app.use(errorMiddleware);
