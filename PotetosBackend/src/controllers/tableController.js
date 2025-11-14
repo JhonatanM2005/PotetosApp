@@ -196,7 +196,8 @@ exports.deleteTable = async (req, res) => {
     // No permitir eliminar mesas ocupadas
     if (table.status === "occupied") {
       return res.status(400).json({
-        message: "No se puede eliminar una mesa ocupada. Por favor, libérela primero.",
+        message:
+          "No se puede eliminar una mesa ocupada. Por favor, libérela primero.",
       });
     }
 
@@ -205,10 +206,11 @@ exports.deleteTable = async (req, res) => {
       const activeOrders = table.orders.filter(
         (order) => !["paid", "cancelled"].includes(order.status)
       );
-      
+
       if (activeOrders.length > 0) {
         return res.status(400).json({
-          message: "No se puede eliminar la mesa porque tiene órdenes activas. Complete o cancele las órdenes primero.",
+          message:
+            "No se puede eliminar la mesa porque tiene órdenes activas. Complete o cancele las órdenes primero.",
         });
       }
     }
@@ -218,17 +220,18 @@ exports.deleteTable = async (req, res) => {
     res.json({ message: "Table deleted successfully" });
   } catch (error) {
     console.error("Delete table error:", error);
-    
+
     // Manejar error de foreign key constraint
     if (error.name === "SequelizeForeignKeyConstraintError") {
       return res.status(400).json({
-        message: "No se puede eliminar la mesa porque tiene órdenes asociadas. Considere desactivarla en su lugar.",
+        message:
+          "No se puede eliminar la mesa porque tiene órdenes asociadas. Considere desactivarla en su lugar.",
       });
     }
-    
-    res.status(500).json({ 
+
+    res.status(500).json({
       message: "Error del servidor al eliminar la mesa",
-      error: error.message 
+      error: error.message,
     });
   }
 };
