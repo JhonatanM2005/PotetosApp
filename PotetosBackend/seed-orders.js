@@ -1,5 +1,13 @@
 require("dotenv").config();
-const { sequelize, User, Category, Dish, Order, OrderItem, Table } = require("./src/models");
+const {
+  sequelize,
+  User,
+  Category,
+  Dish,
+  Order,
+  OrderItem,
+  Table,
+} = require("./src/models");
 
 const seedTestOrders = async () => {
   try {
@@ -11,68 +19,73 @@ const seedTestOrders = async () => {
     const categories = await Category.findAll();
 
     if (!admin) {
-      console.log("❌ No se encontró el usuario admin. Ejecuta primero: npm run seed");
+      console.log(
+        "❌ No se encontró el usuario admin. Ejecuta primero: npm run seed"
+      );
       process.exit(1);
     }
 
     // Crear platos de prueba si no existen
     console.log("🍽️ Creando platos de prueba...");
-    const dishes = await Dish.bulkCreate([
-      {
-        name: "Papitas Francesas",
-        description: "Clásicas papitas fritas",
-        price: 8000,
-        category_id: categories[0].id,
-        preparation_time: 10,
-        is_available: true,
-        is_active: true,
-      },
-      {
-        name: "Papitas con Queso",
-        description: "Papitas con queso derretido",
-        price: 12000,
-        category_id: categories[0].id,
-        preparation_time: 12,
-        is_available: true,
-        is_active: true,
-      },
-      {
-        name: "Papitas BBQ",
-        description: "Papitas con salsa BBQ",
-        price: 10000,
-        category_id: categories[0].id,
-        preparation_time: 10,
-        is_available: true,
-        is_active: true,
-      },
-      {
-        name: "Salsa de Ajo",
-        description: "Deliciosa salsa de ajo",
-        price: 2000,
-        category_id: categories[1].id,
-        preparation_time: 2,
-        is_available: true,
-        is_active: true,
-      },
-      {
-        name: "Coca Cola",
-        description: "Bebida refrescante 350ml",
-        price: 3000,
-        category_id: categories[2].id,
-        preparation_time: 1,
-        is_available: true,
-        is_active: true,
-      },
-      {
-        name: "Brownie",
-        description: "Brownie de chocolate con helado",
-        price: 9000,
-        category_id: categories[3].id,
-        preparation_time: 5,
-        is_available: true,
-        is_active: true,
-      },
-    ], { updateOnDuplicate: ["name", "price"] });
+    const dishes = await Dish.bulkCreate(
+      [
+        {
+          name: "Papitas Francesas",
+          description: "Clásicas papitas fritas",
+          price: 8000,
+          category_id: categories[0].id,
+          preparation_time: 10,
+          is_available: true,
+          is_active: true,
+        },
+        {
+          name: "Papitas con Queso",
+          description: "Papitas con queso derretido",
+          price: 12000,
+          category_id: categories[0].id,
+          preparation_time: 12,
+          is_available: true,
+          is_active: true,
+        },
+        {
+          name: "Papitas BBQ",
+          description: "Papitas con salsa BBQ",
+          price: 10000,
+          category_id: categories[0].id,
+          preparation_time: 10,
+          is_available: true,
+          is_active: true,
+        },
+        {
+          name: "Salsa de Ajo",
+          description: "Deliciosa salsa de ajo",
+          price: 2000,
+          category_id: categories[1].id,
+          preparation_time: 2,
+          is_available: true,
+          is_active: true,
+        },
+        {
+          name: "Coca Cola",
+          description: "Bebida refrescante 350ml",
+          price: 3000,
+          category_id: categories[2].id,
+          preparation_time: 1,
+          is_available: true,
+          is_active: true,
+        },
+        {
+          name: "Brownie",
+          description: "Brownie de chocolate con helado",
+          price: 9000,
+          category_id: categories[3].id,
+          preparation_time: 5,
+          is_available: true,
+          is_active: true,
+        },
+      ],
+      { updateOnDuplicate: ["name", "price"] }
+    );
     console.log(`✅ Creados ${dishes.length} platos\n`);
 
     // Generar órdenes de los últimos 30 días
@@ -136,7 +149,9 @@ const seedTestOrders = async () => {
     console.log(`✅ Creadas ${ordersCreated} órdenes de prueba\n`);
 
     // Mostrar estadísticas
-    const totalSales = await Order.sum("total_amount", { where: { status: "paid" } });
+    const totalSales = await Order.sum("total_amount", {
+      where: { status: "paid" },
+    });
     const totalOrders = await Order.count({ where: { status: "paid" } });
     const avgTicket = totalSales / totalOrders;
 

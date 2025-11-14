@@ -23,19 +23,64 @@ export default function DashboardLayout({ children }) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const menuItems = [
-    { path: "/dashboard", icon: Home, label: "Dashboard", roles: ["admin", "gerente", "mesero", "chef"] },
-    { path: "/dashboard/orders", icon: ShoppingCart, label: "Órdenes", roles: ["admin", "gerente", "mesero"] },
-    { path: "/dashboard/menu", icon: Menu, label: "Menú", roles: ["admin", "gerente", "mesero"] },
-    { path: "/dashboard/kitchen", icon: UtensilsCrossed, label: "Cocina", roles: ["chef"] },
-    { path: "/dashboard/stats", icon: BarChart3, label: "Estadísticas", roles: ["admin", "gerente"] },
-    { path: "/dashboard/categories", icon: LayoutGrid, label: "Categorías", roles: ["admin"] },
-    { path: "/dashboard/tables", icon: TableProperties, label: "Mesas", roles: ["admin", "gerente"] },
-    { path: "/dashboard/users", icon: Users, label: "Usuarios", roles: ["admin"] },
-    { path: "/dashboard/settings", icon: Settings, label: "Configuración", roles: ["admin", "gerente", "mesero", "chef"] },
+    {
+      path: "/dashboard",
+      icon: Home,
+      label: "Dashboard",
+      roles: ["admin", "gerente", "mesero", "chef"],
+    },
+    {
+      path: "/dashboard/orders",
+      icon: ShoppingCart,
+      label: "Órdenes",
+      roles: ["admin", "gerente", "mesero"],
+    },
+    {
+      path: "/dashboard/menu",
+      icon: Menu,
+      label: "Menú",
+      roles: ["admin", "gerente", "mesero"],
+    },
+    {
+      path: "/dashboard/kitchen",
+      icon: UtensilsCrossed,
+      label: "Cocina",
+      roles: ["chef"],
+    },
+    {
+      path: "/dashboard/stats",
+      icon: BarChart3,
+      label: "Estadísticas",
+      roles: ["admin", "gerente"],
+    },
+    {
+      path: "/dashboard/categories",
+      icon: LayoutGrid,
+      label: "Categorías",
+      roles: ["admin"],
+    },
+    {
+      path: "/dashboard/tables",
+      icon: TableProperties,
+      label: "Mesas",
+      roles: ["admin", "gerente"],
+    },
+    {
+      path: "/dashboard/users",
+      icon: Users,
+      label: "Usuarios",
+      roles: ["admin"],
+    },
+    {
+      path: "/dashboard/settings",
+      icon: Settings,
+      label: "Configuración",
+      roles: ["admin", "gerente", "mesero", "chef"],
+    },
   ];
 
   // Filtrar items según el rol del usuario
-  const filteredMenuItems = menuItems.filter(item => 
+  const filteredMenuItems = menuItems.filter((item) =>
     item.roles.includes(user?.role)
   );
 

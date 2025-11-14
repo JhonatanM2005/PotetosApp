@@ -164,7 +164,10 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <InfoCard label="Rol" value={getRoleDisplayName(user?.role)} />
             <InfoCard label="Nombre" value={user?.name || "Usuario"} />
-            <InfoCard label="Email" value={user?.email || "usuario@potetos.com"} />
+            <InfoCard
+              label="Email"
+              value={user?.email || "usuario@potetos.com"}
+            />
           </div>
         </div>
 
@@ -177,7 +180,10 @@ export default function DashboardPage() {
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="bg-gray-200 animate-pulse rounded-2xl h-32"></div>
+                  <div
+                    key={i}
+                    className="bg-gray-200 animate-pulse rounded-2xl h-32"
+                  ></div>
                 ))}
               </div>
             ) : (
@@ -185,7 +191,11 @@ export default function DashboardPage() {
                 <StatCard
                   icon={DollarSign}
                   title="Ventas Hoy"
-                  value={todayStats ? `$${todayStats.totalSales.toLocaleString()}` : "$0"}
+                  value={
+                    todayStats
+                      ? `$${todayStats.totalSales.toLocaleString()}`
+                      : "$0"
+                  }
                   subtitle={`${todayStats?.ordersCount || 0} órdenes`}
                   gradient="from-primary to-primary/80"
                 />
@@ -206,7 +216,13 @@ export default function DashboardPage() {
                 <StatCard
                   icon={Clock}
                   title="Ticket Promedio"
-                  value={todayStats ? `$${Math.round(todayStats.averageOrderValue).toLocaleString()}` : "$0"}
+                  value={
+                    todayStats
+                      ? `$${Math.round(
+                          todayStats.averageOrderValue
+                        ).toLocaleString()}`
+                      : "$0"
+                  }
                   subtitle="Por orden"
                   gradient="from-secondary to-yellow-500"
                 />
@@ -265,16 +281,22 @@ export default function DashboardPage() {
         {/* Tips Section - Solo para chef */}
         {user?.role === "chef" && (
           <div className="bg-linear-to-br from-secondary to-yellow-500 rounded-2xl shadow-lg p-8">
-            <h3 className="text-2xl font-bold text-primary mb-4">👨‍🍳 Panel de Cocina</h3>
+            <h3 className="text-2xl font-bold text-primary mb-4">
+              👨‍🍳 Panel de Cocina
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-white/90 rounded-xl p-4">
-                <p className="font-semibold text-primary mb-2">🔥 Órdenes Pendientes</p>
+                <p className="font-semibold text-primary mb-2">
+                  🔥 Órdenes Pendientes
+                </p>
                 <p className="text-sm text-gray-700">
                   Visualiza las órdenes que están esperando ser preparadas.
                 </p>
               </div>
               <div className="bg-white/90 rounded-xl p-4">
-                <p className="font-semibold text-primary mb-2">⏱️ Tiempo de Preparación</p>
+                <p className="font-semibold text-primary mb-2">
+                  ⏱️ Tiempo de Preparación
+                </p>
                 <p className="text-sm text-gray-700">
                   Actualiza el estado de cada plato mientras cocinas.
                 </p>

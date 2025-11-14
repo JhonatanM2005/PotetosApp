@@ -23,7 +23,14 @@ export default function DashboardStats() {
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState("week");
 
-  const COLORS = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#98D8C8", "#F7DC6F"];
+  const COLORS = [
+    "#FF6B6B",
+    "#4ECDC4",
+    "#45B7D1",
+    "#FFA07A",
+    "#98D8C8",
+    "#F7DC6F",
+  ];
 
   useEffect(() => {
     fetchDashboardStats();
@@ -147,9 +154,7 @@ export default function DashboardStats() {
                     <YAxis tick={{ fontSize: 12 }} />
                     <Tooltip
                       formatter={(value, name) => [
-                        name === "total"
-                          ? formatCurrency(value)
-                          : value,
+                        name === "total" ? formatCurrency(value) : value,
                         name === "total" ? "Ventas" : "Órdenes",
                       ]}
                       labelFormatter={(date) =>
@@ -191,9 +196,7 @@ export default function DashboardStats() {
                     <YAxis tick={{ fontSize: 12 }} />
                     <Tooltip
                       formatter={(value, name) => [
-                        name === "totalSales"
-                          ? formatCurrency(value)
-                          : value,
+                        name === "totalSales" ? formatCurrency(value) : value,
                         name === "totalSales" ? "Ventas" : "Órdenes",
                       ]}
                       labelFormatter={formatHour}
@@ -232,12 +235,8 @@ export default function DashboardStats() {
                     />
                     <Tooltip
                       formatter={(value, name) => [
-                        name === "totalRevenue"
-                          ? formatCurrency(value)
-                          : value,
-                        name === "totalRevenue"
-                          ? "Ingresos"
-                          : "Cantidad",
+                        name === "totalRevenue" ? formatCurrency(value) : value,
+                        name === "totalRevenue" ? "Ingresos" : "Cantidad",
                       ]}
                     />
                     <Legend />
@@ -273,7 +272,10 @@ export default function DashboardStats() {
                             <div className="flex items-center">
                               <div
                                 className="w-2 h-2 rounded-full mr-3"
-                                style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                                style={{
+                                  backgroundColor:
+                                    COLORS[index % COLORS.length],
+                                }}
                               ></div>
                               <span className="text-sm font-medium text-gray-900">
                                 {dish.dishName}

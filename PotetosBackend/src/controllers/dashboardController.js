@@ -36,10 +36,7 @@ exports.getDashboardStats = async (req, res) => {
         },
       },
       attributes: [
-        [
-          sequelize.fn("DATE", sequelize.col("created_at")),
-          "date",
-        ],
+        [sequelize.fn("DATE", sequelize.col("created_at")), "date"],
         [sequelize.fn("SUM", sequelize.col("total_amount")), "total"],
         [sequelize.fn("COUNT", sequelize.col("id")), "orders_count"],
       ],
@@ -74,7 +71,14 @@ exports.getDashboardStats = async (req, res) => {
         [sequelize.fn("SUM", sequelize.col("quantity")), "total_quantity"],
         [sequelize.fn("SUM", sequelize.col("subtotal")), "total_revenue"],
       ],
-      group: ["dish_id", "dish_name", "dish.id", "dish.name", "dish.price", "dish.image_url"],
+      group: [
+        "dish_id",
+        "dish_name",
+        "dish.id",
+        "dish.name",
+        "dish.price",
+        "dish.image_url",
+      ],
       order: [[sequelize.fn("SUM", sequelize.col("quantity")), "DESC"]],
       limit: 10,
       raw: false,
@@ -91,12 +95,22 @@ exports.getDashboardStats = async (req, res) => {
         },
       },
       attributes: [
-        [sequelize.fn("EXTRACT", sequelize.literal("HOUR FROM created_at")), "hour"],
+        [
+          sequelize.fn("EXTRACT", sequelize.literal("HOUR FROM created_at")),
+          "hour",
+        ],
         [sequelize.fn("COUNT", sequelize.col("id")), "orders_count"],
         [sequelize.fn("SUM", sequelize.col("total_amount")), "total_sales"],
       ],
-      group: [sequelize.fn("EXTRACT", sequelize.literal("HOUR FROM created_at"))],
-      order: [[sequelize.fn("EXTRACT", sequelize.literal("HOUR FROM created_at")), "ASC"]],
+      group: [
+        sequelize.fn("EXTRACT", sequelize.literal("HOUR FROM created_at")),
+      ],
+      order: [
+        [
+          sequelize.fn("EXTRACT", sequelize.literal("HOUR FROM created_at")),
+          "ASC",
+        ],
+      ],
       raw: true,
     });
 
@@ -168,9 +182,9 @@ exports.getDashboardStats = async (req, res) => {
     });
   } catch (error) {
     console.error("Get dashboard stats error:", error);
-    res.status(500).json({ 
-      message: "Server error", 
-      error: error.message 
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
     });
   }
 };

@@ -1,7 +1,13 @@
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 
-export default function ModuleCard({ icon: Icon, title, description, path, iconBg = "bg-primary" }) {
+export default function ModuleCard({
+  icon: Icon,
+  title,
+  description,
+  path,
+  iconBg = "bg-primary",
+}) {
   const navigate = useNavigate();
 
   return (
