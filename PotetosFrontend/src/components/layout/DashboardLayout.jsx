@@ -78,7 +78,7 @@ export default function DashboardLayout({ children }) {
       icon: Settings,
       label: "Configuración",
       roles: ["admin", "gerente", "mesero", "chef"],
-    }
+    },
   ];
 
   // Filtrar items según el rol del usuario
