@@ -269,6 +269,12 @@ export const userService = {
     const response = await api.patch("/auth/change-password", data);
     return response.data;
   },
+
+  // Obtener estadísticas del usuario actual
+  getStats: async () => {
+    const response = await api.get("/auth/stats");
+    return response.data;
+  },
 };
 
 // ========== AUTH ==========
