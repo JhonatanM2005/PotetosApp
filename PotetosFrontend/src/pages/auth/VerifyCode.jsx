@@ -36,7 +36,6 @@ export default function VerifyCode() {
     }
     // Aquí iría la lógica para verificar el código
     toast.success("Código verificado correctamente");
-    console.log("Código:", verificationCode);
   };
 
   return (

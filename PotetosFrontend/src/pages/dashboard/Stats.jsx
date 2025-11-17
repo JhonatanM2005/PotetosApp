@@ -40,7 +40,6 @@ export default function DashboardStats() {
     try {
       setLoading(true);
       const response = await api.get(`/dashboard/stats?period=${period}`);
-      console.log("Stats response:", response.data); // Debug
       setStats(response.data);
     } catch (error) {
       console.error("Error fetching dashboard stats:", error);

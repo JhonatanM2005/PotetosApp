@@ -32,7 +32,6 @@ export default function ResetPassword() {
 
     // Aquí iría la lógica para cambiar la contraseña
     toast.success("Contraseña cambiada exitosamente");
-    console.log("Nueva contraseña:", formData.newPassword);
 
     // Redirigir al login después de cambiar la contraseña
     setTimeout(() => {

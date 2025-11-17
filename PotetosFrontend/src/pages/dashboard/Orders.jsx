@@ -62,14 +62,12 @@ export default function OrdersPage() {
   }, [token]);
 
   const handleOrderReady = (data) => {
-    console.log("Orden lista:", data);
     // Recargar órdenes cuando una está lista
     fetchData();
     toast.success(`¡Orden ${data.orderNumber} está lista!`);
   };
 
   const handleOrderStatusChanged = (data) => {
-    console.log("Estado de orden cambiado:", data);
     // Actualizar la lista de órdenes
     setOrders((prevOrders) =>
       prevOrders.map((order) =>
@@ -84,14 +82,12 @@ export default function OrdersPage() {
   };
 
   const handleNewOrder = (data) => {
-    console.log("Nueva orden creada:", data);
     // Recargar órdenes cuando se crea una nueva
     fetchData();
   };
 
   const fetchData = async () => {
     try {
-      console.log("Iniciando carga de datos...");
       const [ordersData, dishesData, availableTablesData, allTablesData] =
         await Promise.all([
           orderService.getAll(),
@@ -99,17 +95,10 @@ export default function OrdersPage() {
           tableService.getAvailable(), // Solo mesas disponibles para crear órdenes
           tableService.getAll(), // Todas las mesas para el filtro
         ]);
-      console.log("Datos recibidos:", {
-        ordersData,
-        dishesData,
-        availableTablesData,
-        allTablesData,
-      });
       setOrders(ordersData.orders || []);
       setDishes(dishesData.dishes || []);
       setTables(availableTablesData.tables || []);
       setAllTables(allTablesData.tables || []);
-      console.log("Estados actualizados correctamente");
     } catch (error) {
       toast.error("Error al cargar datos");
       console.error("Error en fetchData:", error);
@@ -121,9 +110,7 @@ export default function OrdersPage() {
   const handleDelete = async (id) => {
     if (!confirm("¿Estás seguro de eliminar esta orden?")) return;
     try {
-      console.log("Eliminando orden con ID:", id);
       const result = await orderService.delete(id);
-      console.log("Resultado de eliminación:", result);
       toast.success("Orden eliminada correctamente");
       fetchData();
     } catch (error) {
@@ -137,9 +124,7 @@ export default function OrdersPage() {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      console.log("Actualizando estado de orden:", id, "a:", newStatus);
       const result = await orderService.updateStatus(id, newStatus);
-      console.log("Resultado de actualización:", result);
       toast.success("Estado actualizado correctamente");
       fetchData();
     } catch (error) {
@@ -162,9 +147,6 @@ export default function OrdersPage() {
   };
 
   const openCreateModal = () => {
-    console.log("Abriendo modal de nueva orden");
-    console.log("Platos disponibles:", dishes);
-    console.log("Mesas disponibles:", tables);
     setFormData({
       table_id: "",
       notes: "",
@@ -319,14 +301,6 @@ export default function OrdersPage() {
   };
 
   const statuses = Object.keys(statusLabels);
-
-  // Debug log
-  console.log("Estado del componente:", {
-    showCreateModal,
-    dishesCount: dishes.length,
-    tablesCount: tables.length,
-    ordersCount: orders.length,
-  });
 
   return (
     <DashboardLayout>

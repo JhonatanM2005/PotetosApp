@@ -10,7 +10,6 @@ export default function ForgotPassword() {
     e.preventDefault();
     // Aquí iría la lógica para enviar el código
     toast.success("Código enviado a tu correo");
-    console.log("Enviar código a:", email);
   };
 
   return (
