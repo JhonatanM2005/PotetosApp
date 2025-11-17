@@ -6,17 +6,17 @@ const roleMiddleware = require("../middlewares/roleMiddleware");
 
 router.use(authMiddleware);
 
-// Estadísticas del dashboard (admin y gerentes)
+// Estadísticas del dashboard (admin)
 router.get(
   "/stats",
-  roleMiddleware("admin", "gerente"),
+  roleMiddleware("admin"),
   dashboardController.getDashboardStats
 );
 
 // Estadísticas del día
 router.get(
   "/today",
-  roleMiddleware("admin", "gerente"),
+  roleMiddleware("admin"),
   dashboardController.getTodayStats
 );
 

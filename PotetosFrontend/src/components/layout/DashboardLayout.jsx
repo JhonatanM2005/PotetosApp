@@ -28,13 +28,13 @@ export default function DashboardLayout({ children }) {
       path: "/dashboard",
       icon: Home,
       label: "Dashboard",
-      roles: ["admin", "gerente", "mesero", "chef"],
+      roles: ["admin", "mesero", "chef"],
     },
     {
       path: "/dashboard/stats",
       icon: BarChart3,
       label: "Estadísticas",
-      roles: ["admin", "gerente"],
+      roles: ["admin"],
     },
     {
       path: "/dashboard/categories",
@@ -46,20 +46,20 @@ export default function DashboardLayout({ children }) {
       path: "/dashboard/menu",
       icon: BookOpenText,
       label: "Menú",
-      roles: ["admin", "gerente", "mesero"],
+      roles: ["admin", "mesero"],
     },
     {
       path: "/dashboard/tables",
       icon: chairsTablePlatter,
       label: "Mesas",
-      roles: ["admin", "gerente"],
+      roles: ["admin"],
       isCustomIcon: true,
     },
     {
       path: "/dashboard/orders",
       icon: NotebookPen,
       label: "Órdenes",
-      roles: ["admin", "gerente", "mesero"],
+      roles: ["admin", "mesero"],
     },
     {
       path: "/dashboard/kitchen",
@@ -77,7 +77,7 @@ export default function DashboardLayout({ children }) {
       path: "/dashboard/settings",
       icon: Settings,
       label: "Configuración",
-      roles: ["admin", "gerente", "mesero", "chef"],
+      roles: ["admin","mesero", "chef"],
     },
   ];
 

@@ -25,7 +25,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchTodayStats = async () => {
-      if (user?.role === "admin" || user?.role === "gerente") {
+      if (user?.role === "admin") {
         try {
           const data = await dashboardService.getTodayStats();
           setTodayStats(data);
@@ -50,7 +50,7 @@ export default function DashboardPage() {
         icon: BarChart3,
         path: "/dashboard/stats",
         iconBg: "bg-primary",
-        roles: ["admin", "gerente"],
+        roles: ["admin"],
       },
       {
         id: "orders",
@@ -59,7 +59,7 @@ export default function DashboardPage() {
         icon: ShoppingCart,
         path: "/dashboard/orders",
         iconBg: "bg-primary",
-        roles: ["admin", "mesero", "gerente"],
+        roles: ["admin", "mesero"],
       },
       {
         id: "menu",
@@ -68,7 +68,7 @@ export default function DashboardPage() {
         icon: UtensilsCrossed,
         path: "/dashboard/menu",
         iconBg: "bg-primary",
-        roles: ["admin", "gerente"],
+        roles: ["admin"],
       },
       {
         id: "categories",
@@ -77,7 +77,7 @@ export default function DashboardPage() {
         icon: LayoutGrid,
         path: "/dashboard/categories",
         iconBg: "bg-primary",
-        roles: ["admin", "gerente"],
+        roles: ["admin"],
       },
       {
         id: "kitchen",
@@ -86,7 +86,7 @@ export default function DashboardPage() {
         icon: ChefHat,
         path: "/dashboard/kitchen",
         iconBg: "bg-primary",
-        roles: ["admin", "chef", "gerente"],
+        roles: ["chef"],
       },
       {
         id: "tables",
@@ -95,7 +95,7 @@ export default function DashboardPage() {
         icon: ClipboardList,
         path: "/dashboard/tables",
         iconBg: "bg-primary",
-        roles: ["admin", "mesero", "gerente"],
+        roles: ["admin", "mesero"],
       },
       {
         id: "users",
@@ -113,7 +113,7 @@ export default function DashboardPage() {
         icon: Settings,
         path: "/dashboard/settings",
         iconBg: "bg-primary",
-        roles: ["admin", "mesero", "chef", "gerente"],
+        roles: ["admin", "mesero", "chef"],
       },
     ];
 
@@ -128,7 +128,6 @@ export default function DashboardPage() {
       admin: "Administrador",
       mesero: "Mesero",
       chef: "Chef",
-      gerente: "Gerente",
     };
     return roleNames[role] || role;
   };
@@ -138,7 +137,6 @@ export default function DashboardPage() {
       admin: "¡Bienvenido al panel de administración!",
       mesero: "¡Bienvenido! Listo para tomar pedidos",
       chef: "¡Bienvenido a la cocina! A preparar platos deliciosos",
-      gerente: "¡Bienvenido! Panel de gestión y análisis",
     };
     return messages[user?.role] || "¡Bienvenido al sistema POTETOS!";
   };
@@ -171,8 +169,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Quick Stats - Solo para admin y gerente */}
-        {(user?.role === "admin" || user?.role === "gerente") && (
+        {/* Quick Stats - Solo para admin*/}
+        {(user?.role === "admin") && (
           <div className="mb-12">
             <h3 className="text-xl font-bold text-primary mb-6">
               Resumen Rápido
@@ -249,61 +247,6 @@ export default function DashboardPage() {
             ))}
           </div>
         </div>
-
-        {/* Tips Section - Solo para meseros */}
-        {user?.role === "mesero" && (
-          <div className="bg-linear-to-br from-primary to-primary/80 rounded-2xl shadow-lg p-8">
-            <h3 className="text-2xl font-bold text-secondary mb-4">
-              💡 Consejos Rápidos
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white/90 rounded-xl p-4">
-                <p className="font-semibold text-primary mb-2">
-                  📋 Tomar Órdenes
-                </p>
-                <p className="text-sm text-gray-700">
-                  Selecciona una mesa disponible, agrega los platos y confirma
-                  el pedido.
-                </p>
-              </div>
-              <div className="bg-white/90 rounded-xl p-4">
-                <p className="font-semibold text-primary mb-2">
-                  ✅ Estado de Pedidos
-                </p>
-                <p className="text-sm text-gray-700">
-                  Revisa el estado de las órdenes activas en tiempo real.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tips Section - Solo para chef */}
-        {user?.role === "chef" && (
-          <div className="bg-linear-to-br from-secondary to-yellow-500 rounded-2xl shadow-lg p-8">
-            <h3 className="text-2xl font-bold text-primary mb-4">
-              👨‍🍳 Panel de Cocina
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white/90 rounded-xl p-4">
-                <p className="font-semibold text-primary mb-2">
-                  🔥 Órdenes Pendientes
-                </p>
-                <p className="text-sm text-gray-700">
-                  Visualiza las órdenes que están esperando ser preparadas.
-                </p>
-              </div>
-              <div className="bg-white/90 rounded-xl p-4">
-                <p className="font-semibold text-primary mb-2">
-                  ⏱️ Tiempo de Preparación
-                </p>
-                <p className="text-sm text-gray-700">
-                  Actualiza el estado de cada plato mientras cocinas.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </DashboardLayout>
   );

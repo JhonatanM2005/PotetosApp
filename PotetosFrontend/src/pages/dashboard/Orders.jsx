@@ -18,6 +18,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
+  const [tableFilter, setTableFilter] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -41,7 +42,7 @@ export default function OrdersPage() {
       const [ordersData, dishesData, tablesData] = await Promise.all([
         orderService.getAll(),
         dishService.getAvailable(),
-        tableService.getAvailable(),
+        tableService.getAll(),
       ]);
       console.log("Datos recibidos:", { ordersData, dishesData, tablesData });
       setOrders(ordersData.orders || []);
@@ -211,10 +212,11 @@ export default function OrdersPage() {
 
   const filteredOrders = orders.filter((order) => {
     const matchesStatus = !statusFilter || order.status === statusFilter;
+    const matchesTable = !tableFilter || order.table_id === parseInt(tableFilter);
     const matchesSearch =
       order.order_number?.toString().includes(searchTerm) ||
       order.table?.table_number?.toString().includes(searchTerm);
-    return matchesStatus && matchesSearch;
+    return matchesStatus && matchesTable && matchesSearch;
   });
 
   // Paginación
@@ -234,7 +236,7 @@ export default function OrdersPage() {
   // Reset a página 1 cuando cambian los filtros
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
+  }, [searchTerm, statusFilter, tableFilter]);
 
   const statusColors = {
     pending: "bg-yellow-100 text-yellow-800",
@@ -294,6 +296,25 @@ export default function OrdersPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none text-sm md:text-base"
             />
+          </div>
+
+          {/* Table Filter */}
+          <div className="mb-4">
+            <label className="block text-sm font-semibold text-primary mb-2">
+              Filtrar por Mesa
+            </label>
+            <select
+              value={tableFilter || ""}
+              onChange={(e) => setTableFilter(e.target.value || null)}
+              className="w-full md:w-auto px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none text-sm md:text-base bg-white"
+            >
+              <option value="">Todas las Mesas</option>
+              {tables.map((table) => (
+                <option key={table.id} value={table.id}>
+                  Mesa {table.table_number}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Status Filter */}
