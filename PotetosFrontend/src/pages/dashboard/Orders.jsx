@@ -714,6 +714,12 @@ export default function OrdersPage() {
                     </span>
                   </div>
                   <div>
+                    <p className="text-sm text-gray-500 mb-1">Creado por</p>
+                    <p className="font-semibold text-primary">
+                      {viewingOrder.waiter?.name || "N/A"}
+                    </p>
+                  </div>
+                  <div>
                     <p className="text-sm text-gray-500 mb-1">Fecha</p>
                     <p className="font-semibold">
                       {new Date(viewingOrder.created_at).toLocaleString(
@@ -721,9 +727,9 @@ export default function OrdersPage() {
                       )}
                     </p>
                   </div>
-                  <div>
+                  <div className="col-span-2">
                     <p className="text-sm text-gray-500 mb-1">Total</p>
-                    <p className="font-bold text-2xl text-secondary">
+                    <p className="font-bold text-3xl text-secondary">
                       ${parseFloat(viewingOrder.total_amount || 0).toFixed(2)}
                     </p>
                   </div>
