@@ -72,9 +72,7 @@ export default function OrdersPage() {
     // Actualizar la lista de órdenes
     setOrders((prevOrders) =>
       prevOrders.map((order) =>
-        order.id === data.orderId
-          ? { ...order, status: data.newStatus }
-          : order
+        order.id === data.orderId ? { ...order, status: data.newStatus } : order
       )
     );
 
