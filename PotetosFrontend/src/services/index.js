@@ -246,8 +246,8 @@ export const userService = {
     return response.data;
   },
 
-  // Cambiar contraseña
-  changePassword: async (id, newPassword) => {
+  // Cambiar contraseña de un usuario específico (admin)
+  changeUserPassword: async (id, newPassword) => {
     const response = await api.patch(`/users/${id}/password`, { newPassword });
     return response.data;
   },
@@ -265,7 +265,7 @@ export const userService = {
   },
 
   // Cambiar contraseña del usuario actual
-  changePassword: async (data) => {
+  changeOwnPassword: async (data) => {
     const response = await api.patch("/auth/change-password", data);
     return response.data;
   },
