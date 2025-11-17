@@ -9,9 +9,12 @@ import {
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { orderService, dishService, tableService } from "../../services";
+import socketService from "../../services/socket";
+import { useAuthStore } from "../../store/authStore";
 import toast from "react-hot-toast";
 
 export default function OrdersPage() {
+  const { token } = useAuthStore();
   const [orders, setOrders] = useState([]);
   const [dishes, setDishes] = useState([]);
   const [tables, setTables] = useState([]);
@@ -34,7 +37,58 @@ export default function OrdersPage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+
+    // Conectar socket
+    if (token) {
+      socketService.connect(token);
+
+      // Escuchar evento cuando una orden está lista
+      socketService.on("order:ready", handleOrderReady);
+
+      // Escuchar evento de cambio de estado general
+      socketService.on("order:statusChanged", handleOrderStatusChanged);
+
+      // Escuchar evento de nueva orden
+      socketService.on("kitchen:newOrder", handleNewOrder);
+    }
+
+    return () => {
+      // Limpiar listeners
+      socketService.off("order:ready", handleOrderReady);
+      socketService.off("order:statusChanged", handleOrderStatusChanged);
+      socketService.off("kitchen:newOrder", handleNewOrder);
+    };
+  }, [token]);
+
+  const handleOrderReady = (data) => {
+    console.log("Orden lista:", data);
+    // Recargar órdenes cuando una está lista
+    fetchData();
+    toast.success(`¡Orden ${data.orderNumber} está lista!`);
+  };
+
+  const handleOrderStatusChanged = (data) => {
+    console.log("Estado de orden cambiado:", data);
+    // Actualizar la lista de órdenes
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.id === data.orderId
+          ? { ...order, status: data.newStatus }
+          : order
+      )
+    );
+
+    // Si estamos viendo esta orden en el modal, actualizar también
+    if (viewingOrder && viewingOrder.id === data.orderId) {
+      setViewingOrder((prev) => ({ ...prev, status: data.newStatus }));
+    }
+  };
+
+  const handleNewOrder = (data) => {
+    console.log("Nueva orden creada:", data);
+    // Recargar órdenes cuando se crea una nueva
+    fetchData();
+  };
 
   const fetchData = async () => {
     try {

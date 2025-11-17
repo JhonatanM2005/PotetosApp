@@ -249,6 +249,7 @@ exports.updateOrderStatus = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    const oldStatus = order.status;
     await order.update({ status });
 
     // Si se marca como pagado, liberar mesa
@@ -260,11 +261,23 @@ exports.updateOrderStatus = async (req, res) => {
       await order.update({ completed_at: new Date() });
     }
 
-    // Emitir evento
-    if (global.io && status === "ready") {
-      global.io.to("waiters").emit("order:ready", {
+    // Emitir eventos según el cambio de estado
+    if (global.io) {
+      // Notificar a meseros cuando la orden está lista
+      if (status === "ready") {
+        global.io.to("waiters").emit("order:ready", {
+          orderId: order.id,
+          orderNumber: order.order_number,
+          tableId: order.table_id,
+        });
+      }
+
+      // Notificar cambio de estado a todos los usuarios
+      global.io.emit("order:statusChanged", {
         orderId: order.id,
         orderNumber: order.order_number,
+        oldStatus,
+        newStatus: status,
         tableId: order.table_id,
       });
     }
