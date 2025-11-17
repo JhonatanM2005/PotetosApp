@@ -40,9 +40,11 @@ export default function DashboardStats() {
     try {
       setLoading(true);
       const response = await api.get(`/dashboard/stats?period=${period}`);
+      console.log("Stats response:", response.data); // Debug
       setStats(response.data);
     } catch (error) {
       console.error("Error fetching dashboard stats:", error);
+      setStats(null);
     } finally {
       setLoading(false);
     }
@@ -132,52 +134,106 @@ export default function DashboardStats() {
         {/* Charts Grid */}
         {stats && (
           <>
+            {/* Summary Cards */}
+            {stats.summary && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white">
+                  <p className="text-sm font-medium opacity-90 mb-2">
+                    Ventas Totales
+                  </p>
+                  <p className="text-3xl font-bold">
+                    {formatCurrency(stats.summary.totalSales)}
+                  </p>
+                  <p className="text-sm mt-2 opacity-80">
+                    {stats.summary.salesGrowth >= 0 ? "↑" : "↓"}{" "}
+                    {Math.abs(stats.summary.salesGrowth)}% vs período anterior
+                  </p>
+                </div>
+                <div className="bg-linear-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white">
+                  <p className="text-sm font-medium opacity-90 mb-2">
+                    Total Órdenes
+                  </p>
+                  <p className="text-3xl font-bold">
+                    {stats.summary.totalOrders}
+                  </p>
+                  <p className="text-sm mt-2 opacity-80">Órdenes pagadas</p>
+                </div>
+                <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl shadow-lg p-6 text-white">
+                  <p className="text-sm font-medium opacity-90 mb-2">
+                    Ticket Promedio
+                  </p>
+                  <p className="text-3xl font-bold">
+                    {formatCurrency(stats.summary.averageOrderValue)}
+                  </p>
+                  <p className="text-sm mt-2 opacity-80">Por orden</p>
+                </div>
+                <div className="bg-linear-to-br from-orange-500 to-orange-600 rounded-2xl shadow-lg p-6 text-white">
+                  <p className="text-sm font-medium opacity-90 mb-2">
+                    Platos Vendidos
+                  </p>
+                  <p className="text-3xl font-bold">
+                    {stats.topDishes.reduce(
+                      (sum, dish) => sum + dish.totalQuantity,
+                      0
+                    )}
+                  </p>
+                  <p className="text-sm mt-2 opacity-80">Total de platos</p>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
               {/* Sales Chart */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-6">
                   Balance de Ventas
                 </h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={stats.salesData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="date"
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={(date) =>
-                        new Date(date).toLocaleDateString("es-CO", {
-                          month: "short",
-                          day: "numeric",
-                        })
-                      }
-                    />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip
-                      formatter={(value, name) => [
-                        name === "total" ? formatCurrency(value) : value,
-                        name === "total" ? "Ventas" : "Órdenes",
-                      ]}
-                      labelFormatter={(date) =>
-                        new Date(date).toLocaleDateString("es-CO")
-                      }
-                    />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="total"
-                      stroke="#1E0342"
-                      strokeWidth={2}
-                      name="Ventas"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="orders"
-                      stroke="#F5E050"
-                      strokeWidth={2}
-                      name="Órdenes"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                {stats.salesData && stats.salesData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={stats.salesData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="date"
+                        tick={{ fontSize: 12 }}
+                        tickFormatter={(date) =>
+                          new Date(date).toLocaleDateString("es-CO", {
+                            month: "short",
+                            day: "numeric",
+                          })
+                        }
+                      />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip
+                        formatter={(value, name) => [
+                          name === "total" ? formatCurrency(value) : value,
+                          name === "total" ? "Ventas" : "Órdenes",
+                        ]}
+                        labelFormatter={(date) =>
+                          new Date(date).toLocaleDateString("es-CO")
+                        }
+                      />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="total"
+                        stroke="#1E0342"
+                        strokeWidth={2}
+                        name="Ventas"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="orders"
+                        stroke="#F5E050"
+                        strokeWidth={2}
+                        name="Órdenes"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                    <p>No hay datos de ventas para este período</p>
+                  </div>
+                )}
               </div>
 
               {/* Peak Hours Chart */}
@@ -185,31 +241,37 @@ export default function DashboardStats() {
                 <h3 className="text-xl font-bold text-gray-900 mb-6">
                   Horas Más Concurridas
                 </h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={stats.peakHours}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="hour"
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={formatHour}
-                    />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip
-                      formatter={(value, name) => [
-                        name === "totalSales" ? formatCurrency(value) : value,
-                        name === "totalSales" ? "Ventas" : "Órdenes",
-                      ]}
-                      labelFormatter={formatHour}
-                    />
-                    <Legend />
-                    <Bar
-                      dataKey="ordersCount"
-                      fill="#1E0342"
-                      name="Órdenes"
-                      radius={[8, 8, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+                {stats.peakHours && stats.peakHours.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={stats.peakHours}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="hour"
+                        tick={{ fontSize: 12 }}
+                        tickFormatter={formatHour}
+                      />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip
+                        formatter={(value, name) => [
+                          name === "totalSales" ? formatCurrency(value) : value,
+                          name === "totalSales" ? "Ventas" : "Órdenes",
+                        ]}
+                        labelFormatter={formatHour}
+                      />
+                      <Legend />
+                      <Bar
+                        dataKey="ordersCount"
+                        fill="#1E0342"
+                        name="Órdenes"
+                        radius={[8, 8, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                    <p>No hay datos de horas concurridas para este período</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -218,7 +280,8 @@ export default function DashboardStats() {
               <h3 className="text-xl font-bold text-gray-900 mb-6">
                 Platos Más Vendidos
               </h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {stats.topDishes && stats.topDishes.length > 0 ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Chart */}
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart
@@ -294,6 +357,11 @@ export default function DashboardStats() {
                   </table>
                 </div>
               </div>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-gray-500">
+                  <p>No hay datos de platos vendidos para este período</p>
+                </div>
+              )}
             </div>
           </>
         )}
