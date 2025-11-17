@@ -212,7 +212,8 @@ export default function OrdersPage() {
 
   const filteredOrders = orders.filter((order) => {
     const matchesStatus = !statusFilter || order.status === statusFilter;
-    const matchesTable = !tableFilter || order.table_id === parseInt(tableFilter);
+    const matchesTable =
+      !tableFilter || order.table_id === parseInt(tableFilter);
     const matchesSearch =
       order.order_number?.toString().includes(searchTerm) ||
       order.table?.table_number?.toString().includes(searchTerm);
