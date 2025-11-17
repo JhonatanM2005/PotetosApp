@@ -202,11 +202,34 @@ export default function DashboardStats() {
                           })
                         }
                       />
-                      <YAxis tick={{ fontSize: 12 }} />
+                      {/* Eje Y izquierdo - Ventas */}
+                      <YAxis 
+                        yAxisId="left"
+                        tick={{ fontSize: 12 }}
+                        tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                        label={{ 
+                          value: 'Ventas (COP)', 
+                          angle: -90, 
+                          position: 'insideLeft',
+                          style: { fontSize: 12, fill: '#1E0342', fontWeight: 600 }
+                        }}
+                      />
+                      {/* Eje Y derecho - Órdenes */}
+                      <YAxis 
+                        yAxisId="right"
+                        orientation="right"
+                        tick={{ fontSize: 12 }}
+                        label={{ 
+                          value: 'Órdenes', 
+                          angle: 90, 
+                          position: 'insideRight',
+                          style: { fontSize: 12, fill: '#F5E050', fontWeight: 600 }
+                        }}
+                      />
                       <Tooltip
                         formatter={(value, name) => [
-                          name === "total" ? formatCurrency(value) : value,
-                          name === "total" ? "Ventas" : "Órdenes",
+                          name === "Ventas" ? formatCurrency(value) : value,
+                          name,
                         ]}
                         labelFormatter={(date) =>
                           new Date(date).toLocaleDateString("es-CO")
@@ -214,18 +237,24 @@ export default function DashboardStats() {
                       />
                       <Legend />
                       <Line
+                        yAxisId="left"
                         type="monotone"
                         dataKey="total"
                         stroke="#1E0342"
                         strokeWidth={2}
                         name="Ventas"
+                        dot={{ fill: '#1E0342', r: 4 }}
+                        activeDot={{ r: 6 }}
                       />
                       <Line
+                        yAxisId="right"
                         type="monotone"
                         dataKey="orders"
                         stroke="#F5E050"
                         strokeWidth={2}
                         name="Órdenes"
+                        dot={{ fill: '#F5E050', r: 4 }}
+                        activeDot={{ r: 6 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
