@@ -79,7 +79,7 @@ export default function SettingsPage() {
       return;
     }
     try {
-      await userService.changePassword({
+      await userService.changeOwnPassword({
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });

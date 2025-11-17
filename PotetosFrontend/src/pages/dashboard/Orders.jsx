@@ -14,10 +14,11 @@ import { useAuthStore } from "../../store/authStore";
 import toast from "react-hot-toast";
 
 export default function OrdersPage() {
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const [orders, setOrders] = useState([]);
   const [dishes, setDishes] = useState([]);
-  const [tables, setTables] = useState([]);
+  const [tables, setTables] = useState([]); // Mesas disponibles para crear órdenes
+  const [allTables, setAllTables] = useState([]); // Todas las mesas para filtro
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
@@ -91,15 +92,23 @@ export default function OrdersPage() {
   const fetchData = async () => {
     try {
       console.log("Iniciando carga de datos...");
-      const [ordersData, dishesData, tablesData] = await Promise.all([
-        orderService.getAll(),
-        dishService.getAvailable(),
-        tableService.getAll(),
-      ]);
-      console.log("Datos recibidos:", { ordersData, dishesData, tablesData });
+      const [ordersData, dishesData, availableTablesData, allTablesData] =
+        await Promise.all([
+          orderService.getAll(),
+          dishService.getAvailable(),
+          tableService.getAvailable(), // Solo mesas disponibles para crear órdenes
+          tableService.getAll(), // Todas las mesas para el filtro
+        ]);
+      console.log("Datos recibidos:", {
+        ordersData,
+        dishesData,
+        availableTablesData,
+        allTablesData,
+      });
       setOrders(ordersData.orders || []);
       setDishes(dishesData.dishes || []);
-      setTables(tablesData.tables || []);
+      setTables(availableTablesData.tables || []);
+      setAllTables(allTablesData.tables || []);
       console.log("Estados actualizados correctamente");
     } catch (error) {
       toast.error("Error al cargar datos");
@@ -327,14 +336,17 @@ export default function OrdersPage() {
           <h1 className="text-2xl md:text-3xl font-bold text-primary">
             ÓRDENES
           </h1>
-          <button
-            onClick={openCreateModal}
-            className="bg-primary text-secondary px-4 md:px-6 py-2 md:py-3 rounded-full font-bold hover:opacity-90 transition flex items-center gap-2 w-full sm:w-auto justify-center"
-          >
-            <Plus size={20} />
-            <span className="hidden sm:inline">Nueva Orden</span>
-            <span className="sm:hidden">Nueva</span>
-          </button>
+          {/* Solo meseros y cajeros pueden crear órdenes */}
+          {(user?.role === "mesero" || user?.role === "cajero") && (
+            <button
+              onClick={openCreateModal}
+              className="bg-primary text-secondary px-4 md:px-6 py-2 md:py-3 rounded-full font-bold hover:opacity-90 transition flex items-center gap-2 w-full sm:w-auto justify-center"
+            >
+              <Plus size={20} />
+              <span className="hidden sm:inline">Nueva Orden</span>
+              <span className="sm:hidden">Nueva</span>
+            </button>
+          )}
         </div>
 
         {/* Filters */}
@@ -362,7 +374,7 @@ export default function OrdersPage() {
               className="w-full md:w-auto px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none text-sm md:text-base bg-white"
             >
               <option value="">Todas las Mesas</option>
-              {tables.map((table) => (
+              {allTables.map((table) => (
                 <option key={table.id} value={table.id}>
                   Mesa {table.table_number}
                 </option>
@@ -459,22 +471,57 @@ export default function OrdersPage() {
                         ${parseFloat(order.total_amount || 0).toFixed(2)}
                       </td>
                       <td className="px-6 py-4">
-                        <select
-                          value={order.status}
-                          onChange={(e) =>
-                            handleStatusChange(order.id, e.target.value)
-                          }
-                          className={`px-3 py-1 rounded-full text-xs font-semibold outline-none cursor-pointer ${
-                            statusColors[order.status] ||
-                            "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {statuses.map((status) => (
-                            <option key={status} value={status}>
-                              {statusLabels[status]}
+                        {/* Admin y chef solo pueden ver el estado, no cambiarlo */}
+                        {user?.role === "admin" || user?.role === "chef" ? (
+                          <span
+                            className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                              statusColors[order.status] ||
+                              "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {statusLabels[order.status]}
+                          </span>
+                        ) : (
+                          /* Meseros y cajeros solo pueden cambiar a "delivered", "paid" o "cancelled" */
+                          <select
+                            value={order.status}
+                            onChange={(e) =>
+                              handleStatusChange(order.id, e.target.value)
+                            }
+                            className={`px-3 py-1 rounded-full text-xs font-semibold outline-none cursor-pointer ${
+                              statusColors[order.status] ||
+                              "bg-gray-100 text-gray-800"
+                            }`}
+                            disabled={
+                              order.status === "paid" ||
+                              order.status === "cancelled"
+                            }
+                          >
+                            {/* Mostrar el estado actual */}
+                            <option value={order.status}>
+                              {statusLabels[order.status]}
                             </option>
-                          ))}
-                        </select>
+                            {/* Solo permitir cambiar a estados específicos si no está pagada o cancelada */}
+                            {order.status !== "paid" &&
+                              order.status !== "cancelled" && (
+                                <>
+                                  {order.status === "ready" && (
+                                    <option value="delivered">
+                                      {statusLabels["delivered"]}
+                                    </option>
+                                  )}
+                                  {order.status === "delivered" && (
+                                    <option value="paid">
+                                      {statusLabels["paid"]}
+                                    </option>
+                                  )}
+                                  <option value="cancelled">
+                                    {statusLabels["cancelled"]}
+                                  </option>
+                                </>
+                              )}
+                          </select>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-gray-600">
                         {new Date(order.created_at).toLocaleDateString("es-ES")}
@@ -488,13 +535,16 @@ export default function OrdersPage() {
                           >
                             <Eye size={18} />
                           </button>
-                          <button
-                            onClick={() => handleDelete(order.id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                            title="Eliminar"
-                          >
-                            <Trash2 size={18} />
-                          </button>
+                          {/* Solo admin puede eliminar órdenes */}
+                          {user?.role === "admin" && (
+                            <button
+                              onClick={() => handleDelete(order.id)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                              title="Eliminar"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
