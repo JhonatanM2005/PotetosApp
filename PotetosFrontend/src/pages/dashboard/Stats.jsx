@@ -282,81 +282,83 @@ export default function DashboardStats() {
               </h3>
               {stats.topDishes && stats.topDishes.length > 0 ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Chart */}
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart
-                    data={stats.topDishes.slice(0, 5)}
-                    layout="vertical"
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" tick={{ fontSize: 12 }} />
-                    <YAxis
-                      dataKey="dishName"
-                      type="category"
-                      tick={{ fontSize: 12 }}
-                      width={100}
-                    />
-                    <Tooltip
-                      formatter={(value, name) => [
-                        name === "totalRevenue" ? formatCurrency(value) : value,
-                        name === "totalRevenue" ? "Ingresos" : "Cantidad",
-                      ]}
-                    />
-                    <Legend />
-                    <Bar
-                      dataKey="totalQuantity"
-                      fill="#1E0342"
-                      name="Cantidad Vendida"
-                      radius={[0, 8, 8, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+                  {/* Chart */}
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart
+                      data={stats.topDishes.slice(0, 5)}
+                      layout="vertical"
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" tick={{ fontSize: 12 }} />
+                      <YAxis
+                        dataKey="dishName"
+                        type="category"
+                        tick={{ fontSize: 12 }}
+                        width={100}
+                      />
+                      <Tooltip
+                        formatter={(value, name) => [
+                          name === "totalRevenue"
+                            ? formatCurrency(value)
+                            : value,
+                          name === "totalRevenue" ? "Ingresos" : "Cantidad",
+                        ]}
+                      />
+                      <Legend />
+                      <Bar
+                        dataKey="totalQuantity"
+                        fill="#1E0342"
+                        name="Cantidad Vendida"
+                        radius={[0, 8, 8, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
 
-                {/* Table */}
-                <div className="overflow-auto max-h-[300px]">
-                  <table className="w-full">
-                    <thead className="bg-gray-50 sticky top-0">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                          Plato
-                        </th>
-                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">
-                          Cantidad
-                        </th>
-                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase">
-                          Ingresos
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {stats.topDishes.map((dish, index) => (
-                        <tr key={dish.dishId} className="hover:bg-gray-50">
-                          <td className="px-4 py-3">
-                            <div className="flex items-center">
-                              <div
-                                className="w-2 h-2 rounded-full mr-3"
-                                style={{
-                                  backgroundColor:
-                                    COLORS[index % COLORS.length],
-                                }}
-                              ></div>
-                              <span className="text-sm font-medium text-gray-900">
-                                {dish.dishName}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-center text-sm text-gray-700">
-                            {dish.totalQuantity}
-                          </td>
-                          <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
-                            {formatCurrency(dish.totalRevenue)}
-                          </td>
+                  {/* Table */}
+                  <div className="overflow-auto max-h-[300px]">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 sticky top-0">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                            Plato
+                          </th>
+                          <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">
+                            Cantidad
+                          </th>
+                          <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase">
+                            Ingresos
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {stats.topDishes.map((dish, index) => (
+                          <tr key={dish.dishId} className="hover:bg-gray-50">
+                            <td className="px-4 py-3">
+                              <div className="flex items-center">
+                                <div
+                                  className="w-2 h-2 rounded-full mr-3"
+                                  style={{
+                                    backgroundColor:
+                                      COLORS[index % COLORS.length],
+                                  }}
+                                ></div>
+                                <span className="text-sm font-medium text-gray-900">
+                                  {dish.dishName}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-center text-sm text-gray-700">
+                              {dish.totalQuantity}
+                            </td>
+                            <td className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                              {formatCurrency(dish.totalRevenue)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
               ) : (
                 <div className="h-[300px] flex items-center justify-center text-gray-500">
                   <p>No hay datos de platos vendidos para este período</p>
