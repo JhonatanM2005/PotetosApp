@@ -202,27 +202,37 @@ export default function DashboardStats() {
                         }
                       />
                       {/* Eje Y izquierdo - Ventas */}
-                      <YAxis 
+                      <YAxis
                         yAxisId="left"
                         tick={{ fontSize: 12 }}
-                        tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                        label={{ 
-                          value: 'Ventas (COP)', 
-                          angle: -90, 
-                          position: 'insideLeft',
-                          style: { fontSize: 12, fill: '#1E0342', fontWeight: 600 }
+                        tickFormatter={(value) =>
+                          `$${(value / 1000).toFixed(0)}k`
+                        }
+                        label={{
+                          value: "Ventas (COP)",
+                          angle: -90,
+                          position: "insideLeft",
+                          style: {
+                            fontSize: 12,
+                            fill: "#1E0342",
+                            fontWeight: 600,
+                          },
                         }}
                       />
                       {/* Eje Y derecho - Órdenes */}
-                      <YAxis 
+                      <YAxis
                         yAxisId="right"
                         orientation="right"
                         tick={{ fontSize: 12 }}
-                        label={{ 
-                          value: 'Órdenes', 
-                          angle: 90, 
-                          position: 'insideRight',
-                          style: { fontSize: 12, fill: '#F5E050', fontWeight: 600 }
+                        label={{
+                          value: "Órdenes",
+                          angle: 90,
+                          position: "insideRight",
+                          style: {
+                            fontSize: 12,
+                            fill: "#F5E050",
+                            fontWeight: 600,
+                          },
                         }}
                       />
                       <Tooltip
@@ -242,7 +252,7 @@ export default function DashboardStats() {
                         stroke="#1E0342"
                         strokeWidth={2}
                         name="Ventas"
-                        dot={{ fill: '#1E0342', r: 4 }}
+                        dot={{ fill: "#1E0342", r: 4 }}
                         activeDot={{ r: 6 }}
                       />
                       <Line
@@ -252,7 +262,7 @@ export default function DashboardStats() {
                         stroke="#F5E050"
                         strokeWidth={2}
                         name="Órdenes"
-                        dot={{ fill: '#F5E050', r: 4 }}
+                        dot={{ fill: "#F5E050", r: 4 }}
                         activeDot={{ r: 6 }}
                       />
                     </LineChart>
