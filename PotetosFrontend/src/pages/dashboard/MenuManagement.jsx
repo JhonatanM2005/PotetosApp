@@ -29,7 +29,11 @@ export default function MenuManagementPage() {
   const [categoryModalTab, setCategoryModalTab] = useState("list"); // "list" or "form"
   const [editingDish, setEditingDish] = useState(null);
   const [editingCategory, setEditingCategory] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState({ show: false, id: null, type: null });
+  const [confirmDelete, setConfirmDelete] = useState({
+    show: false,
+    id: null,
+    type: null,
+  });
   const [categoryFormData, setCategoryFormData] = useState({
     name: "",
     description: "",
@@ -932,7 +936,9 @@ export default function MenuManagementPage() {
         {/* Confirm Delete Modal */}
         <ConfirmModal
           isOpen={confirmDelete.show}
-          onClose={() => setConfirmDelete({ show: false, id: null, type: null })}
+          onClose={() =>
+            setConfirmDelete({ show: false, id: null, type: null })
+          }
           onConfirm={() => {
             if (confirmDelete.type === "dish") {
               handleDelete(confirmDelete.id);

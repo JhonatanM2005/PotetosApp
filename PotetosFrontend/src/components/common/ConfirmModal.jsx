@@ -48,9 +48,7 @@ export default function ConfirmModal({
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
         {/* Header con icono */}
         <div className={`${styles.bg} p-6 flex items-center gap-4`}>
-          <div
-            className={`${styles.icon} bg-white rounded-full p-3 shadow-md`}
-          >
+          <div className={`${styles.icon} bg-white rounded-full p-3 shadow-md`}>
             <AlertTriangle size={32} strokeWidth={2.5} />
           </div>
           <div className="flex-1">
