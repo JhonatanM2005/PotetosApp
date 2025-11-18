@@ -29,3 +29,4 @@ sequelize
     console.error("❌ Unable to connect to database:", err);
     process.exit(1);
   });
+// trigger

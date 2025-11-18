@@ -10,6 +10,14 @@ exports.getKitchenOrders = async (req, res) => {
           [Op.in]: ["pending", "preparing"],
         },
       },
+      attributes: [
+        "id",
+        "order_number",
+        "notes",
+        "status",
+        "created_at",
+        "updated_at",
+      ],
       include: [
         {
           model: OrderItem,
@@ -19,11 +27,21 @@ exports.getKitchenOrders = async (req, res) => {
               [Op.in]: ["pending", "preparing"],
             },
           },
+          attributes: [
+            "id",
+            "dish_name",
+            "quantity",
+            "notes",
+            "status",
+            "unit_price",
+            "subtotal",
+          ],
           include: [{ model: Dish, as: "dish" }],
         },
         {
           model: Table,
           as: "table",
+          attributes: ["id", "table_number", "capacity"],
         },
       ],
       order: [["created_at", "ASC"]],

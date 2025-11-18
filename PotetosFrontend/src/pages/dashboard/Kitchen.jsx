@@ -8,26 +8,47 @@ import {
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { kitchenService } from "../../services";
+import socketService from "../../services/socket";
+import { useAuthStore } from "../../store/authStore";
 import toast from "react-hot-toast";
 
 export default function KitchenPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const { token } = useAuthStore();
 
   useEffect(() => {
     fetchKitchenOrders();
 
-    // Auto-actualizar cada 5 segundos si está activado
-    let interval;
-    if (autoRefresh) {
-      interval = setInterval(fetchKitchenOrders, 5000);
+    // Conectar Socket.io para actualizaciones en tiempo real
+    if (token) {
+      socketService.connect(token);
+
+      // Escuchar nuevas órdenes
+      socketService.on("kitchen:newOrder", handleNewOrder);
+
+      // Escuchar cambios de estado
+      socketService.on("order:statusChanged", handleOrderStatusChanged);
     }
 
     return () => {
-      if (interval) clearInterval(interval);
+      socketService.off("kitchen:newOrder", handleNewOrder);
+      socketService.off("order:statusChanged", handleOrderStatusChanged);
     };
-  }, [autoRefresh]);
+  }, [token]);
+
+  const handleNewOrder = (data) => {
+    toast.success(`¡Nueva orden #${data.orderNumber} recibida!`, {
+      duration: 4000,
+      icon: "🔔",
+    });
+    fetchKitchenOrders();
+  };
+
+  const handleOrderStatusChanged = () => {
+    // Actualizar cuando cambia el estado de una orden
+    fetchKitchenOrders();
+  };
 
   const fetchKitchenOrders = async () => {
     try {
@@ -95,29 +116,6 @@ export default function KitchenPage() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full lg:w-auto">
-            <button
-              onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`px-3 md:px-4 py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2 text-sm md:text-base ${
-                autoRefresh
-                  ? "bg-green-100 text-green-800"
-                  : "bg-gray-200 text-gray-800"
-              }`}
-            >
-              <RefreshCw
-                size={16}
-                className={`md:w-[18px] md:h-[18px] ${
-                  autoRefresh ? "animate-spin" : ""
-                }`}
-              />
-              <span className="hidden md:inline">
-                {autoRefresh
-                  ? "Auto-actualización ON"
-                  : "Auto-actualización OFF"}
-              </span>
-              <span className="md:hidden">
-                Auto {autoRefresh ? "ON" : "OFF"}
-              </span>
-            </button>
             <button
               onClick={fetchKitchenOrders}
               className="bg-primary text-secondary px-4 md:px-6 py-2 md:py-3 rounded-full font-bold hover:opacity-90 transition flex items-center justify-center gap-2"
@@ -230,6 +228,18 @@ export default function KitchenPage() {
 
                 {/* Order Items */}
                 <div className="p-4 space-y-3">
+                  {/* Notas generales de la orden */}
+                  {order.notes && (
+                    <div className="bg-blue-50 border-l-4 border-blue-500 p-3 mb-4 rounded">
+                      <p className="text-xs font-semibold text-blue-800 mb-1">
+                        📋 NOTAS DE LA ORDEN:
+                      </p>
+                      <p className="text-sm text-blue-900 font-medium">
+                        {order.notes}
+                      </p>
+                    </div>
+                  )}
+
                   {order.items
                     ?.filter(
                       (item) =>
@@ -264,10 +274,11 @@ export default function KitchenPage() {
                             </span>
                           </div>
 
+                          {/* Notas específicas del item (si las hay) */}
                           {item.notes && (
-                            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-2 mb-3">
+                            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-2 mb-3 rounded">
                               <p className="text-xs text-yellow-800 font-semibold">
-                                📝 Nota: {item.notes}
+                                📝 Nota del plato: {item.notes}
                               </p>
                             </div>
                           )}
