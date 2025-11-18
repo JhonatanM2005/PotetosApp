@@ -1,10 +1,22 @@
 import { useState, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import imgChef from "@/assets/images/chef-manos.png";
 import toast from "react-hot-toast";
+import { authService } from "@/services";
 
 export default function VerifyCode() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [loading, setLoading] = useState(false);
   const inputRefs = useRef([]);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const email = location.state?.email;
+
+  // Redirigir si no hay email
+  if (!email) {
+    navigate("/forgot-password");
+    return null;
+  }
 
   const handleChange = (index, value) => {
     // Solo permite números
@@ -30,12 +42,46 @@ export default function VerifyCode() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const verificationCode = code.join("");
+    
     if (verificationCode.length !== 6) {
       toast.error("Por favor ingresa el código completo");
       return;
     }
-    // Aquí iría la lógica para verificar el código
-    toast.success("Código verificado correctamente");
+
+    try {
+      setLoading(true);
+      const response = await authService.verifyResetCode(email, verificationCode);
+      toast.success("Código verificado correctamente");
+      
+      // Redirigir a reset password con el token
+      navigate("/reset-password", { 
+        state: { 
+          resetToken: response.resetToken,
+          email 
+        } 
+      });
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Código inválido o expirado");
+      // Limpiar código en caso de error
+      setCode(["", "", "", "", "", ""]);
+      inputRefs.current[0]?.focus();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    try {
+      setLoading(true);
+      await authService.forgotPassword(email);
+      toast.success("Código reenviado a tu correo");
+      setCode(["", "", "", "", "", ""]);
+      inputRefs.current[0]?.focus();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error al reenviar el código");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -81,7 +127,9 @@ export default function VerifyCode() {
             <div className="text-center">
               <button
                 type="button"
-                className="text-sm text-white hover:text-secondary transition-colors"
+                onClick={handleResend}
+                disabled={loading}
+                className="text-sm text-white hover:text-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Reenviar código
               </button>
@@ -91,9 +139,10 @@ export default function VerifyCode() {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="w-full max-w-xs px-8 py-3 bg-secondary text-primary font-bold rounded-full hover:opacity-90 transition-opacity shadow-lg"
+                disabled={loading}
+                className="w-full max-w-xs px-8 py-3 bg-secondary text-primary font-bold rounded-full hover:opacity-90 transition-opacity shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Continuar
+                {loading ? "Verificando..." : "Continuar"}
               </button>
             </div>
           </form>

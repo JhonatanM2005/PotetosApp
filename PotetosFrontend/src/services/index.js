@@ -291,6 +291,27 @@ export const authService = {
     const response = await api.get("/auth/me");
     return response.data;
   },
+
+  // Recuperación de contraseña - Enviar código
+  forgotPassword: async (email) => {
+    const response = await api.post("/auth/forgot-password", { email });
+    return response.data;
+  },
+
+  // Verificar código de recuperación
+  verifyResetCode: async (email, code) => {
+    const response = await api.post("/auth/verify-reset-code", { email, code });
+    return response.data;
+  },
+
+  // Resetear contraseña
+  resetPassword: async (resetToken, newPassword) => {
+    const response = await api.post("/auth/reset-password", {
+      resetToken,
+      newPassword,
+    });
+    return response.data;
+  },
 };
 
 // ========== DASHBOARD ==========

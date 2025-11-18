@@ -1,14 +1,26 @@
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import imgChef from "@/assets/images/chef-manos.png";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { authService } from "@/services";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const resetToken = location.state?.resetToken;
+  const email = location.state?.email;
+
   const [formData, setFormData] = useState({
     newPassword: "",
     confirmPassword: "",
   });
+  const [loading, setLoading] = useState(false);
+
+  // Redirigir si no hay token
+  if (!resetToken) {
+    navigate("/forgot-password");
+    return null;
+  }
 
   const handleChange = (e) => {
     setFormData({
@@ -30,13 +42,20 @@ export default function ResetPassword() {
       return;
     }
 
-    // Aquí iría la lógica para cambiar la contraseña
-    toast.success("Contraseña cambiada exitosamente");
+    try {
+      setLoading(true);
+      await authService.resetPassword(resetToken, formData.newPassword);
+      toast.success("Contraseña cambiada exitosamente");
 
-    // Redirigir al login después de cambiar la contraseña
-    setTimeout(() => {
-      navigate("/login");
-    }, 1500);
+      // Redirigir al login después de cambiar la contraseña
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error al cambiar la contraseña");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -93,9 +112,10 @@ export default function ResetPassword() {
             <div className="flex justify-center pt-4">
               <button
                 type="submit"
-                className="w-full max-w-xs px-8 py-3 bg-secondary text-primary font-bold rounded-full hover:opacity-90 transition-opacity shadow-lg"
+                disabled={loading}
+                className="w-full max-w-xs px-8 py-3 bg-secondary text-primary font-bold rounded-full hover:opacity-90 transition-opacity shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Cambiar contraseña
+                {loading ? "Cambiando..." : "Cambiar contraseña"}
               </button>
             </div>
           </form>

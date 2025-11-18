@@ -5,6 +5,7 @@ const Dish = require("./Dish");
 const Order = require("./Order");
 const OrderItem = require("./OrderItem");
 const Table = require("./Table");
+const PasswordReset = require("./PasswordReset");
 
 // Relaciones
 // Dish - Category
@@ -35,4 +36,5 @@ module.exports = {
   Order,
   OrderItem,
   Table,
+  PasswordReset,
 };
