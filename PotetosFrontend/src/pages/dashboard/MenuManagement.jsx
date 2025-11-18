@@ -1,5 +1,15 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit2, Trash2, Search, Eye, EyeOff, Grid2x2Plus, Power, PowerOff } from "lucide-react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Search,
+  Eye,
+  EyeOff,
+  Grid2x2Plus,
+  Power,
+  PowerOff,
+} from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { dishService, categoryService } from "../../services";
 import toast from "react-hot-toast";
@@ -407,7 +417,9 @@ export default function MenuManagementPage() {
               {/* Header */}
               <div className="flex justify-between items-center p-6 border-b border-gray-200">
                 <div>
-                  <h2 className="text-2xl font-bold text-primary">Gestionar Categorías</h2>
+                  <h2 className="text-2xl font-bold text-primary">
+                    Gestionar Categorías
+                  </h2>
                   <p className="text-sm text-gray-600 mt-1">
                     Organiza las categorías de tu menú
                   </p>
@@ -451,7 +463,9 @@ export default function MenuManagementPage() {
                       : "border-transparent text-gray-500 hover:text-gray-700"
                   }`}
                 >
-                  {editingCategory ? "✏️ Editar Categoría" : "➕ Nueva Categoría"}
+                  {editingCategory
+                    ? "✏️ Editar Categoría"
+                    : "➕ Nueva Categoría"}
                 </button>
               </div>
 
@@ -490,7 +504,9 @@ export default function MenuManagementPage() {
                           >
                             <div className="flex justify-between items-start mb-3">
                               <div className="flex items-start gap-3 flex-1">
-                                <span className="text-4xl">{category.icon || "📂"}</span>
+                                <span className="text-4xl">
+                                  {category.icon || "📂"}
+                                </span>
                                 <div className="flex-1 min-w-0">
                                   <h4 className="font-bold text-lg text-gray-800 truncate">
                                     {category.name}
@@ -510,7 +526,7 @@ export default function MenuManagementPage() {
                                 {category.is_active ? "✓" : "✗"}
                               </span>
                             </div>
-                            
+
                             {category.description && (
                               <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                                 {category.description}
@@ -519,15 +535,23 @@ export default function MenuManagementPage() {
 
                             <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200">
                               <button
-                                onClick={() => toggleCategoryStatus(category.id)}
+                                onClick={() =>
+                                  toggleCategoryStatus(category.id)
+                                }
                                 className={`flex-1 py-2 px-3 rounded-lg transition font-semibold text-sm flex items-center justify-center gap-1 ${
                                   category.is_active
                                     ? "bg-orange-50 text-orange-700 hover:bg-orange-100"
                                     : "bg-green-50 text-green-700 hover:bg-green-100"
                                 }`}
-                                title={category.is_active ? "Desactivar" : "Activar"}
+                                title={
+                                  category.is_active ? "Desactivar" : "Activar"
+                                }
                               >
-                                {category.is_active ? <PowerOff size={14} /> : <Power size={14} />}
+                                {category.is_active ? (
+                                  <PowerOff size={14} />
+                                ) : (
+                                  <Power size={14} />
+                                )}
                               </button>
                               <button
                                 onClick={() => openCategoryModal(category)}
@@ -538,7 +562,9 @@ export default function MenuManagementPage() {
                                 Editar
                               </button>
                               <button
-                                onClick={() => handleCategoryDelete(category.id)}
+                                onClick={() =>
+                                  handleCategoryDelete(category.id)
+                                }
                                 className="py-2 px-3 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg transition"
                                 title="Eliminar"
                               >
@@ -555,7 +581,10 @@ export default function MenuManagementPage() {
                   <div className="max-w-3xl mx-auto">
                     {/* Form Card */}
                     <div className="bg-white rounded-2xl shadow-xl border border-gray-100">
-                      <form onSubmit={handleCategorySubmit} className="p-8 space-y-6">
+                      <form
+                        onSubmit={handleCategorySubmit}
+                        className="p-8 space-y-6"
+                      >
                         {/* Nombre */}
                         <div>
                           <label className="block text-sm font-bold text-gray-700 mb-3">
@@ -565,7 +594,10 @@ export default function MenuManagementPage() {
                             type="text"
                             value={categoryFormData.name}
                             onChange={(e) =>
-                              setCategoryFormData({ ...categoryFormData, name: e.target.value })
+                              setCategoryFormData({
+                                ...categoryFormData,
+                                name: e.target.value,
+                              })
                             }
                             className="w-full px-5 py-4 text-lg border-2 border-gray-200 rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition"
                             placeholder="Ej: Entradas, Platos Fuertes, Bebidas, Postres..."
@@ -580,11 +612,41 @@ export default function MenuManagementPage() {
                           </label>
                           <div className="bg-linear-to-br from-gray-50 to-gray-100/50 rounded-2xl p-6 border border-gray-200">
                             <div className="grid grid-cols-8 gap-3">
-                              {["🥗", "🍽️", "🍔", "🍕", "🥤", "🍰", "🍗", "🌮", "🍜", "🥘", "🍱", "🍻", "☕", "🥙", "🍖", "🥩", "🍷", "🍝", "🍛", "🥟", "🍣", "🌭", "🥪", "🧁"].map((emoji) => (
+                              {[
+                                "🥗",
+                                "🍽️",
+                                "🍔",
+                                "🍕",
+                                "🥤",
+                                "🍰",
+                                "🍗",
+                                "🌮",
+                                "🍜",
+                                "🥘",
+                                "🍱",
+                                "🍻",
+                                "☕",
+                                "🥙",
+                                "🍖",
+                                "🥩",
+                                "🍷",
+                                "🍝",
+                                "🍛",
+                                "🥟",
+                                "🍣",
+                                "🌭",
+                                "🥪",
+                                "🧁",
+                              ].map((emoji) => (
                                 <button
                                   key={emoji}
                                   type="button"
-                                  onClick={() => setCategoryFormData({ ...categoryFormData, icon: emoji })}
+                                  onClick={() =>
+                                    setCategoryFormData({
+                                      ...categoryFormData,
+                                      icon: emoji,
+                                    })
+                                  }
                                   className={`aspect-square text-4xl rounded-xl transition-all transform hover:scale-110 ${
                                     categoryFormData.icon === emoji
                                       ? "bg-primary text-white shadow-lg scale-110"
@@ -596,12 +658,17 @@ export default function MenuManagementPage() {
                               ))}
                             </div>
                             <div className="mt-4 pt-4 border-t border-gray-300">
-                              <p className="text-xs text-gray-600 mb-2">O escribe tu propio emoji:</p>
+                              <p className="text-xs text-gray-600 mb-2">
+                                O escribe tu propio emoji:
+                              </p>
                               <input
                                 type="text"
                                 value={categoryFormData.icon}
                                 onChange={(e) =>
-                                  setCategoryFormData({ ...categoryFormData, icon: e.target.value })
+                                  setCategoryFormData({
+                                    ...categoryFormData,
+                                    icon: e.target.value,
+                                  })
                                 }
                                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-3xl text-center transition bg-white"
                                 placeholder="🍽️"
@@ -615,12 +682,17 @@ export default function MenuManagementPage() {
                         <div>
                           <label className="block text-sm font-bold text-gray-700 mb-3">
                             Descripción
-                            <span className="text-gray-400 font-normal ml-2">(Opcional)</span>
+                            <span className="text-gray-400 font-normal ml-2">
+                              (Opcional)
+                            </span>
                           </label>
                           <textarea
                             value={categoryFormData.description}
                             onChange={(e) =>
-                              setCategoryFormData({ ...categoryFormData, description: e.target.value })
+                              setCategoryFormData({
+                                ...categoryFormData,
+                                description: e.target.value,
+                              })
                             }
                             className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition resize-none"
                             rows="3"
@@ -637,7 +709,10 @@ export default function MenuManagementPage() {
                                 id="cat_is_active"
                                 checked={categoryFormData.is_active}
                                 onChange={(e) =>
-                                  setCategoryFormData({ ...categoryFormData, is_active: e.target.checked })
+                                  setCategoryFormData({
+                                    ...categoryFormData,
+                                    is_active: e.target.checked,
+                                  })
                                 }
                                 className="w-6 h-6 text-primary rounded-lg focus:ring-2 focus:ring-primary/20 cursor-pointer"
                               />
@@ -647,7 +722,8 @@ export default function MenuManagementPage() {
                                 Categoría activa
                               </span>
                               <p className="text-sm text-gray-500 mt-0.5">
-                                Las categorías inactivas no se mostrarán en el menú
+                                Las categorías inactivas no se mostrarán en el
+                                menú
                               </p>
                             </div>
                           </label>
@@ -675,7 +751,9 @@ export default function MenuManagementPage() {
                             type="submit"
                             className="flex-1 px-6 py-4 bg-primary text-secondary rounded-2xl font-bold hover:opacity-90 transition shadow-xl shadow-primary/30 text-lg"
                           >
-                            {editingCategory ? "💾 Guardar Cambios" : "✨ Crear Categoría"}
+                            {editingCategory
+                              ? "💾 Guardar Cambios"
+                              : "✨ Crear Categoría"}
                           </button>
                         </div>
                       </form>

@@ -71,7 +71,7 @@ export default function DashboardLayout({ children }) {
       path: "/dashboard/settings",
       icon: Settings,
       label: "Configuración",
-      roles: ["admin","mesero", "chef"],
+      roles: ["admin", "mesero", "chef"],
     },
   ];
 
