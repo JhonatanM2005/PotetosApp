@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
-const { User } = require("../models");
+const { User, PasswordReset } = require("../models");
+const { sendPasswordResetCode } = require("../services/emailService");
+const { Op } = require("sequelize");
 
 // Login
 exports.login = async (req, res) => {
@@ -133,6 +135,169 @@ exports.changePassword = async (req, res) => {
     res.json({ message: "Password changed successfully" });
   } catch (error) {
     console.error("Change password error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Forgot password - Send reset code
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    // Verificar que el usuario existe
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      // Por seguridad, no revelar si el email existe o no
+      return res.json({
+        message: "If the email exists, a reset code has been sent",
+      });
+    }
+
+    // Generar código de 6 dígitos
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Expiración: 15 minutos
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    // Invalidar códigos anteriores del mismo email
+    await PasswordReset.update(
+      { used: true },
+      { where: { email, used: false } }
+    );
+
+    // Crear nuevo código
+    await PasswordReset.create({
+      email,
+      code,
+      expiresAt,
+      attempts: 0,
+      used: false,
+    });
+
+    // Enviar email
+    await sendPasswordResetCode(email, code);
+
+    res.json({
+      message: "Reset code sent to your email",
+      expiresIn: "15 minutes",
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Verify reset code
+exports.verifyResetCode = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({ message: "Email and code are required" });
+    }
+
+    // Buscar código válido
+    const resetCode = await PasswordReset.findOne({
+      where: {
+        email,
+        code,
+        used: false,
+        expiresAt: { [Op.gt]: new Date() },
+      },
+    });
+
+    if (!resetCode) {
+      return res.status(400).json({
+        message: "Invalid or expired code",
+      });
+    }
+
+    // Verificar intentos
+    if (resetCode.attempts >= 3) {
+      await resetCode.update({ used: true });
+      return res.status(400).json({
+        message: "Maximum attempts exceeded. Please request a new code",
+      });
+    }
+
+    // Incrementar intentos si el código no coincide
+    if (resetCode.code !== code) {
+      await resetCode.increment("attempts");
+      return res.status(400).json({
+        message: `Invalid code. ${
+          3 - (resetCode.attempts + 1)
+        } attempts remaining`,
+      });
+    }
+
+    // Código válido - generar token temporal para resetear contraseña
+    const resetToken = jwt.sign(
+      { email, resetCodeId: resetCode.id },
+      process.env.JWT_SECRET,
+      { expiresIn: "10m" } // 10 minutos para cambiar la contraseña
+    );
+
+    res.json({
+      message: "Code verified successfully",
+      resetToken,
+    });
+  } catch (error) {
+    console.error("Verify code error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Reset password
+exports.resetPassword = async (req, res) => {
+  try {
+    const { resetToken, newPassword } = req.body;
+
+    if (!resetToken || !newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Reset token and new password are required" });
+    }
+
+    // Verificar token
+    let decoded;
+    try {
+      decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    const { email, resetCodeId } = decoded;
+
+    // Verificar que el código no haya sido usado
+    const resetCode = await PasswordReset.findByPk(resetCodeId);
+
+    if (!resetCode || resetCode.used) {
+      return res
+        .status(400)
+        .json({ message: "Reset code has already been used" });
+    }
+
+    // Buscar usuario
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Actualizar contraseña
+    await user.update({ password: newPassword });
+
+    // Marcar código como usado
+    await resetCode.update({ used: true });
+
+    res.json({ message: "Password reset successfully" });
+  } catch (error) {
+    console.error("Reset password error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };

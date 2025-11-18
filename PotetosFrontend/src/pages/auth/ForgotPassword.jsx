@@ -1,16 +1,54 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Mail } from "lucide-react";
 import imgChef from "@/assets/images/chef-manos.png";
 import toast from "react-hot-toast";
+import { authService } from "@/services";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí iría la lógica para enviar el código
-    toast.success("Código enviado a tu correo");
-    console.log("Enviar código a:", email);
+
+    if (!email) {
+      toast.error("Por favor ingresa tu correo electrónico");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await authService.forgotPassword(email);
+      toast.success("Código enviado a tu correo");
+
+      // Redirigir a la página de verificación con el email
+      navigate("/verify-code", { state: { email } });
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error al enviar el código");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email) {
+      toast.error("Por favor ingresa tu correo electrónico primero");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await authService.forgotPassword(email);
+      toast.success("Código reenviado a tu correo");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Error al reenviar el código"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -54,7 +92,9 @@ export default function ForgotPassword() {
             <div className="text-center">
               <button
                 type="button"
-                className="text-sm text-white hover:text-secondary transition-colors"
+                onClick={handleResend}
+                disabled={loading || !email}
+                className="text-sm text-white hover:text-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Reenviar código
               </button>
@@ -64,9 +104,10 @@ export default function ForgotPassword() {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="w-full max-w-xs px-8 py-3 bg-secondary text-primary font-bold rounded-full hover:opacity-90 transition-opacity shadow-lg"
+                disabled={loading}
+                className="w-full max-w-xs px-8 py-3 bg-secondary text-primary font-bold rounded-full hover:opacity-90 transition-opacity shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Enviar código
+                {loading ? "Enviando..." : "Enviar código"}
               </button>
             </div>
           </form>

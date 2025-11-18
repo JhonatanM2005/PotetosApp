@@ -74,7 +74,6 @@ export default function Reservations() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Reserva confirmada:", formData);
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);

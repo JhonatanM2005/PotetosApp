@@ -25,6 +25,9 @@ export default function SettingsPage() {
     totalOrders: 0,
     completedOrders: 0,
     pendingOrders: 0,
+    todayOrders: 0,
+    weekOrders: 0,
+    monthOrders: 0,
   });
   const [formData, setFormData] = useState({
     name: "",
@@ -50,7 +53,7 @@ export default function SettingsPage() {
 
   const fetchUserStats = async () => {
     try {
-      const data = await orderService.getStats();
+      const data = await userService.getStats();
       setUserStats(data.stats || {});
     } catch (error) {
       console.error("Error al cargar estadísticas", error);
@@ -76,7 +79,7 @@ export default function SettingsPage() {
       return;
     }
     try {
-      await userService.changePassword({
+      await userService.changeOwnPassword({
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });
@@ -207,25 +210,55 @@ export default function SettingsPage() {
             {/* Estadísticas */}
             <div className="bg-white rounded-2xl shadow-md p-6">
               <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                📊 Estadísticas
+                📊 Mis Estadísticas
               </h3>
-              <div className="space-y-4">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600">Total Procesadas</p>
-                  <p className="text-3xl font-bold text-blue-600">
-                    {userStats.totalOrders || 1247}
+              <div className="space-y-3">
+                <div className="bg-linear-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                  <p className="text-xs text-blue-600 font-semibold uppercase mb-1">
+                    Total Órdenes
+                  </p>
+                  <p className="text-2xl font-bold text-blue-700">
+                    {userStats.totalOrders || 0}
                   </p>
                 </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600">Tareas Completadas</p>
-                  <p className="text-3xl font-bold text-green-600">
-                    {userStats.completedOrders || 856}
+                <div className="bg-linear-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                  <p className="text-xs text-green-600 font-semibold uppercase mb-1">
+                    Completadas
+                  </p>
+                  <p className="text-2xl font-bold text-green-700">
+                    {userStats.completedOrders || 0}
                   </p>
                 </div>
-                <div className="bg-orange-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600">Tareas Pendientes</p>
-                  <p className="text-3xl font-bold text-orange-600">
-                    {userStats.pendingOrders || 1848}
+                <div className="bg-linear-to-r from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
+                  <p className="text-xs text-orange-600 font-semibold uppercase mb-1">
+                    Pendientes
+                  </p>
+                  <p className="text-2xl font-bold text-orange-700">
+                    {userStats.pendingOrders || 0}
+                  </p>
+                </div>
+                <div className="bg-linear-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                  <p className="text-xs text-purple-600 font-semibold uppercase mb-1">
+                    Hoy
+                  </p>
+                  <p className="text-2xl font-bold text-purple-700">
+                    {userStats.todayOrders || 0}
+                  </p>
+                </div>
+                <div className="bg-linear-to-r from-indigo-50 to-indigo-100 p-4 rounded-lg border border-indigo-200">
+                  <p className="text-xs text-indigo-600 font-semibold uppercase mb-1">
+                    Esta Semana
+                  </p>
+                  <p className="text-2xl font-bold text-indigo-700">
+                    {userStats.weekOrders || 0}
+                  </p>
+                </div>
+                <div className="bg-linear-to-r from-pink-50 to-pink-100 p-4 rounded-lg border border-pink-200">
+                  <p className="text-xs text-pink-600 font-semibold uppercase mb-1">
+                    Este Mes
+                  </p>
+                  <p className="text-2xl font-bold text-pink-700">
+                    {userStats.monthOrders || 0}
                   </p>
                 </div>
               </div>

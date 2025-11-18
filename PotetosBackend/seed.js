@@ -9,8 +9,8 @@ const seedDatabase = async () => {
     await sequelize.sync({ alter: true });
     console.log("✅ Database synced\n");
 
-    // 1. Crear usuario Admin
-    console.log("👥 Creating admin user...");
+    // 1. Crear usuarios
+    console.log("👥 Creating users...");
     const users = await User.bulkCreate(
       [
         {
@@ -21,10 +21,34 @@ const seedDatabase = async () => {
           phone: "123456789",
           is_active: true,
         },
+        {
+          name: "Juan Mesero",
+          email: "mesero@potetos.com",
+          password: "Mesero123",
+          role: "mesero",
+          phone: "987654321",
+          is_active: true,
+        },
+        {
+          name: "Carlos Chef",
+          email: "chef@potetos.com",
+          password: "Chef123",
+          role: "chef",
+          phone: "555123456",
+          is_active: true,
+        },
+        {
+          name: "María Cajera",
+          email: "cajero@potetos.com",
+          password: "Cajero123",
+          role: "cajero",
+          phone: "555987654",
+          is_active: true,
+        },
       ],
       { individualHooks: true }
     );
-    console.log(`✅ Created admin user\n`);
+    console.log(`✅ Created ${users.length} users\n`);
 
     // 2. Crear categorías
     console.log("📂 Creating categories...");
@@ -110,9 +134,19 @@ const seedDatabase = async () => {
     console.log(`   Categories: ${categories.length}`);
     console.log(`   Tables: ${tables.length}\n`);
 
-    console.log("👤 Admin Credentials:");
-    console.log("   Email:    admin@potetos.com");
-    console.log("   Password: Admin123\n");
+    console.log("👤 User Credentials:");
+    console.log("   Admin:");
+    console.log("     Email:    admin@potetos.com");
+    console.log("     Password: Admin123");
+    console.log("   Mesero:");
+    console.log("     Email:    mesero@potetos.com");
+    console.log("     Password: Mesero123");
+    console.log("   Chef:");
+    console.log("     Email:    chef@potetos.com");
+    console.log("     Password: Chef123");
+    console.log("   Cajero:");
+    console.log("     Email:    cajero@potetos.com");
+    console.log("     Password: Cajero123\n");
 
     process.exit(0);
   } catch (error) {

@@ -3,16 +3,18 @@ import { useAuthStore } from "../../store/authStore";
 import { useState } from "react";
 import {
   Home,
-  ShoppingCart,
-  Menu,
+  NotebookPen,
+  BookOpenText,
   Users,
   UtensilsCrossed,
   Settings,
   LogOut,
   AlertTriangle,
-  LayoutGrid,
-  TableProperties,
+  Grid2x2Plus,
+  BarChart3,
+  Icon,
 } from "lucide-react";
+import { chairsTablePlatter } from "@lucide/lab";
 import logo from "@/assets/images/favicon-potetos.svg";
 
 export default function DashboardLayout({ children }) {
@@ -22,31 +24,67 @@ export default function DashboardLayout({ children }) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const menuItems = [
-    { path: "/dashboard", icon: Home, label: "Dashboard" },
-    { path: "/orders", icon: ShoppingCart, label: "Órdenes" },
-    { path: "/dashboard/menu", icon: Menu, label: "Menú" },
-  ];
-
-  // Agregar item de cocina para chefs
-  if (user?.role === "chef") {
-    menuItems.push({
-      path: "/kitchen",
+    {
+      path: "/dashboard",
+      icon: Home,
+      label: "Dashboard",
+      roles: ["admin", "mesero", "chef"],
+    },
+    {
+      path: "/dashboard/stats",
+      icon: BarChart3,
+      label: "Estadísticas",
+      roles: ["admin"],
+    },
+    {
+      path: "/dashboard/categories",
+      icon: Grid2x2Plus,
+      label: "Categorías",
+      roles: ["admin"],
+    },
+    {
+      path: "/dashboard/menu",
+      icon: BookOpenText,
+      label: "Menú",
+      roles: ["admin", "mesero"],
+    },
+    {
+      path: "/dashboard/tables",
+      icon: chairsTablePlatter,
+      label: "Mesas",
+      roles: ["admin"],
+      isCustomIcon: true,
+    },
+    {
+      path: "/dashboard/orders",
+      icon: NotebookPen,
+      label: "Órdenes",
+      roles: ["admin", "mesero"],
+    },
+    {
+      path: "/dashboard/kitchen",
       icon: UtensilsCrossed,
       label: "Cocina",
-    });
-  }
+      roles: ["chef"],
+    },
+    {
+      path: "/dashboard/users",
+      icon: Users,
+      label: "Usuarios",
+      roles: ["admin"],
+    },
+    {
+      path: "/dashboard/settings",
+      icon: Settings,
+      label: "Configuración",
+      roles: ["admin","mesero", "chef"],
+    },
+  ];
 
-  // Agregar items de gestión para admins
-  if (user?.role === "admin") {
-    menuItems.push(
-      { path: "/dashboard/categories", icon: LayoutGrid, label: "Categorías" },
-      { path: "/dashboard/tables", icon: TableProperties, label: "Mesas" },
-      { path: "/users", icon: Users, label: "Usuarios" }
-    );
-  }
-
-  // Agregar configuración al final
-  menuItems.push({ path: "/settings", icon: Settings, label: "Configuración" });
+  // Filtrar items según el rol del usuario
+  const filteredMenuItems = menuItems.filter((item) =>
+    item.roles.includes(user?.role)
+  );
 
   const isActive = (path) => location.pathname === path;
 
@@ -66,8 +104,7 @@ export default function DashboardLayout({ children }) {
 
         {/* Menu Items */}
         <nav className="flex flex-col gap-4 flex-1 overflow-y-auto scrollbar-hide">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
+          {filteredMenuItems.map((item) => {
             return (
               <button
                 key={item.path}
@@ -79,7 +116,11 @@ export default function DashboardLayout({ children }) {
                 }`}
                 title={item.label}
               >
-                <Icon size={24} />
+                {item.isCustomIcon ? (
+                  <Icon iconNode={item.icon} size={24} />
+                ) : (
+                  <item.icon size={24} />
+                )}
               </button>
             );
           })}

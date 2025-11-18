@@ -13,24 +13,16 @@ export default function Navbar() {
 
   const isActive = (path) => location.pathname === path;
 
-  const navigationItems = isAuthenticated
-    ? [
-        { href: "/dashboard", label: "Dashboard" },
-        { href: "/orders", label: "Órdenes" },
-        { href: "/menu", label: "Menú" },
-        ...(user?.role === "chef"
-          ? [{ href: "/kitchen", label: "Cocina" }]
-          : []),
-        ...(user?.role === "admin"
-          ? [{ href: "/users", label: "Usuarios" }]
-          : []),
-      ]
-    : [
-        { href: "/", label: "Inicio" },
-        { href: "/menu", label: "Menú" },
-        { href: "/reservations", label: "Reservas" },
-        { href: "/about", label: "Nosotros" },
-      ];
+  // Navbar sólo muestra enlaces públicos. Si el usuario está autenticado,
+  // añadimos únicamente un acceso al panel (/dashboard). El sidebar del
+  // dashboard se encarga de las rutas internas.
+  const navigationItems = [
+    { href: "/", label: "Inicio" },
+    { href: "/menu", label: "Menú" },
+    { href: "/reservations", label: "Reservas" },
+    { href: "/about", label: "Nosotros" },
+    ...(isAuthenticated ? [{ href: "/dashboard", label: "Panel" }] : []),
+  ];
 
   const handleLogout = () => {
     logout();
@@ -123,8 +115,8 @@ export default function Navbar() {
                   to={item.href}
                   className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                     isActive(item.href)
-                      ? "text-primary bg-orange-50 border-l-4 border-orange-600"
-                      : "text-gray-700 hover:text-orange-600 hover:bg-secondary/10"
+                      ? "text-primary bg-secondary border-l-4 border-primary"
+                      : "text-white hover:text-secondary hover:bg-primary/80"
                   }`}
                   onClick={() => setIsOpen(false)}
                 >
@@ -135,12 +127,12 @@ export default function Navbar() {
               {isAuthenticated && (
                 <>
                   {/* User Info Mobile */}
-                  <div className="px-4 py-3 mt-2 bg-orange-50 rounded-lg border-l-4 border-orange-600">
-                    <p className="text-xs text-gray-500 mb-1">Usuario</p>
-                    <p className="text-sm font-semibold text-gray-800 mb-2">
+                  <div className="px-4 py-3 mt-2 bg-secondary rounded-lg border-l-4 border-primary">
+                    <p className="text-xs text-primary/70 mb-1">Usuario</p>
+                    <p className="text-sm font-semibold text-primary mb-2">
                       {user?.name}
                     </p>
-                    <p className="text-xs text-gray-600 capitalize">
+                    <p className="text-xs text-primary/80 capitalize">
                       Rol: {user?.role}
                     </p>
                   </div>

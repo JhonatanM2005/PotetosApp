@@ -57,21 +57,27 @@ export default function UsersPage() {
 
     try {
       if (editingUser) {
-        // Editar
+        // Editar - actualizar datos del usuario
         const updateData = {
           name: formData.name,
           email: formData.email,
           role: formData.role,
           phone: formData.phone,
         };
-        if (formData.password) {
-          updateData.password = formData.password;
-        }
 
         await userService.update(editingUser.id, updateData);
+
+        // Si se proporciona una nueva contraseña, actualizarla por separado
+        if (formData.password) {
+          await userService.changeUserPassword(
+            editingUser.id,
+            formData.password
+          );
+        }
+
         toast.success("Usuario actualizado correctamente");
       } else {
-        // Crear
+        // Crear nuevo usuario
         if (!formData.password) {
           toast.error("La contraseña es requerida");
           return;

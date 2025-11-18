@@ -25,6 +25,7 @@ import ResetPasswordPage from "./pages/auth/ResetPassword";
 
 // Protected Pages
 import DashboardPage from "./pages/dashboard/Dashboard";
+import DashboardStats from "./pages/dashboard/Stats";
 import KitchenPage from "./pages/dashboard/Kitchen";
 import UsersPage from "./pages/dashboard/Users";
 import OrdersPage from "./pages/dashboard/Orders";
@@ -82,7 +83,16 @@ function App() {
         />
 
         <Route
-          path="/kitchen"
+          path="/dashboard/stats"
+          element={
+            <ProtectedRoute>
+              <DashboardStats />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/kitchen"
           element={
             <ProtectedRoute requiredRole="chef">
               <KitchenPage />
@@ -91,7 +101,7 @@ function App() {
         />
 
         <Route
-          path="/users"
+          path="/dashboard/users"
           element={
             <ProtectedRoute requiredRole="admin">
               <UsersPage />
@@ -100,7 +110,7 @@ function App() {
         />
 
         <Route
-          path="/orders"
+          path="/dashboard/orders"
           element={
             <ProtectedRoute>
               <OrdersPage />
@@ -136,7 +146,7 @@ function App() {
         />
 
         <Route
-          path="/settings"
+          path="/dashboard/settings"
           element={
             <ProtectedRoute>
               <SettingsPage />

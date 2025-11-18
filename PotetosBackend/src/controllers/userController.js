@@ -1,5 +1,90 @@
-const { User } = require("../models");
+const { User, Order } = require("../models");
 const { Op } = require("sequelize");
+
+// Obtener estadísticas del usuario actual
+exports.getUserStats = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Obtener todas las órdenes del usuario
+    const allOrders = await Order.count({
+      where: { waiter_id: userId },
+    });
+
+    // Órdenes completadas (pagadas)
+    const completedOrders = await Order.count({
+      where: {
+        waiter_id: userId,
+        status: "paid",
+      },
+    });
+
+    // Órdenes pendientes (pending, preparing, ready, delivered)
+    const pendingOrders = await Order.count({
+      where: {
+        waiter_id: userId,
+        status: {
+          [Op.in]: ["pending", "preparing", "ready", "delivered"],
+        },
+      },
+    });
+
+    // Órdenes de hoy
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const todayOrders = await Order.count({
+      where: {
+        waiter_id: userId,
+        created_at: {
+          [Op.gte]: today,
+        },
+      },
+    });
+
+    // Órdenes de esta semana
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const weekOrders = await Order.count({
+      where: {
+        waiter_id: userId,
+        created_at: {
+          [Op.gte]: startOfWeek,
+        },
+      },
+    });
+
+    // Órdenes de este mes
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const monthOrders = await Order.count({
+      where: {
+        waiter_id: userId,
+        created_at: {
+          [Op.gte]: startOfMonth,
+        },
+      },
+    });
+
+    res.json({
+      stats: {
+        totalOrders: allOrders,
+        completedOrders,
+        pendingOrders,
+        todayOrders,
+        weekOrders,
+        monthOrders,
+      },
+    });
+  } catch (error) {
+    console.error("Get user stats error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 // Obtener todos los usuarios
 exports.getUsers = async (req, res) => {

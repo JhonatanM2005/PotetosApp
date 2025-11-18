@@ -246,8 +246,8 @@ export const userService = {
     return response.data;
   },
 
-  // Cambiar contraseña
-  changePassword: async (id, newPassword) => {
+  // Cambiar contraseña de un usuario específico (admin)
+  changeUserPassword: async (id, newPassword) => {
     const response = await api.patch(`/users/${id}/password`, { newPassword });
     return response.data;
   },
@@ -265,8 +265,14 @@ export const userService = {
   },
 
   // Cambiar contraseña del usuario actual
-  changePassword: async (data) => {
+  changeOwnPassword: async (data) => {
     const response = await api.patch("/auth/change-password", data);
+    return response.data;
+  },
+
+  // Obtener estadísticas del usuario actual
+  getStats: async () => {
+    const response = await api.get("/auth/stats");
     return response.data;
   },
 };
@@ -285,6 +291,43 @@ export const authService = {
     const response = await api.get("/auth/me");
     return response.data;
   },
+
+  // Recuperación de contraseña - Enviar código
+  forgotPassword: async (email) => {
+    const response = await api.post("/auth/forgot-password", { email });
+    return response.data;
+  },
+
+  // Verificar código de recuperación
+  verifyResetCode: async (email, code) => {
+    const response = await api.post("/auth/verify-reset-code", { email, code });
+    return response.data;
+  },
+
+  // Resetear contraseña
+  resetPassword: async (resetToken, newPassword) => {
+    const response = await api.post("/auth/reset-password", {
+      resetToken,
+      newPassword,
+    });
+    return response.data;
+  },
+};
+
+// ========== DASHBOARD ==========
+
+export const dashboardService = {
+  // Obtener estadísticas del dashboard
+  getStats: async (period = "week") => {
+    const response = await api.get("/dashboard/stats", { params: { period } });
+    return response.data;
+  },
+
+  // Obtener estadísticas del día
+  getTodayStats: async () => {
+    const response = await api.get("/dashboard/today");
+    return response.data;
+  },
 };
 
 export default {
@@ -295,4 +338,5 @@ export default {
   kitchen: kitchenService,
   user: userService,
   auth: authService,
+  dashboard: dashboardService,
 };
