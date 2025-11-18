@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
+import PasswordStrengthIndicator from "../../components/common/PasswordStrengthIndicator";
 import { userService } from "../../services";
 import toast from "react-hot-toast";
 
@@ -67,8 +68,23 @@ export default function UsersPage() {
 
         await userService.update(editingUser.id, updateData);
 
-        // Si se proporciona una nueva contraseña, actualizarla por separado
+        // Si se proporciona una nueva contraseña, validarla y actualizarla
         if (formData.password) {
+          // Validar contraseña segura
+          const passwordRegex = {
+            length: formData.password.length >= 8,
+            uppercase: /[A-Z]/.test(formData.password),
+            lowercase: /[a-z]/.test(formData.password),
+            number: /[0-9]/.test(formData.password),
+            special: /[!@#$%^&*(),.?":{}|<>_\-]/.test(formData.password),
+          };
+
+          const isValid = Object.values(passwordRegex).every((v) => v);
+          if (!isValid) {
+            toast.error("La contraseña no cumple con los requisitos de seguridad");
+            return;
+          }
+
           await userService.changeUserPassword(
             editingUser.id,
             formData.password
@@ -82,6 +98,22 @@ export default function UsersPage() {
           toast.error("La contraseña es requerida");
           return;
         }
+
+        // Validar contraseña segura
+        const passwordRegex = {
+          length: formData.password.length >= 8,
+          uppercase: /[A-Z]/.test(formData.password),
+          lowercase: /[a-z]/.test(formData.password),
+          number: /[0-9]/.test(formData.password),
+          special: /[!@#$%^&*(),.?":{}|<>_\-]/.test(formData.password),
+        };
+
+        const isValid = Object.values(passwordRegex).every((v) => v);
+        if (!isValid) {
+          toast.error("La contraseña no cumple con los requisitos de seguridad");
+          return;
+        }
+
         await userService.create(formData);
         toast.success("Usuario creado correctamente");
       }
@@ -89,7 +121,14 @@ export default function UsersPage() {
       closeModal();
       fetchUsers();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error al guardar usuario");
+      const errorMessage = error.response?.data?.message || "Error al guardar usuario";
+      const errors = error.response?.data?.errors;
+      
+      if (errors && errors.length > 0) {
+        errors.forEach((err) => toast.error(err));
+      } else {
+        toast.error(errorMessage);
+      }
     }
   };
 
@@ -547,6 +586,16 @@ export default function UsersPage() {
                       className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
                     />
                   </div>
+
+                  {/* Password Strength Indicator */}
+                  {formData.password && (
+                    <div className="col-span-2">
+                      <PasswordStrengthIndicator
+                        password={formData.password}
+                        showRequirements={true}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-3 pt-4">

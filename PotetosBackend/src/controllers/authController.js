@@ -3,6 +3,33 @@ const { User, PasswordReset } = require("../models");
 const { sendPasswordResetCode } = require("../services/emailService");
 const { Op } = require("sequelize");
 
+// Función de validación de contraseña segura
+const validatePassword = (password) => {
+  const errors = [];
+
+  if (password.length < 8) {
+    errors.push("La contraseña debe tener al menos 8 caracteres");
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    errors.push("La contraseña debe incluir al menos una letra mayúscula");
+  }
+
+  if (!/[a-z]/.test(password)) {
+    errors.push("La contraseña debe incluir al menos una letra minúscula");
+  }
+
+  if (!/[0-9]/.test(password)) {
+    errors.push("La contraseña debe incluir al menos un número");
+  }
+
+  if (!/[!@#$%^&*(),.?":{}|<>_\-]/.test(password)) {
+    errors.push("La contraseña debe incluir al menos un carácter especial (!@#$%^&*(),.?\":{}|<>_-)");
+  }
+
+  return errors;
+};
+
 // Login
 exports.login = async (req, res) => {
   try {
@@ -114,6 +141,15 @@ exports.changePassword = async (req, res) => {
       return res
         .status(400)
         .json({ message: "Current and new password are required" });
+    }
+
+    // Validar seguridad de la nueva contraseña
+    const passwordErrors = validatePassword(newPassword);
+    if (passwordErrors.length > 0) {
+      return res.status(400).json({
+        message: "La nueva contraseña no cumple con los requisitos de seguridad",
+        errors: passwordErrors,
+      });
     }
 
     const user = await User.findByPk(userId);
@@ -261,6 +297,15 @@ exports.resetPassword = async (req, res) => {
       return res
         .status(400)
         .json({ message: "Reset token and new password are required" });
+    }
+
+    // Validar seguridad de la nueva contraseña
+    const passwordErrors = validatePassword(newPassword);
+    if (passwordErrors.length > 0) {
+      return res.status(400).json({
+        message: "La contraseña no cumple con los requisitos de seguridad",
+        errors: passwordErrors,
+      });
     }
 
     // Verificar token

@@ -12,9 +12,12 @@ import {
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { dishService, categoryService } from "../../services";
+import { useAuthStore } from "../../store/authStore";
 import toast from "react-hot-toast";
 
 export default function MenuManagementPage() {
+  const { user } = useAuthStore();
+  const isChef = user?.role === "chef";
   const [dishes, setDishes] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -254,22 +257,24 @@ export default function MenuManagementPage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-primary">MENÚ</h1>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setShowCategoryModal(true)}
-              className="bg-white border-2 border-primary text-primary px-6 py-3 rounded-full font-bold hover:bg-primary hover:text-secondary transition flex items-center gap-2"
-            >
-              <Grid2x2Plus size={20} />
-              Gestionar Categorías
-            </button>
-            <button
-              onClick={() => openModal()}
-              className="bg-primary text-secondary px-6 py-3 rounded-full font-bold hover:opacity-90 transition flex items-center gap-2"
-            >
-              <Plus size={20} />
-              Nuevo Plato
-            </button>
-          </div>
+          {!isChef && (
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowCategoryModal(true)}
+                className="bg-white border-2 border-primary text-primary px-6 py-3 rounded-full font-bold hover:bg-primary hover:text-secondary transition flex items-center gap-2"
+              >
+                <Grid2x2Plus size={20} />
+                Gestionar Categorías
+              </button>
+              <button
+                onClick={() => openModal()}
+                className="bg-primary text-secondary px-6 py-3 rounded-full font-bold hover:opacity-90 transition flex items-center gap-2"
+              >
+                <Plus size={20} />
+                Nuevo Plato
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Filters */}
@@ -387,20 +392,24 @@ export default function MenuManagementPage() {
                             <Eye size={18} />
                           )}
                         </button>
-                        <button
-                          onClick={() => openModal(dish)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                          title="Editar"
-                        >
-                          <Edit2 size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(dish.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                          title="Eliminar"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                        {!isChef && (
+                          <>
+                            <button
+                              onClick={() => openModal(dish)}
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                              title="Editar"
+                            >
+                              <Edit2 size={18} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(dish.id)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                              title="Eliminar"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

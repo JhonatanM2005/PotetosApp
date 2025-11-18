@@ -13,6 +13,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
+import PasswordStrengthIndicator from "../../components/common/PasswordStrengthIndicator";
 import { userService, orderService } from "../../services";
 import toast from "react-hot-toast";
 
@@ -78,6 +79,22 @@ export default function SettingsPage() {
       toast.error("Las contraseñas no coinciden");
       return;
     }
+
+    // Validar contraseña segura
+    const passwordRegex = {
+      length: passwordData.newPassword.length >= 8,
+      uppercase: /[A-Z]/.test(passwordData.newPassword),
+      lowercase: /[a-z]/.test(passwordData.newPassword),
+      number: /[0-9]/.test(passwordData.newPassword),
+      special: /[!@#$%^&*(),.?":{}|<>_\-]/.test(passwordData.newPassword),
+    };
+
+    const isValid = Object.values(passwordRegex).every((v) => v);
+    if (!isValid) {
+      toast.error("La nueva contraseña no cumple con los requisitos de seguridad");
+      return;
+    }
+
     try {
       await userService.changeOwnPassword({
         currentPassword: passwordData.currentPassword,
@@ -91,8 +108,14 @@ export default function SettingsPage() {
         confirmPassword: "",
       });
     } catch (error) {
-      toast.error("Error al cambiar la contraseña");
-      console.error(error);
+      const errorMessage = error.response?.data?.message || "Error al cambiar la contraseña";
+      const errors = error.response?.data?.errors;
+      
+      if (errors && errors.length > 0) {
+        errors.forEach((err) => toast.error(err));
+      } else {
+        toast.error(errorMessage);
+      }
     }
   };
 
@@ -409,6 +432,32 @@ export default function SettingsPage() {
                     required
                   />
                 </div>
+
+                {/* Password Strength Indicator */}
+                {passwordData.newPassword && (
+                  <div>
+                    <PasswordStrengthIndicator
+                      password={passwordData.newPassword}
+                      showRequirements={true}
+                    />
+                  </div>
+                )}
+
+                {/* Match indicator */}
+                {passwordData.confirmPassword && (
+                  <div className="text-center">
+                    {passwordData.newPassword === passwordData.confirmPassword ? (
+                      <p className="text-green-600 text-sm font-semibold">
+                        ✓ Las contraseñas coinciden
+                      </p>
+                    ) : (
+                      <p className="text-red-600 text-sm font-semibold">
+                        ✗ Las contraseñas no coinciden
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 <div className="flex gap-3 pt-4">
                   <button
                     type="button"

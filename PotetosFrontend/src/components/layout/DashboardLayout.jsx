@@ -40,7 +40,7 @@ export default function DashboardLayout({ children }) {
       path: "/dashboard/menu",
       icon: BookOpenText,
       label: "Menú",
-      roles: ["admin", "mesero"],
+      roles: ["admin", "mesero", "chef"],
     },
     {
       path: "/dashboard/tables",

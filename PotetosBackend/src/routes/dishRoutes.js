@@ -14,13 +14,21 @@ router.use(authMiddleware);
 router.get("/", dishController.getDishes);
 router.get("/:id", dishController.getDishById);
 
-// Rutas de administración - Solo admin
-router.use(roleMiddleware("admin"));
+// Toggle availability - Admin y Chef pueden cambiar disponibilidad
+router.patch(
+  "/:id/toggle-availability",
+  roleMiddleware("admin", "chef"),
+  dishController.toggleDishAvailability
+);
 
-router.post("/", dishController.createDish);
-router.patch("/:id", dishController.updateDish);
-router.delete("/:id", dishController.deleteDish);
-router.patch("/:id/toggle-availability", dishController.toggleDishAvailability);
-router.patch("/:id/toggle-status", dishController.toggleDishStatus);
+// Rutas de administración - Solo admin
+router.post("/", roleMiddleware("admin"), dishController.createDish);
+router.patch("/:id", roleMiddleware("admin"), dishController.updateDish);
+router.delete("/:id", roleMiddleware("admin"), dishController.deleteDish);
+router.patch(
+  "/:id/toggle-status",
+  roleMiddleware("admin"),
+  dishController.toggleDishStatus
+);
 
 module.exports = router;

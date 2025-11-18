@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import imgChef from "@/assets/images/chef-manos.png";
 import toast from "react-hot-toast";
 import { authService } from "@/services";
+import PasswordStrengthIndicator from "@/components/common/PasswordStrengthIndicator";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -37,8 +38,18 @@ export default function ResetPassword() {
       return;
     }
 
-    if (formData.newPassword.length < 6) {
-      toast.error("La contraseña debe tener al menos 6 caracteres");
+    // Validación de contraseña segura
+    const passwordRegex = {
+      length: formData.newPassword.length >= 8,
+      uppercase: /[A-Z]/.test(formData.newPassword),
+      lowercase: /[a-z]/.test(formData.newPassword),
+      number: /[0-9]/.test(formData.newPassword),
+      special: /[!@#$%^&*(),.?":{}|<>_\-]/.test(formData.newPassword),
+    };
+
+    const isValid = Object.values(passwordRegex).every((v) => v);
+    if (!isValid) {
+      toast.error("La contraseña no cumple con los requisitos de seguridad");
       return;
     }
 
@@ -52,9 +63,14 @@ export default function ResetPassword() {
         navigate("/login");
       }, 1500);
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Error al cambiar la contraseña"
-      );
+      const errorMessage = error.response?.data?.message || "Error al cambiar la contraseña";
+      const errors = error.response?.data?.errors;
+      
+      if (errors && errors.length > 0) {
+        errors.forEach((err) => toast.error(err));
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -109,6 +125,31 @@ export default function ResetPassword() {
                 className="w-full px-2 py-2 bg-transparent text-white text-center placeholder-gray-400 focus:outline-none"
               />
             </div>
+
+            {/* Password Strength Indicator */}
+            {formData.newPassword && (
+              <div className="bg-white/95 rounded-2xl p-4">
+                <PasswordStrengthIndicator
+                  password={formData.newPassword}
+                  showRequirements={true}
+                />
+              </div>
+            )}
+
+            {/* Match indicator */}
+            {formData.confirmPassword && (
+              <div className="text-center">
+                {formData.newPassword === formData.confirmPassword ? (
+                  <p className="text-green-400 text-sm font-semibold">
+                    ✓ Las contraseñas coinciden
+                  </p>
+                ) : (
+                  <p className="text-red-400 text-sm font-semibold">
+                    ✗ Las contraseñas no coinciden
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Submit Button */}
             <div className="flex justify-center pt-4">
