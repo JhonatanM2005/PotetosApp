@@ -21,7 +21,9 @@ const transporter = nodemailer.createTransport({
 transporter.verify((error, success) => {
   if (error) {
     console.error("❌ Error al configurar email:", error.message);
-    console.error("   Verifica EMAIL_USER y EMAIL_PASSWORD en las variables de entorno");
+    console.error(
+      "   Verifica EMAIL_USER y EMAIL_PASSWORD en las variables de entorno"
+    );
   } else {
     console.log("✅ Servicio de email configurado correctamente");
     console.log(`   Email configurado: ${process.env.EMAIL_USER}`);
