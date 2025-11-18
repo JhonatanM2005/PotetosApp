@@ -100,7 +100,7 @@ const sendPasswordResetCode = async (email, code) => {
         <body>
           <div class="container">
             <div class="header">
-              <h1>🍽️ POTETOS</h1>
+              <h1>🍟 POTETOS</h1>
               <p style="margin: 10px 0 0 0; font-size: 16px;">Restaurant ERP System</p>
             </div>
             <div class="content">
