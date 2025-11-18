@@ -9,6 +9,7 @@ import {
   PowerOff,
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
+import ConfirmModal from "../../components/common/ConfirmModal";
 import { tableService } from "../../services";
 import toast from "react-hot-toast";
 
@@ -18,6 +19,7 @@ export default function TablesPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingTable, setEditingTable] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
+  const [confirmDelete, setConfirmDelete] = useState({ show: false, id: null });
   const [formData, setFormData] = useState({
     table_number: "",
     capacity: 4,
@@ -69,7 +71,6 @@ export default function TablesPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("¿Estás seguro de eliminar esta mesa?")) return;
     try {
       await tableService.delete(id);
       toast.success("Mesa eliminada correctamente");
@@ -347,7 +348,12 @@ export default function TablesPage() {
                           <Edit2 size={18} />
                         </button>
                         <button
-                          onClick={() => handleDelete(table.id)}
+                          onClick={() =>
+                            setConfirmDelete({
+                              show: true,
+                              id: table.id,
+                            })
+                          }
                           className="flex-1 p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
                           title="Eliminar"
                         >
@@ -483,6 +489,18 @@ export default function TablesPage() {
             </div>
           </div>
         )}
+
+        {/* Confirm Delete Modal */}
+        <ConfirmModal
+          isOpen={confirmDelete.show}
+          onClose={() => setConfirmDelete({ show: false, id: null })}
+          onConfirm={() => handleDelete(confirmDelete.id)}
+          title="Confirmar eliminación"
+          message="¿Estás seguro de eliminar esta mesa? Esta acción no se puede deshacer."
+          confirmText="Sí, eliminar"
+          cancelText="Cancelar"
+          type="danger"
+        />
       </div>
     </DashboardLayout>
   );

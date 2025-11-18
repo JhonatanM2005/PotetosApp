@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import PasswordStrengthIndicator from "../../components/common/PasswordStrengthIndicator";
+import ConfirmModal from "../../components/common/ConfirmModal";
 import { userService } from "../../services";
 import toast from "react-hot-toast";
 
@@ -29,6 +30,7 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(8);
+  const [confirmDelete, setConfirmDelete] = useState({ show: false, id: null });
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -177,7 +179,6 @@ export default function UsersPage() {
       toast.error("No puedes eliminarte a ti mismo");
       return;
     }
-    if (!confirm("¿Estás seguro de eliminar este usuario?")) return;
 
     try {
       await userService.delete(id);
@@ -433,7 +434,12 @@ export default function UsersPage() {
                               <Edit2 size={18} />
                             </button>
                             <button
-                              onClick={() => handleDelete(user.id)}
+                              onClick={() =>
+                                setConfirmDelete({
+                                  show: true,
+                                  id: user.id,
+                                })
+                              }
                               disabled={user.id === currentUser?.id}
                               className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                               title="Eliminar"
@@ -622,6 +628,18 @@ export default function UsersPage() {
             </div>
           </div>
         )}
+
+        {/* Confirm Delete Modal */}
+        <ConfirmModal
+          isOpen={confirmDelete.show}
+          onClose={() => setConfirmDelete({ show: false, id: null })}
+          onConfirm={() => handleDelete(confirmDelete.id)}
+          title="Confirmar eliminación"
+          message="¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer y el usuario perderá acceso al sistema."
+          confirmText="Sí, eliminar"
+          cancelText="Cancelar"
+          type="danger"
+        />
       </div>
     </DashboardLayout>
   );

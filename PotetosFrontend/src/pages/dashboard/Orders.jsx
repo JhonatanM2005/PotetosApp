@@ -8,6 +8,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
+import ConfirmModal from "../../components/common/ConfirmModal";
 import { orderService, dishService, tableService } from "../../services";
 import socketService from "../../services/socket";
 import { useAuthStore } from "../../store/authStore";
@@ -28,6 +29,7 @@ export default function OrdersPage() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewingOrder, setViewingOrder] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState({ show: false, id: null });
   const [formData, setFormData] = useState({
     table_id: "",
     notes: "",
@@ -108,7 +110,6 @@ export default function OrdersPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("¿Estás seguro de eliminar esta orden?")) return;
     try {
       const result = await orderService.delete(id);
       toast.success("Orden eliminada correctamente");
@@ -512,7 +513,12 @@ export default function OrdersPage() {
                           {/* Solo admin puede eliminar órdenes */}
                           {user?.role === "admin" && (
                             <button
-                              onClick={() => handleDelete(order.id)}
+                              onClick={() =>
+                                setConfirmDelete({
+                                  show: true,
+                                  id: order.id,
+                                })
+                              }
                               className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
                               title="Eliminar"
                             >
@@ -859,6 +865,18 @@ export default function OrdersPage() {
             </div>
           </div>
         )}
+
+        {/* Confirm Delete Modal */}
+        <ConfirmModal
+          isOpen={confirmDelete.show}
+          onClose={() => setConfirmDelete({ show: false, id: null })}
+          onConfirm={() => handleDelete(confirmDelete.id)}
+          title="Confirmar eliminación"
+          message="¿Estás seguro de eliminar esta orden? Esta acción no se puede deshacer y se perderán todos los datos asociados."
+          confirmText="Sí, eliminar"
+          cancelText="Cancelar"
+          type="danger"
+        />
       </div>
     </DashboardLayout>
   );

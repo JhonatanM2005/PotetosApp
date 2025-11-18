@@ -11,6 +11,7 @@ import {
   PowerOff,
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
+import ConfirmModal from "../../components/common/ConfirmModal";
 import { dishService, categoryService } from "../../services";
 import { useAuthStore } from "../../store/authStore";
 import toast from "react-hot-toast";
@@ -28,6 +29,7 @@ export default function MenuManagementPage() {
   const [categoryModalTab, setCategoryModalTab] = useState("list"); // "list" or "form"
   const [editingDish, setEditingDish] = useState(null);
   const [editingCategory, setEditingCategory] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState({ show: false, id: null, type: null });
   const [categoryFormData, setCategoryFormData] = useState({
     name: "",
     description: "",
@@ -92,7 +94,6 @@ export default function MenuManagementPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("¿Estás seguro de eliminar este plato?")) return;
     try {
       await dishService.delete(id);
       toast.success("Plato eliminado correctamente");
@@ -145,7 +146,6 @@ export default function MenuManagementPage() {
   };
 
   const handleCategoryDelete = async (id) => {
-    if (!confirm("¿Estás seguro de eliminar esta categoría?")) return;
     try {
       await categoryService.delete(id);
       toast.success("Categoría eliminada correctamente");
@@ -402,7 +402,13 @@ export default function MenuManagementPage() {
                               <Edit2 size={18} />
                             </button>
                             <button
-                              onClick={() => handleDelete(dish.id)}
+                              onClick={() =>
+                                setConfirmDelete({
+                                  show: true,
+                                  id: dish.id,
+                                  type: "dish",
+                                })
+                              }
                               className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
                               title="Eliminar"
                             >
@@ -572,7 +578,11 @@ export default function MenuManagementPage() {
                               </button>
                               <button
                                 onClick={() =>
-                                  handleCategoryDelete(category.id)
+                                  setConfirmDelete({
+                                    show: true,
+                                    id: category.id,
+                                    type: "category",
+                                  })
                                 }
                                 className="py-2 px-3 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg transition"
                                 title="Eliminar"
@@ -918,6 +928,28 @@ export default function MenuManagementPage() {
             </div>
           </div>
         )}
+
+        {/* Confirm Delete Modal */}
+        <ConfirmModal
+          isOpen={confirmDelete.show}
+          onClose={() => setConfirmDelete({ show: false, id: null, type: null })}
+          onConfirm={() => {
+            if (confirmDelete.type === "dish") {
+              handleDelete(confirmDelete.id);
+            } else if (confirmDelete.type === "category") {
+              handleCategoryDelete(confirmDelete.id);
+            }
+          }}
+          title="Confirmar eliminación"
+          message={
+            confirmDelete.type === "dish"
+              ? "¿Estás seguro de eliminar este plato? Esta acción no se puede deshacer."
+              : "¿Estás seguro de eliminar esta categoría? Todos los platos asociados quedarán sin categoría."
+          }
+          confirmText="Sí, eliminar"
+          cancelText="Cancelar"
+          type="danger"
+        />
       </div>
     </DashboardLayout>
   );
