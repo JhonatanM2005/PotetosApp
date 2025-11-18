@@ -13,6 +13,8 @@ import {
   UserCircle,
   ChevronLeft,
   ChevronRight,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import PasswordStrengthIndicator from "../../components/common/PasswordStrengthIndicator";
@@ -29,6 +31,7 @@ export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showPassword, setShowPassword] = useState(false);
   const [itemsPerPage] = useState(8);
   const [confirmDelete, setConfirmDelete] = useState({ show: false, id: null });
   const [formData, setFormData] = useState({
@@ -554,15 +557,28 @@ export default function UsersPage() {
                         ? "Contraseña (vacío = sin cambios)"
                         : "Contraseña *"}
                     </label>
-                    <input
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) =>
-                        setFormData({ ...formData, password: e.target.value })
-                      }
-                      className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
-                      required={!editingUser}
-                    />
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={formData.password}
+                        onChange={(e) =>
+                          setFormData({ ...formData, password: e.target.value })
+                        }
+                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none pr-10"
+                        required={!editingUser}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   <div>

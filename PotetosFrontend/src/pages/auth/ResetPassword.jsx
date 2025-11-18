@@ -4,6 +4,7 @@ import imgChef from "@/assets/images/chef-manos.png";
 import toast from "react-hot-toast";
 import { authService } from "@/services";
 import PasswordStrengthIndicator from "@/components/common/PasswordStrengthIndicator";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ export default function ResetPassword() {
     confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Redirigir si no hay token
   if (!resetToken) {
@@ -100,31 +103,53 @@ export default function ResetPassword() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Nueva contraseña Input */}
-            <div className="bg-[#272159] rounded-full px-6 py-4">
+            <div className="bg-[#272159] rounded-full px-6 py-4 relative">
               <input
-                type="password"
+                type={showNewPassword ? "text" : "password"}
                 id="newPassword"
                 name="newPassword"
                 value={formData.newPassword}
                 onChange={handleChange}
                 placeholder="Nueva contraseña"
                 required
-                className="w-full px-2 py-2 bg-transparent text-white text-center placeholder-gray-400 focus:outline-none"
+                className="w-full px-2 py-2 bg-transparent text-white text-center placeholder-gray-400 focus:outline-none pr-10"
               />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-6 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors"
+              >
+                {showNewPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
             </div>
 
             {/* Confirmar contraseña Input */}
-            <div className="bg-[#272159] rounded-full px-6 py-4">
+            <div className="bg-[#272159] rounded-full px-6 py-4 relative">
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 id="confirmPassword"
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Confirmar contraseña"
                 required
-                className="w-full px-2 py-2 bg-transparent text-white text-center placeholder-gray-400 focus:outline-none"
+                className="w-full px-2 py-2 bg-transparent text-white text-center placeholder-gray-400 focus:outline-none pr-10"
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-6 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
             </div>
 
             {/* Password Strength Indicator */}
