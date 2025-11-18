@@ -37,12 +37,6 @@ export default function DashboardLayout({ children }) {
       roles: ["admin"],
     },
     {
-      path: "/dashboard/categories",
-      icon: Grid2x2Plus,
-      label: "Categorías",
-      roles: ["admin"],
-    },
-    {
       path: "/dashboard/menu",
       icon: BookOpenText,
       label: "Menú",

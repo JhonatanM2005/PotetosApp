@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit2, Trash2, Search, Eye, EyeOff } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, Eye, EyeOff, Grid2x2Plus, Power, PowerOff } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { dishService, categoryService } from "../../services";
 import toast from "react-hot-toast";
@@ -11,7 +11,16 @@ export default function MenuManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [categoryModalTab, setCategoryModalTab] = useState("list"); // "list" or "form"
   const [editingDish, setEditingDish] = useState(null);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [categoryFormData, setCategoryFormData] = useState({
+    name: "",
+    description: "",
+    icon: "",
+    is_active: true,
+  });
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -94,6 +103,94 @@ export default function MenuManagementPage() {
     }
   };
 
+  // Category Management Functions
+  const handleCategorySubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const categoryData = {
+        name: categoryFormData.name,
+        description: categoryFormData.description,
+        icon: categoryFormData.icon,
+        is_active: categoryFormData.is_active,
+      };
+
+      if (editingCategory) {
+        await categoryService.update(editingCategory.id, categoryData);
+        toast.success("Categoría actualizada correctamente");
+      } else {
+        await categoryService.create(categoryData);
+        toast.success("Categoría creada correctamente");
+      }
+      fetchData();
+      closeCategoryModal();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Error al guardar la categoría"
+      );
+      console.error(error);
+    }
+  };
+
+  const handleCategoryDelete = async (id) => {
+    if (!confirm("¿Estás seguro de eliminar esta categoría?")) return;
+    try {
+      await categoryService.delete(id);
+      toast.success("Categoría eliminada correctamente");
+      fetchData();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Error al eliminar la categoría"
+      );
+      console.error(error);
+    }
+  };
+
+  const toggleCategoryStatus = async (id) => {
+    try {
+      await categoryService.toggleStatus(id);
+      toast.success("Estado actualizado");
+      fetchData();
+    } catch (error) {
+      toast.error("Error al cambiar el estado");
+      console.error(error);
+    }
+  };
+
+  const openCategoryModal = (category = null) => {
+    if (category) {
+      setEditingCategory(category);
+      setCategoryFormData({
+        name: category.name,
+        description: category.description || "",
+        icon: category.icon || "",
+        is_active: category.is_active,
+      });
+      setCategoryModalTab("form"); // Switch to form tab when editing
+    } else {
+      setEditingCategory(null);
+      setCategoryFormData({
+        name: "",
+        description: "",
+        icon: "",
+        is_active: true,
+      });
+      setCategoryModalTab("list"); // Start with list tab
+    }
+    setShowCategoryModal(true);
+  };
+
+  const closeCategoryModal = () => {
+    setShowCategoryModal(false);
+    setEditingCategory(null);
+    setCategoryModalTab("list");
+    setCategoryFormData({
+      name: "",
+      description: "",
+      icon: "",
+      is_active: true,
+    });
+  };
+
   const openModal = (dish = null) => {
     if (dish) {
       setEditingDish(dish);
@@ -147,13 +244,22 @@ export default function MenuManagementPage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-primary">MENÚ</h1>
-          <button
-            onClick={() => openModal()}
-            className="bg-primary text-secondary px-6 py-3 rounded-full font-bold hover:opacity-90 transition flex items-center gap-2"
-          >
-            <Plus size={20} />
-            Nuevo Plato
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowCategoryModal(true)}
+              className="bg-white border-2 border-primary text-primary px-6 py-3 rounded-full font-bold hover:bg-primary hover:text-secondary transition flex items-center gap-2"
+            >
+              <Grid2x2Plus size={20} />
+              Gestionar Categorías
+            </button>
+            <button
+              onClick={() => openModal()}
+              className="bg-primary text-secondary px-6 py-3 rounded-full font-bold hover:opacity-90 transition flex items-center gap-2"
+            >
+              <Plus size={20} />
+              Nuevo Plato
+            </button>
+          </div>
         </div>
 
         {/* Filters */}
@@ -294,7 +400,307 @@ export default function MenuManagementPage() {
           </table>
         </div>
 
-        {/* Modal */}
+        {/* Category Management Modal */}
+        {showCategoryModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full my-8 max-h-[90vh] flex flex-col">
+              {/* Header */}
+              <div className="flex justify-between items-center p-6 border-b border-gray-200">
+                <div>
+                  <h2 className="text-2xl font-bold text-primary">Gestionar Categorías</h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Organiza las categorías de tu menú
+                  </p>
+                </div>
+                <button
+                  onClick={() => closeCategoryModal()}
+                  className="text-gray-400 hover:text-gray-600 text-3xl leading-none"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex border-b border-gray-200 px-6">
+                <button
+                  onClick={() => setCategoryModalTab("list")}
+                  className={`px-6 py-3 font-semibold border-b-2 transition ${
+                    categoryModalTab === "list"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  📋 Lista de Categorías ({categories.length})
+                </button>
+                <button
+                  onClick={() => {
+                    setCategoryModalTab("form");
+                    if (editingCategory) {
+                      setEditingCategory(null);
+                      setCategoryFormData({
+                        name: "",
+                        description: "",
+                        icon: "",
+                        is_active: true,
+                      });
+                    }
+                  }}
+                  className={`px-6 py-3 font-semibold border-b-2 transition ${
+                    categoryModalTab === "form"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  {editingCategory ? "✏️ Editar Categoría" : "➕ Nueva Categoría"}
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {categoryModalTab === "list" ? (
+                  /* Categories List View */
+                  <div>
+                    {categories.length === 0 ? (
+                      <div className="text-center py-16">
+                        <div className="text-6xl mb-4">📂</div>
+                        <p className="text-xl font-semibold text-gray-800 mb-2">
+                          No hay categorías
+                        </p>
+                        <p className="text-gray-600 mb-6">
+                          Crea tu primera categoría para organizar el menú
+                        </p>
+                        <button
+                          onClick={() => setCategoryModalTab("form")}
+                          className="bg-primary text-secondary px-6 py-3 rounded-full font-bold hover:opacity-90 transition inline-flex items-center gap-2"
+                        >
+                          <Plus size={20} />
+                          Crear Primera Categoría
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {categories.map((category) => (
+                          <div
+                            key={category.id}
+                            className={`bg-linear-to-br from-white to-gray-50 border-2 rounded-xl p-5 transition-all hover:shadow-lg ${
+                              category.is_active
+                                ? "border-gray-200 hover:border-primary"
+                                : "border-red-200 opacity-60"
+                            }`}
+                          >
+                            <div className="flex justify-between items-start mb-3">
+                              <div className="flex items-start gap-3 flex-1">
+                                <span className="text-4xl">{category.icon || "📂"}</span>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-bold text-lg text-gray-800 truncate">
+                                    {category.name}
+                                  </h4>
+                                  <p className="text-xs text-gray-500">
+                                    {category.dishes?.length || 0} platos
+                                  </p>
+                                </div>
+                              </div>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-bold shrink-0 ${
+                                  category.is_active
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-red-100 text-red-700"
+                                }`}
+                              >
+                                {category.is_active ? "✓" : "✗"}
+                              </span>
+                            </div>
+                            
+                            {category.description && (
+                              <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                                {category.description}
+                              </p>
+                            )}
+
+                            <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200">
+                              <button
+                                onClick={() => toggleCategoryStatus(category.id)}
+                                className={`flex-1 py-2 px-3 rounded-lg transition font-semibold text-sm flex items-center justify-center gap-1 ${
+                                  category.is_active
+                                    ? "bg-orange-50 text-orange-700 hover:bg-orange-100"
+                                    : "bg-green-50 text-green-700 hover:bg-green-100"
+                                }`}
+                                title={category.is_active ? "Desactivar" : "Activar"}
+                              >
+                                {category.is_active ? <PowerOff size={14} /> : <Power size={14} />}
+                              </button>
+                              <button
+                                onClick={() => openCategoryModal(category)}
+                                className="flex-1 py-2 px-3 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition font-semibold text-sm flex items-center justify-center gap-1"
+                                title="Editar"
+                              >
+                                <Edit2 size={14} />
+                                Editar
+                              </button>
+                              <button
+                                onClick={() => handleCategoryDelete(category.id)}
+                                className="py-2 px-3 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg transition"
+                                title="Eliminar"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Category Form View */
+                  <div className="max-w-3xl mx-auto">
+                    {/* Form Card */}
+                    <div className="bg-white rounded-2xl shadow-xl border border-gray-100">
+                      <form onSubmit={handleCategorySubmit} className="p-8 space-y-6">
+                        {/* Nombre */}
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-3">
+                            Nombre de la Categoría *
+                          </label>
+                          <input
+                            type="text"
+                            value={categoryFormData.name}
+                            onChange={(e) =>
+                              setCategoryFormData({ ...categoryFormData, name: e.target.value })
+                            }
+                            className="w-full px-5 py-4 text-lg border-2 border-gray-200 rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition"
+                            placeholder="Ej: Entradas, Platos Fuertes, Bebidas, Postres..."
+                            required
+                          />
+                        </div>
+
+                        {/* Emoji Selector */}
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-3">
+                            Selecciona un Icono
+                          </label>
+                          <div className="bg-linear-to-br from-gray-50 to-gray-100/50 rounded-2xl p-6 border border-gray-200">
+                            <div className="grid grid-cols-8 gap-3">
+                              {["🥗", "🍽️", "🍔", "🍕", "🥤", "🍰", "🍗", "🌮", "🍜", "🥘", "🍱", "🍻", "☕", "🥙", "🍖", "🥩", "🍷", "🍝", "🍛", "🥟", "🍣", "🌭", "🥪", "🧁"].map((emoji) => (
+                                <button
+                                  key={emoji}
+                                  type="button"
+                                  onClick={() => setCategoryFormData({ ...categoryFormData, icon: emoji })}
+                                  className={`aspect-square text-4xl rounded-xl transition-all transform hover:scale-110 ${
+                                    categoryFormData.icon === emoji
+                                      ? "bg-primary text-white shadow-lg scale-110"
+                                      : "bg-white hover:bg-primary/5 hover:shadow-md"
+                                  }`}
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-gray-300">
+                              <p className="text-xs text-gray-600 mb-2">O escribe tu propio emoji:</p>
+                              <input
+                                type="text"
+                                value={categoryFormData.icon}
+                                onChange={(e) =>
+                                  setCategoryFormData({ ...categoryFormData, icon: e.target.value })
+                                }
+                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-3xl text-center transition bg-white"
+                                placeholder="🍽️"
+                                maxLength={2}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Descripción */}
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-3">
+                            Descripción
+                            <span className="text-gray-400 font-normal ml-2">(Opcional)</span>
+                          </label>
+                          <textarea
+                            value={categoryFormData.description}
+                            onChange={(e) =>
+                              setCategoryFormData({ ...categoryFormData, description: e.target.value })
+                            }
+                            className="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition resize-none"
+                            rows="3"
+                            placeholder="Una breve descripción de esta categoría..."
+                          />
+                        </div>
+
+                        {/* Estado Activo */}
+                        <div className="bg-gray-50 rounded-2xl p-5 border border-gray-200">
+                          <label className="flex items-center gap-4 cursor-pointer group">
+                            <div className="relative">
+                              <input
+                                type="checkbox"
+                                id="cat_is_active"
+                                checked={categoryFormData.is_active}
+                                onChange={(e) =>
+                                  setCategoryFormData({ ...categoryFormData, is_active: e.target.checked })
+                                }
+                                className="w-6 h-6 text-primary rounded-lg focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <span className="text-base font-bold text-gray-800 group-hover:text-primary transition">
+                                Categoría activa
+                              </span>
+                              <p className="text-sm text-gray-500 mt-0.5">
+                                Las categorías inactivas no se mostrarán en el menú
+                              </p>
+                            </div>
+                          </label>
+                        </div>
+
+                        {/* Botones de Acción */}
+                        <div className="flex gap-4 pt-4">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCategoryModalTab("list");
+                              setEditingCategory(null);
+                              setCategoryFormData({
+                                name: "",
+                                description: "",
+                                icon: "",
+                                is_active: true,
+                              });
+                            }}
+                            className="flex-1 px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-2xl font-bold hover:bg-gray-50 hover:border-gray-400 transition text-lg"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            type="submit"
+                            className="flex-1 px-6 py-4 bg-primary text-secondary rounded-2xl font-bold hover:opacity-90 transition shadow-xl shadow-primary/30 text-lg"
+                          >
+                            {editingCategory ? "💾 Guardar Cambios" : "✨ Crear Categoría"}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              {categoryModalTab === "list" && categories.length > 0 && (
+                <div className="border-t border-gray-200 p-6 bg-gray-50">
+                  <button
+                    onClick={() => setCategoryModalTab("form")}
+                    className="w-full bg-primary text-secondary px-6 py-3 rounded-xl font-bold hover:opacity-90 transition flex items-center justify-center gap-2 shadow-lg"
+                  >
+                    <Plus size={20} />
+                    Agregar Nueva Categoría
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Dish Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
