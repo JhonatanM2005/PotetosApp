@@ -22,7 +22,9 @@ const validatePassword = (password) => {
   }
 
   if (!/[!@#$%^&*(),.?":{}|<>_\-]/.test(password)) {
-    errors.push("La contraseña debe incluir al menos un carácter especial (!@#$%^&*(),.?\":{}|<>_-)");
+    errors.push(
+      'La contraseña debe incluir al menos un carácter especial (!@#$%^&*(),.?":{}|<>_-)'
+    );
   }
 
   return errors;

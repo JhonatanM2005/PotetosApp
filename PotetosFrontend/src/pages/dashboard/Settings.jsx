@@ -91,7 +91,9 @@ export default function SettingsPage() {
 
     const isValid = Object.values(passwordRegex).every((v) => v);
     if (!isValid) {
-      toast.error("La nueva contraseña no cumple con los requisitos de seguridad");
+      toast.error(
+        "La nueva contraseña no cumple con los requisitos de seguridad"
+      );
       return;
     }
 
@@ -108,9 +110,10 @@ export default function SettingsPage() {
         confirmPassword: "",
       });
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Error al cambiar la contraseña";
+      const errorMessage =
+        error.response?.data?.message || "Error al cambiar la contraseña";
       const errors = error.response?.data?.errors;
-      
+
       if (errors && errors.length > 0) {
         errors.forEach((err) => toast.error(err));
       } else {
@@ -446,7 +449,8 @@ export default function SettingsPage() {
                 {/* Match indicator */}
                 {passwordData.confirmPassword && (
                   <div className="text-center">
-                    {passwordData.newPassword === passwordData.confirmPassword ? (
+                    {passwordData.newPassword ===
+                    passwordData.confirmPassword ? (
                       <p className="text-green-600 text-sm font-semibold">
                         ✓ Las contraseñas coinciden
                       </p>

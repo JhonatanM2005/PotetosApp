@@ -24,7 +24,9 @@ const validatePassword = (password) => {
   }
 
   if (!/[!@#$%^&*(),.?":{}|<>_\-]/.test(password)) {
-    errors.push("La contraseña debe incluir al menos un carácter especial (!@#$%^&*(),.?\":{}|<>_-)");
+    errors.push(
+      'La contraseña debe incluir al menos un carácter especial (!@#$%^&*(),.?":{}|<>_-)'
+    );
   }
 
   return errors;
@@ -147,7 +149,8 @@ exports.changePassword = async (req, res) => {
     const passwordErrors = validatePassword(newPassword);
     if (passwordErrors.length > 0) {
       return res.status(400).json({
-        message: "La nueva contraseña no cumple con los requisitos de seguridad",
+        message:
+          "La nueva contraseña no cumple con los requisitos de seguridad",
         errors: passwordErrors,
       });
     }

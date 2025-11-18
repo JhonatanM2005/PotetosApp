@@ -81,7 +81,9 @@ export default function UsersPage() {
 
           const isValid = Object.values(passwordRegex).every((v) => v);
           if (!isValid) {
-            toast.error("La contraseña no cumple con los requisitos de seguridad");
+            toast.error(
+              "La contraseña no cumple con los requisitos de seguridad"
+            );
             return;
           }
 
@@ -110,7 +112,9 @@ export default function UsersPage() {
 
         const isValid = Object.values(passwordRegex).every((v) => v);
         if (!isValid) {
-          toast.error("La contraseña no cumple con los requisitos de seguridad");
+          toast.error(
+            "La contraseña no cumple con los requisitos de seguridad"
+          );
           return;
         }
 
@@ -121,9 +125,10 @@ export default function UsersPage() {
       closeModal();
       fetchUsers();
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Error al guardar usuario";
+      const errorMessage =
+        error.response?.data?.message || "Error al guardar usuario";
       const errors = error.response?.data?.errors;
-      
+
       if (errors && errors.length > 0) {
         errors.forEach((err) => toast.error(err));
       } else {

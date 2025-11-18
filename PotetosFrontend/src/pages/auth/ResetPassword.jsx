@@ -63,9 +63,10 @@ export default function ResetPassword() {
         navigate("/login");
       }, 1500);
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Error al cambiar la contraseña";
+      const errorMessage =
+        error.response?.data?.message || "Error al cambiar la contraseña";
       const errors = error.response?.data?.errors;
-      
+
       if (errors && errors.length > 0) {
         errors.forEach((err) => toast.error(err));
       } else {
