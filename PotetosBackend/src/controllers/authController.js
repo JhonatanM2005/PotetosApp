@@ -224,18 +224,16 @@ exports.forgotPassword = async (req, res) => {
       console.log(`✅ Email enviado a ${email} con código: ${code}`);
     } catch (emailError) {
       console.error("⚠️ Error al enviar email:", emailError.message);
-      // En desarrollo, mostrar el código en consola
-      if (process.env.NODE_ENV === "development") {
-        console.log(`🔑 CÓDIGO DE RECUPERACIÓN (dev): ${code}`);
-      }
+      // TEMPORAL: Mostrar código en logs para debugging en producción
+      console.log(`🔑 CÓDIGO DE RECUPERACIÓN: ${code} para ${email}`);
       // No fallar la petición, solo logear el error
     }
 
     res.json({
       message: "Reset code sent to your email",
       expiresIn: "15 minutes",
-      // Solo en desarrollo, incluir el código en la respuesta
-      ...(process.env.NODE_ENV === "development" && { code }),
+      // TEMPORAL: Incluir código en respuesta para debugging
+      ...(process.env.NODE_ENV !== "production" && { code }),
     });
   } catch (error) {
     console.error("Forgot password error:", error);

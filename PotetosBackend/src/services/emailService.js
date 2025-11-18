@@ -1,20 +1,30 @@
 const nodemailer = require("nodemailer");
 
-// Configurar transporter (usa Gmail como ejemplo)
+// Configurar transporter con opciones mejoradas para Gmail
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // true para 465, false para otros puertos
   auth: {
-    user: process.env.EMAIL_USER, // Tu email de Gmail
-    pass: process.env.EMAIL_PASSWORD, // Contraseña de aplicación de Gmail
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
   },
+  tls: {
+    rejectUnauthorized: false, // Acepta certificados autofirmados (útil para desarrollo)
+  },
+  pool: true, // Usar pool de conexiones
+  maxConnections: 5,
+  maxMessages: 100,
 });
 
 // Verificar conexión
 transporter.verify((error, success) => {
   if (error) {
-    console.error("❌ Error al configurar email:", error);
+    console.error("❌ Error al configurar email:", error.message);
+    console.error("   Verifica EMAIL_USER y EMAIL_PASSWORD en las variables de entorno");
   } else {
     console.log("✅ Servicio de email configurado correctamente");
+    console.log(`   Email configurado: ${process.env.EMAIL_USER}`);
   }
 });
 
