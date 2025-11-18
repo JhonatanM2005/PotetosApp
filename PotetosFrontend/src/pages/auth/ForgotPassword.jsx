@@ -22,7 +22,7 @@ export default function ForgotPassword() {
       setLoading(true);
       await authService.forgotPassword(email);
       toast.success("Código enviado a tu correo");
-      
+
       // Redirigir a la página de verificación con el email
       navigate("/verify-code", { state: { email } });
     } catch (error) {
@@ -43,7 +43,9 @@ export default function ForgotPassword() {
       await authService.forgotPassword(email);
       toast.success("Código reenviado a tu correo");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error al reenviar el código");
+      toast.error(
+        error.response?.data?.message || "Error al reenviar el código"
+      );
     } finally {
       setLoading(false);
     }

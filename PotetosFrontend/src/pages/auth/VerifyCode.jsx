@@ -42,7 +42,7 @@ export default function VerifyCode() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const verificationCode = code.join("");
-    
+
     if (verificationCode.length !== 6) {
       toast.error("Por favor ingresa el código completo");
       return;
@@ -50,18 +50,23 @@ export default function VerifyCode() {
 
     try {
       setLoading(true);
-      const response = await authService.verifyResetCode(email, verificationCode);
+      const response = await authService.verifyResetCode(
+        email,
+        verificationCode
+      );
       toast.success("Código verificado correctamente");
-      
+
       // Redirigir a reset password con el token
-      navigate("/reset-password", { 
-        state: { 
+      navigate("/reset-password", {
+        state: {
           resetToken: response.resetToken,
-          email 
-        } 
+          email,
+        },
       });
     } catch (error) {
-      toast.error(error.response?.data?.message || "Código inválido o expirado");
+      toast.error(
+        error.response?.data?.message || "Código inválido o expirado"
+      );
       // Limpiar código en caso de error
       setCode(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
@@ -78,7 +83,9 @@ export default function VerifyCode() {
       setCode(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error al reenviar el código");
+      toast.error(
+        error.response?.data?.message || "Error al reenviar el código"
+      );
     } finally {
       setLoading(false);
     }

@@ -52,7 +52,9 @@ export default function ResetPassword() {
         navigate("/login");
       }, 1500);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error al cambiar la contraseña");
+      toast.error(
+        error.response?.data?.message || "Error al cambiar la contraseña"
+      );
     } finally {
       setLoading(false);
     }

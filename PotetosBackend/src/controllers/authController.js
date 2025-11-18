@@ -229,7 +229,9 @@ exports.verifyResetCode = async (req, res) => {
     if (resetCode.code !== code) {
       await resetCode.increment("attempts");
       return res.status(400).json({
-        message: `Invalid code. ${3 - (resetCode.attempts + 1)} attempts remaining`,
+        message: `Invalid code. ${
+          3 - (resetCode.attempts + 1)
+        } attempts remaining`,
       });
     }
 
@@ -299,4 +301,3 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-
