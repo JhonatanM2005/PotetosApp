@@ -26,6 +26,27 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
+// Ruta raíz - Bienvenida
+app.get("/", (req, res) => {
+  res.json({
+    message: "🍟 POTETOS ERP API",
+    version: "1.0.0",
+    status: "online",
+    endpoints: {
+      health: "/health",
+      api: "/api",
+      auth: "/api/auth",
+      users: "/api/users",
+      orders: "/api/orders",
+      kitchen: "/api/kitchen",
+      categories: "/api/categories",
+      dishes: "/api/dishes",
+      tables: "/api/tables",
+      dashboard: "/api/dashboard",
+    },
+  });
+});
+
 // Health check
 app.get("/health", (req, res) => {
   res.json({ status: "ok", message: "POTETOS ERP API is running" });
