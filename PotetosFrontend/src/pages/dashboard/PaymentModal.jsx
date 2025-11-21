@@ -96,14 +96,30 @@ export default function PaymentModal({ order, onClose, onSuccess }) {
 
       if (splits.length === 0) {
         // Pago simple sin división
+        console.log("💳 Pago simple:", { 
+          orderId: order.id, 
+          amount: order.total_amount, 
+          paymentMethod 
+        });
+        
         await cashierService.processPayment(order.id, {
-          amount: order.total_amount,
+          amount: parseFloat(order.total_amount),
           paymentMethod,
           splits: [],
         });
       } else {
         // Validar que el total de splits sea igual al monto total
-        if (totalPaid !== parseFloat(order.total_amount)) {
+        const splitsTotal = splits.reduce((sum, split) => sum + parseFloat(split.amount), 0);
+        console.log("💳 Pago con splits:", { 
+          orderId: order.id, 
+          totalAmount: parseFloat(order.total_amount),
+          splitsTotal,
+          splitsCount: splits.length
+        });
+
+        // Permitir tolerancia de 0.01 por redondeo
+        const difference = Math.abs(splitsTotal - parseFloat(order.total_amount));
+        if (difference > 0.01) {
           setError(
             `El total debe ser exacto: ${formatCurrency(order.total_amount)}`
           );
@@ -112,14 +128,19 @@ export default function PaymentModal({ order, onClose, onSuccess }) {
         }
 
         await cashierService.processPayment(order.id, {
-          amount: order.total_amount,
+          amount: parseFloat(order.total_amount),
           paymentMethod: "mixed", // mixed cuando hay división
-          splits,
+          splits: splits.map(s => ({
+            person_name: s.person_name,
+            amount: parseFloat(s.amount),
+            payment_method: s.payment_method,
+          })),
         });
       }
 
       onSuccess();
     } catch (err) {
+      console.error("❌ Error procesando pago:", err.response?.data || err.message);
       setError(
         err.response?.data?.message || "Error al procesar el pago"
       );

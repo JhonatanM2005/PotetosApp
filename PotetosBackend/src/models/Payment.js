@@ -30,7 +30,7 @@ const Payment = sequelize.define(
       allowNull: false,
     },
     payment_method: {
-      type: DataTypes.ENUM("cash", "card", "transfer"),
+      type: DataTypes.ENUM("cash", "card", "transfer", "mixed"),
       allowNull: false,
     },
     status: {

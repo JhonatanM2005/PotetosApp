@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   CreditCard,
   History,
+  FileText,
 } from "lucide-react";
 import { chairsTablePlatter } from "@lucide/lab";
 import favicon from "@/assets/images/favicon-potetos.svg";
@@ -77,6 +78,12 @@ export default function DashboardLayout({ children }) {
       path: "/dashboard/payment-history",
       icon: History,
       label: "Historial",
+      roles: ["admin", "cajero"],
+    },
+    {
+      path: "/dashboard/invoices",
+      icon: FileText,
+      label: "Facturas",
       roles: ["admin", "cajero"],
     },
     {

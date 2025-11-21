@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { cashierService } from "../../services";
 import {
@@ -8,9 +9,11 @@ import {
   CreditCard,
   ChevronDown,
   Download,
+  FileText,
 } from "lucide-react";
 
 export default function PaymentHistoryPage() {
+  const navigate = useNavigate();
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
@@ -232,70 +235,69 @@ export default function PaymentHistoryPage() {
               </div>
 
               {/* Payments Table */}
-              <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50 border-b">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                          Fecha
-                        </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                          Orden
-                        </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                          Mesa
-                        </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                          Cajero
-                        </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                          Método
-                        </th>
-                        <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">
-                          Monto
-                        </th>
-                        <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900">
-                          Detalles
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
+              <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-primary text-white">
+                    <tr>
+                      <th className="px-6 py-4 text-left font-semibold">
+                        Fecha
+                      </th>
+                      <th className="px-6 py-4 text-left font-semibold">
+                        Orden
+                      </th>
+                      <th className="px-6 py-4 text-left font-semibold">
+                        Mesa
+                      </th>
+                      <th className="px-6 py-4 text-left font-semibold">
+                        Cajero
+                      </th>
+                      <th className="px-6 py-4 text-left font-semibold">
+                        Método
+                      </th>
+                      <th className="px-6 py-4 text-left font-semibold">
+                        Monto
+                      </th>
+                      <th className="px-6 py-4 text-center font-semibold">
+                        Detalles
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
                       {filteredPayments.map((payment) => (
-                        <div key={payment.id}>
-                          <tr className="hover:bg-gray-50 transition">
-                            <td className="px-6 py-4 text-sm text-gray-900">
+                        <>
+                          <tr key={payment.id} className="border-b hover:bg-gray-50 transition">
+                            <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                               {formatDate(payment.paid_at)}
                             </td>
-                            <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                            <td className="px-6 py-4 text-sm font-semibold text-gray-900 whitespace-nowrap">
                               {payment.order?.order_number}
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-600">
+                            <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                               {payment.order?.table?.table_number || "N/A"}
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-900">
+                            <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                               {payment.cashier?.name}
                             </td>
-                            <td className="px-6 py-4 text-sm">
+                            <td className="px-6 py-4 text-sm whitespace-nowrap">
                               <span
-                                className={`px-2 py-1 rounded-full text-xs font-semibold ${getPaymentMethodColor(
+                                className={`px-3 py-1 rounded-full text-xs font-semibold ${getPaymentMethodColor(
                                   payment.payment_method
                                 )}`}
                               >
                                 {getPaymentMethodLabel(payment.payment_method)}
                               </span>
                             </td>
-                            <td className="px-6 py-4 text-sm font-bold text-primary text-right">
+                            <td className="px-6 py-4 text-sm font-bold text-secondary whitespace-nowrap">
                               {formatCurrency(payment.amount)}
                             </td>
-                            <td className="px-6 py-4 text-center">
+                            <td className="px-6 py-4 text-center whitespace-nowrap">
                               <button
                                 onClick={() =>
                                   setExpandedId(
                                     expandedId === payment.id ? null : payment.id
                                   )
                                 }
-                                className="text-primary hover:text-primary/80 transition"
+                                className="text-primary hover:text-primary/80 transition inline-flex items-center justify-center"
                               >
                                 <ChevronDown
                                   className={`w-5 h-5 transition ${
@@ -311,33 +313,45 @@ export default function PaymentHistoryPage() {
                             <tr className="bg-gray-50">
                               <td colSpan="7" className="px-6 py-4">
                                 <div className="space-y-4">
+                                  {/* Invoice Button */}
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() =>
+                                        navigate(`/dashboard/invoice/${payment.id}`)
+                                      }
+                                      className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition font-semibold"
+                                    >
+                                      <FileText className="w-4 h-4" />
+                                      Ver Factura Completa
+                                    </button>
+                                  </div>
                                   {/* Order Info */}
                                   <div>
-                                    <h4 className="font-semibold text-gray-900 mb-2">
+                                    <h4 className="font-semibold text-gray-900 mb-3">
                                       Información de la Orden
                                     </h4>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                      <div>
-                                        <p className="text-gray-600">Mesero</p>
-                                        <p className="font-semibold">
+                                      <div className="bg-white p-3 rounded-lg">
+                                        <p className="text-gray-600 text-xs font-semibold">Mesero</p>
+                                        <p className="font-semibold text-gray-900">
                                           {payment.order?.waiter?.name || "N/A"}
                                         </p>
                                       </div>
-                                      <div>
-                                        <p className="text-gray-600">Mesa</p>
-                                        <p className="font-semibold">
+                                      <div className="bg-white p-3 rounded-lg">
+                                        <p className="text-gray-600 text-xs font-semibold">Mesa</p>
+                                        <p className="font-semibold text-gray-900">
                                           {payment.order?.table?.table_number || "N/A"}
                                         </p>
                                       </div>
-                                      <div>
-                                        <p className="text-gray-600">Total de Orden</p>
-                                        <p className="font-semibold">
+                                      <div className="bg-white p-3 rounded-lg">
+                                        <p className="text-gray-600 text-xs font-semibold">Total de Orden</p>
+                                        <p className="font-semibold text-secondary">
                                           {formatCurrency(payment.order?.total_amount)}
                                         </p>
                                       </div>
-                                      <div>
-                                        <p className="text-gray-600">Cajero</p>
-                                        <p className="font-semibold">
+                                      <div className="bg-white p-3 rounded-lg">
+                                        <p className="text-gray-600 text-xs font-semibold">Cajero</p>
+                                        <p className="font-semibold text-gray-900">
                                           {payment.cashier?.name}
                                         </p>
                                       </div>
@@ -346,19 +360,19 @@ export default function PaymentHistoryPage() {
 
                                   {/* Items */}
                                   <div>
-                                    <h4 className="font-semibold text-gray-900 mb-2">
+                                    <h4 className="font-semibold text-gray-900 mb-3">
                                       Items de la Orden
                                     </h4>
-                                    <div className="bg-white rounded p-3 space-y-1 text-sm">
+                                    <div className="bg-white rounded-lg p-4 space-y-2 text-sm">
                                       {payment.order?.items?.map((item) => (
                                         <div
                                           key={item.id}
-                                          className="flex justify-between"
+                                          className="flex justify-between items-center pb-2 border-b last:border-b-0"
                                         >
                                           <span className="text-gray-600">
                                             {item.quantity}x {item.dish_name}
                                           </span>
-                                          <span className="font-semibold">
+                                          <span className="font-semibold text-gray-900">
                                             {formatCurrency(item.subtotal)}
                                           </span>
                                         </div>
@@ -369,24 +383,24 @@ export default function PaymentHistoryPage() {
                                   {/* Payment Splits */}
                                   {payment.splits && payment.splits.length > 0 && (
                                     <div>
-                                      <h4 className="font-semibold text-gray-900 mb-2">
+                                      <h4 className="font-semibold text-gray-900 mb-3">
                                         División de Pago
                                       </h4>
                                       <div className="space-y-2 text-sm">
                                         {payment.splits.map((split) => (
                                           <div
                                             key={split.id}
-                                            className="bg-white rounded p-3 flex justify-between items-center"
+                                            className="bg-white rounded-lg p-4 flex justify-between items-center"
                                           >
                                             <div>
-                                              <p className="font-semibold">
+                                              <p className="font-semibold text-gray-900">
                                                 {split.person_name}
                                               </p>
                                               <p className="text-xs text-gray-600">
                                                 {getPaymentMethodLabel(split.payment_method)}
                                               </p>
                                             </div>
-                                            <span className="font-bold text-primary">
+                                            <span className="font-bold text-secondary">
                                               {formatCurrency(split.amount)}
                                             </span>
                                           </div>
@@ -396,10 +410,10 @@ export default function PaymentHistoryPage() {
                                   )}
 
                                   {/* Payment Summary */}
-                                  <div className="bg-white rounded p-3 border border-blue-200">
-                                    <div className="flex justify-between text-sm">
-                                      <span className="text-gray-600">Total Pagado:</span>
-                                      <span className="font-bold text-primary">
+                                  <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-primary">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-gray-700 font-semibold">Total Pagado:</span>
+                                      <span className="font-bold text-secondary text-lg">
                                         {formatCurrency(payment.amount)}
                                       </span>
                                     </div>
@@ -408,11 +422,10 @@ export default function PaymentHistoryPage() {
                               </td>
                             </tr>
                           )}
-                        </div>
+                        </>
                       ))}
                     </tbody>
                   </table>
-                </div>
               </div>
             </>
           )}

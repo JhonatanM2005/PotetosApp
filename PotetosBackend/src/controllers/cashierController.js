@@ -125,6 +125,8 @@ exports.processPayment = async (req, res) => {
     const { orderId } = req.params;
     const { amount, paymentMethod, splits } = req.body;
 
+    console.log("💳 [Cashier] Datos recibidos:", { orderId, amount, paymentMethod, splits });
+
     const order = await Order.findByPk(orderId, {
       include: [
         { model: Table, as: "table" },
@@ -136,11 +138,36 @@ exports.processPayment = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // Validar que el monto sea correcto
-    if (parseFloat(amount) !== parseFloat(order.total_amount)) {
+    // Validar que el monto sea correcto (con tolerancia por redondeo)
+    const amountDifference = Math.abs(
+      parseFloat(amount) - parseFloat(order.total_amount)
+    );
+    if (amountDifference > 0.01) {
+      console.error(
+        `❌ Monto incorrecto. Esperado: ${order.total_amount}, Recibido: ${amount}`
+      );
       return res.status(400).json({
         message: "Payment amount does not match order total",
+        expected: order.total_amount,
+        received: amount,
       });
+    }
+
+    // Validar splits si existen
+    if (splits && splits.length > 0) {
+      const splitTotal = splits.reduce((sum, split) => sum + parseFloat(split.amount), 0);
+      const splitDifference = Math.abs(splitTotal - parseFloat(order.total_amount));
+      
+      if (splitDifference > 0.01) {
+        console.error(
+          `❌ Total de splits incorrecto. Esperado: ${order.total_amount}, Recibido: ${splitTotal}`
+        );
+        return res.status(400).json({
+          message: "Split amounts do not match order total",
+          expected: order.total_amount,
+          received: splitTotal,
+        });
+      }
     }
 
     // Crear registro de pago
@@ -153,20 +180,42 @@ exports.processPayment = async (req, res) => {
       paid_at: new Date(),
     });
 
+    console.log("✅ Pago creado:", payment.id);
+
     // Si hay división de cuenta, crear registros de splits
     if (splits && splits.length > 0) {
-      const splitRecords = await Promise.all(
-        splits.map((split) =>
-          PaymentSplit.create({
-            payment_id: payment.id,
-            person_name: split.person_name,
-            amount: split.amount,
-            payment_method: split.payment_method,
-            status: "completed",
+      try {
+        console.log("📝 Creando splits:", JSON.stringify(splits, null, 2));
+        
+        const splitRecords = await Promise.all(
+          splits.map((split) => {
+            console.log("📌 Creando split individual:", {
+              payment_id: payment.id,
+              person_name: split.person_name,
+              amount: parseFloat(split.amount),
+              payment_method: split.payment_method,
+              status: "completed",
+            });
+            
+            return PaymentSplit.create({
+              payment_id: payment.id,
+              person_name: split.person_name,
+              amount: parseFloat(split.amount),
+              payment_method: split.payment_method,
+              status: "completed",
+            });
           })
-        )
-      );
-      payment.splits = splitRecords;
+        );
+        payment.splits = splitRecords;
+        console.log(`✅ ${splitRecords.length} splits creados exitosamente`);
+      } catch (splitError) {
+        console.error("❌ Error creando splits:", {
+          message: splitError.message,
+          errors: splitError.errors?.map(e => ({ message: e.message, field: e.path })),
+          stack: splitError.stack,
+        });
+        throw splitError;
+      }
     }
 
     // Actualizar estado de la orden a pagada
@@ -176,12 +225,15 @@ exports.processPayment = async (req, res) => {
       completed_at: new Date(),
     });
 
+    console.log("✅ Orden actualizada a pagada");
+
     // Liberar mesa si está disponible
     if (order.table_id) {
       await Table.update(
         { status: "available", current_order_id: null },
         { where: { id: order.table_id } }
       );
+      console.log("✅ Mesa liberada");
     }
 
     // Emitir evento Socket.io a sala cashier
@@ -212,8 +264,25 @@ exports.processPayment = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Process payment error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("❌ Process payment error:", {
+      message: error.message,
+      errors: error.errors?.map(e => ({
+        message: e.message,
+        field: e.path,
+        value: e.value,
+      })),
+      stack: error.stack,
+    });
+    
+    res.status(500).json({ 
+      message: "Server error", 
+      error: error.message,
+      details: error.errors ? error.errors.map(e => ({ 
+        message: e.message, 
+        field: e.path 
+      })) : [],
+      type: error.name,
+    });
   }
 };
 
@@ -242,6 +311,11 @@ exports.getPaymentHistory = async (req, res) => {
           include: [
             { model: Table, as: "table", attributes: ["table_number"] },
             { model: User, as: "waiter", attributes: ["name"] },
+            {
+              model: OrderItem,
+              as: "items",
+              attributes: ["id", "dish_id", "dish_name", "quantity", "unit_price", "subtotal"],
+            },
           ],
         },
         {
