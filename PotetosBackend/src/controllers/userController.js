@@ -302,7 +302,34 @@ exports.changePassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    await user.update({ password: newPassword });
+    // Verificar que la nueva contraseña no sea igual a la actual
+    const isSameAsCurrentPassword = await user.comparePassword(newPassword);
+    if (isSameAsCurrentPassword) {
+      return res.status(400).json({
+        message: "La nueva contraseña no puede ser igual a la contraseña actual",
+      });
+    }
+
+    // Verificar que no esté en el historial de contraseñas (últimas 3)
+    const passwordHistory = user.password_history || [];
+    const bcrypt = require('bcryptjs');
+    
+    for (const oldPasswordHash of passwordHistory) {
+      const isReused = await bcrypt.compare(newPassword, oldPasswordHash);
+      if (isReused) {
+        return res.status(400).json({
+          message: "No puedes reutilizar ninguna de tus últimas 3 contraseñas",
+        });
+      }
+    }
+
+    // Actualizar historial de contraseñas
+    const updatedHistory = [user.password, ...passwordHistory].slice(0, 3);
+    
+    await user.update({ 
+      password: newPassword,
+      password_history: updatedHistory
+    });
 
     res.json({ message: "Password changed successfully" });
   } catch (error) {

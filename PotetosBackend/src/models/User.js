@@ -35,6 +35,10 @@ const User = sequelize.define('User', {
   is_active: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
+  },
+  password_history: {
+    type: DataTypes.JSON,
+    defaultValue: []
   }
 }, {
   tableName: 'users',
