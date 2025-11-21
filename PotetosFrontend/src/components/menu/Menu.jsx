@@ -19,26 +19,26 @@ export default function Menu() {
         id: 1,
         name: "POTETO RANCHERA",
         description:
-          "Crujientes y doradas papas con queso mozzarella, salchicho ranchero, lactosa, mozzarella y sour cream",
+          "Crujientes y doradas papas con queso mozzarella, salchicha ranchera, tocineta, mozzarella y sour cream",
         price: "26.000",
         rating: 5,
         image: rancheraImg,
       },
       {
         id: 2,
-        name: "POTETO RANCHERA",
+        name: "POTETO MEXICANA",
         description:
-          "Crujientes y doradas papas con queso mozzarella, salchicho ranchero, lactosa, mozzarella y sour cream",
+          "Crujientes y doradas papas con queso mozzarella, salchicha mexicana, jalapeños, pico de gallo y sour cream",
         price: "26.000",
         rating: 5,
         image: rancheraImg,
       },
       {
         id: 3,
-        name: "POTETO RANCHERA",
+        name: "POTETO CLÁSICA",
         description:
-          "Crujientes y doradas papas con queso mozzarella, salchicho ranchero, lactosa, mozzarella y sour cream",
-        price: "26.000",
+          "Crujientes y doradas papas con queso mozzarella, salchicha manguera, mozzarella, salsa de la casa y huevo de codorniz",
+        price: "15.000",
         rating: 5,
         image: rancheraImg,
       },
@@ -62,8 +62,8 @@ export default function Menu() {
       },
       {
         id: 6,
-        name: "SALSA ALIOLI",
-        description: "Alioli casero con ajo fresco",
+        name: "SALSA DE LA CASA",
+        description: "Secreta salsa especial de Potetos",
         price: "4.000",
         rating: 4,
         image: rancheraImg,
