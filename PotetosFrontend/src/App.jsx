@@ -32,6 +32,8 @@ import ResetPasswordPage from "./pages/auth/ResetPassword";
 import DashboardPage from "./pages/dashboard/Dashboard";
 import DashboardStats from "./pages/dashboard/Stats";
 import KitchenPage from "./pages/dashboard/Kitchen";
+import CashierPage from "./pages/dashboard/Cashier";
+import PaymentHistoryPage from "./pages/dashboard/PaymentHistory";
 import UsersPage from "./pages/dashboard/Users";
 import OrdersPage from "./pages/dashboard/Orders";
 import MenuManagementPage from "./pages/dashboard/MenuManagement";
@@ -114,6 +116,24 @@ function App() {
           element={
             <ProtectedRoute requiredRole="chef">
               <KitchenPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/cashier"
+          element={
+            <ProtectedRoute>
+              <CashierPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/payment-history"
+          element={
+            <ProtectedRoute>
+              <PaymentHistoryPage />
             </ProtectedRoute>
           }
         />

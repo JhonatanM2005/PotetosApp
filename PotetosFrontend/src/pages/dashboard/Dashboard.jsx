@@ -16,6 +16,8 @@ import {
   Settings,
   DollarSign,
   Clock,
+  CreditCard,
+  History,
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -87,6 +89,24 @@ export default function DashboardPage() {
         path: "/dashboard/kitchen",
         iconBg: "bg-primary",
         roles: ["chef"],
+      },
+      {
+        id: "cashier",
+        title: "Cajero",
+        description: "Procesa pagos y divisiones de cuenta",
+        icon: CreditCard,
+        path: "/dashboard/cashier",
+        iconBg: "bg-primary",
+        roles: ["admin", "cajero"],
+      },
+      {
+        id: "payment-history",
+        title: "Historial de Pagos",
+        description: "Visualiza el registro de todas las transacciones",
+        icon: History,
+        path: "/dashboard/payment-history",
+        iconBg: "bg-primary",
+        roles: ["admin", "cajero"],
       },
       {
         id: "tables",

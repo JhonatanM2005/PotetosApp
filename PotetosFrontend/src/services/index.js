@@ -330,6 +330,40 @@ export const dashboardService = {
   },
 };
 
+// ========== CASHIER ==========
+
+export const cashierService = {
+  // Obtener órdenes entregadas para pagar
+  getDeliveredOrders: async () => {
+    const response = await api.get("/cashier/orders/delivered");
+    return response.data;
+  },
+
+  // Obtener detalles de una orden para pagar
+  getOrderForPayment: async (id) => {
+    const response = await api.get(`/cashier/payment/${id}`);
+    return response.data;
+  },
+
+  // Procesar pago de una orden
+  processPayment: async (orderId, data) => {
+    const response = await api.post(`/cashier/payment/${orderId}/process`, data);
+    return response.data;
+  },
+
+  // Obtener historial de pagos
+  getPaymentHistory: async (filters = {}) => {
+    const response = await api.get("/cashier/history", { params: filters });
+    return response.data;
+  },
+
+  // Obtener estadísticas del cajero
+  getStats: async () => {
+    const response = await api.get("/cashier/stats");
+    return response.data;
+  },
+};
+
 export default {
   category: categoryService,
   dish: dishService,
@@ -339,4 +373,5 @@ export default {
   user: userService,
   auth: authService,
   dashboard: dashboardService,
+  cashier: cashierService,
 };

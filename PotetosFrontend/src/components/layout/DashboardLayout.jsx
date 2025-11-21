@@ -15,6 +15,8 @@ import {
   Icon,
   ChevronRight,
   ChevronLeft,
+  CreditCard,
+  History,
 } from "lucide-react";
 import { chairsTablePlatter } from "@lucide/lab";
 import favicon from "@/assets/images/favicon-potetos.svg";
@@ -64,6 +66,18 @@ export default function DashboardLayout({ children }) {
       icon: UtensilsCrossed,
       label: "Cocina",
       roles: ["chef"],
+    },
+    {
+      path: "/dashboard/cashier",
+      icon: CreditCard,
+      label: "Cajero",
+      roles: ["admin", "cajero"],
+    },
+    {
+      path: "/dashboard/payment-history",
+      icon: History,
+      label: "Historial",
+      roles: ["admin", "cajero"],
     },
     {
       path: "/dashboard/users",
