@@ -1,44 +1,59 @@
-const nodemailer = require("nodemailer");
+const BREVO_API_URL =
+  process.env.BREVO_API_URL || "https://api.brevo.com/v3/smtp/email";
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL;
+const BREVO_SENDER_NAME = process.env.BREVO_SENDER_NAME || "POTETOS Restaurant";
 
-// Configurar transporter con opciones mejoradas para Gmail
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // true para 465, false para otros puertos
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false, // Acepta certificados autofirmados (útil para desarrollo)
-  },
-  pool: true, // Usar pool de conexiones
-  maxConnections: 5,
-  maxMessages: 100,
-});
-
-// Verificar conexión
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("❌ Error al configurar email:", error.message);
-    console.error(
-      "   Verifica EMAIL_USER y EMAIL_PASSWORD en las variables de entorno"
+const isBrevoConfigured = () => {
+  if (!BREVO_API_KEY || !BREVO_SENDER_EMAIL) {
+    console.warn(
+      "⚠️ Servicio de email no configurado: faltan BREVO_API_KEY o BREVO_SENDER_EMAIL"
     );
-  } else {
-    console.log("✅ Servicio de email configurado correctamente");
-    console.log(`   Email configurado: ${process.env.EMAIL_USER}`);
+    return false;
   }
-});
+  return true;
+};
+
+const sendEmailThroughBrevo = async ({ to, subject, html }) => {
+  if (!isBrevoConfigured()) {
+    throw new Error("Email service not configured");
+  }
+
+  const payload = {
+    sender: {
+      email: BREVO_SENDER_EMAIL,
+      name: BREVO_SENDER_NAME,
+    },
+    to: [{ email: to }],
+    subject,
+    htmlContent: html,
+  };
+
+  const response = await fetch(BREVO_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": BREVO_API_KEY,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(
+      `Brevo API error (${response.status} ${response.statusText}): ${errorBody}`
+    );
+  }
+
+  const data = await response.json();
+  return data;
+};
 
 /**
  * Enviar código de recuperación de contraseña
  */
 const sendPasswordResetCode = async (email, code) => {
-  const mailOptions = {
-    from: `"POTETOS Restaurant" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: "🔐 Código de Recuperación de Contraseña - POTETOS",
-    html: `
+  const html = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -149,13 +164,16 @@ const sendPasswordResetCode = async (email, code) => {
           </div>
         </body>
       </html>
-    `,
-  };
+    `;
 
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log("✅ Email enviado:", info.messageId);
-    return { success: true, messageId: info.messageId };
+    const response = await sendEmailThroughBrevo({
+      to: email,
+      subject: "🔐 Código de Recuperación de Contraseña - POTETOS",
+      html,
+    });
+    console.log("✅ Email enviado:", response.messageId || response.message);
+    return { success: true, response };
   } catch (error) {
     console.error("❌ Error al enviar email:", error);
     throw error;
