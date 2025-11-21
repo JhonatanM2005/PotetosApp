@@ -4,7 +4,8 @@ import DashboardLayout from "../../components/layout/DashboardLayout";
 import { useState, useEffect } from "react";
 import api from "../../services/api";
 import jsPDF from "jspdf";
-import { Download } from "lucide-react";
+import { Download, FileSpreadsheet } from "lucide-react";
+import * as XLSX from 'xlsx';
 import {
   BarChart,
   Bar,
@@ -314,6 +315,180 @@ export default function DashboardStats() {
     }
   };
 
+  const downloadExcel = async () => {
+    try {
+      const loadingToast = document.createElement("div");
+      loadingToast.className = "fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50";
+      loadingToast.style.backgroundColor = "#1E0342";
+      loadingToast.style.color = "#ffffff";
+      loadingToast.textContent = "Generando Excel...";
+      document.body.appendChild(loadingToast);
+
+      const endDate = new Date();
+      let startDate = new Date();
+      
+      switch (period) {
+        case "day":
+          startDate.setHours(0, 0, 0, 0);
+          break;
+        case "week":
+          startDate.setDate(endDate.getDate() - 7);
+          break;
+        case "month":
+          startDate.setMonth(endDate.getMonth() - 1);
+          break;
+        case "year":
+          startDate.setFullYear(endDate.getFullYear() - 1);
+          break;
+        default:
+          startDate.setDate(endDate.getDate() - 7);
+      }
+
+      const response = await api.get('/dashboard/export', {
+        params: {
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+          reportType: 'all'
+        }
+      });
+
+      const { data } = response.data;
+      const wb = XLSX.utils.book_new();
+
+      if (data.sales && data.sales.length > 0) {
+        const salesFlattened = [];
+        data.sales.forEach(sale => {
+          if (sale.items && sale.items.length > 0) {
+            sale.items.forEach(item => {
+              salesFlattened.push({
+                'Nro. Orden': sale.orderNumber || 'N/A',
+                'Fecha': new Date(sale.fecha).toLocaleDateString('es-CO', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+                'Mesa': sale.mesa || 'N/A',
+                'Mesero': sale.mesero || 'N/A',
+                'Cajero': sale.cajero || 'N/A',
+                'Plato': item.plato || 'N/A',
+                'Cantidad': item.cantidad || 0,
+                'Precio Unit.': `$${(item.precioUnitario || 0).toFixed(2)}`,
+                'Subtotal Item': `$${(item.subtotal || 0).toFixed(2)}`,
+                'Total Orden': `$${(sale.total || 0).toFixed(2)}`,
+                'Propina': `$${(sale.propina || 0).toFixed(2)}`,
+                'Método Pago': (sale.metodoPago || 'N/A').toUpperCase()
+              });
+            });
+          }
+        });
+        
+        const wsSales = XLSX.utils.json_to_sheet(salesFlattened);
+        wsSales['!cols'] = [
+          { width: 15 }, { width: 22 }, { width: 8 }, { width: 18 },
+          { width: 18 }, { width: 28 }, { width: 10 }, { width: 13 },
+          { width: 14 }, { width: 13 }, { width: 11 }, { width: 16 }
+        ];
+        if (salesFlattened.length > 0) {
+          wsSales['!autofilter'] = { ref: `A1:L${salesFlattened.length + 1}` };
+        }
+        XLSX.utils.book_append_sheet(wb, wsSales, '💰 Ventas Detalladas');
+      }
+
+      if (data.products && data.products.length > 0) {
+        const productsData = data.products.map(p => ({
+          'Plato': p.plato || 'N/A',
+          'Categoría': p.categoria || 'N/A',
+          'Unidades Vendidas': p.totalVendido || 0,
+          'Ingreso Total': `$${(p.ingresoTotal || 0).toFixed(2)}`,
+          'Precio Promedio': `$${(p.precioPromedio || 0).toFixed(2)}`
+        }));
+        
+        const wsProducts = XLSX.utils.json_to_sheet(productsData);
+        wsProducts['!cols'] = [{ width: 35 }, { width: 20 }, { width: 18 }, { width: 16 }, { width: 17 }];
+        if (productsData.length > 0) {
+          wsProducts['!autofilter'] = { ref: `A1:E${productsData.length + 1}` };
+        }
+        XLSX.utils.book_append_sheet(wb, wsProducts, '🍽️ Productos');
+      }
+
+      if (data.waiters && data.waiters.length > 0) {
+        const waitersData = data.waiters.map(w => ({
+          'Mesero': w.mesero || 'N/A',
+          'Email': w.email || 'N/A',
+          'Total Órdenes': w.totalOrdenes || 0,
+          'Total Ventas': `$${(w.totalVentas || 0).toFixed(2)}`,
+          'Total Propinas': `$${(w.totalPropinas || 0).toFixed(2)}`,
+          'Ticket Promedio': `$${(w.ticketPromedio || 0).toFixed(2)}`
+        }));
+        
+        const wsWaiters = XLSX.utils.json_to_sheet(waitersData);
+        wsWaiters['!cols'] = [{ width: 22 }, { width: 30 }, { width: 16 }, { width: 16 }, { width: 17 }, { width: 17 }];
+        if (waitersData.length > 0) {
+          wsWaiters['!autofilter'] = { ref: `A1:F${waitersData.length + 1}` };
+        }
+        XLSX.utils.book_append_sheet(wb, wsWaiters, '👨‍🍳 Meseros');
+      }
+
+      if (data.tables && data.tables.length > 0) {
+        const tablesData = data.tables.map(t => ({
+          'Número Mesa': t.numeroMesa || 'N/A',
+          'Capacidad': t.capacidad || 0,
+          'Total Órdenes': t.totalOrdenes || 0,
+          'Total Ventas': `$${(t.totalVentas || 0).toFixed(2)}`,
+          'Ticket Promedio': `$${(t.ticketPromedio || 0).toFixed(2)}`
+        }));
+        
+        const wsTables = XLSX.utils.json_to_sheet(tablesData);
+        wsTables['!cols'] = [{ width: 15 }, { width: 13 }, { width: 16 }, { width: 16 }, { width: 17 }];
+        if (tablesData.length > 0) {
+          wsTables['!autofilter'] = { ref: `A1:E${tablesData.length + 1}` };
+        }
+        XLSX.utils.book_append_sheet(wb, wsTables, '🪑 Mesas');
+      }
+
+      if (data.financial && data.financial.length > 0) {
+        const financialData = data.financial.map(f => ({
+          'Método de Pago': (f.metodoPago || 'N/A').toUpperCase(),
+          'Total Transacciones': f.totalTransacciones || 0,
+          'Total Ventas': `$${(f.totalVentas || 0).toFixed(2)}`,
+          'Total Propinas': `$${(f.totalPropinas || 0).toFixed(2)}`,
+          'Total General': `$${(f.total || 0).toFixed(2)}`
+        }));
+        
+        // Agregar fila de totales
+        const totalTransacciones = financialData.reduce((sum, f) => sum + f['Total Transacciones'], 0);
+        const totalVentas = data.financial.reduce((sum, f) => sum + (f.totalVentas || 0), 0);
+        const totalPropinas = data.financial.reduce((sum, f) => sum + (f.totalPropinas || 0), 0);
+        const totalGeneral = data.financial.reduce((sum, f) => sum + (f.total || 0), 0);
+        
+        financialData.push({
+          'Método de Pago': '🟢 TOTAL GENERAL',
+          'Total Transacciones': totalTransacciones,
+          'Total Ventas': `$${totalVentas.toFixed(2)}`,
+          'Total Propinas': `$${totalPropinas.toFixed(2)}`,
+          'Total General': `$${totalGeneral.toFixed(2)}`
+        });
+        
+        const wsFinancial = XLSX.utils.json_to_sheet(financialData);
+        wsFinancial['!cols'] = [{ width: 22 }, { width: 20 }, { width: 16 }, { width: 17 }, { width: 17 }];
+        XLSX.utils.book_append_sheet(wb, wsFinancial, '💵 Resumen Financiero');
+      }
+
+      const periodNames = { day: "Hoy", week: "Semana", month: "Mes", year: "Año" };
+      const fileName = `Reporte_Completo_POTETOS_${periodNames[period]}_${new Date().toLocaleDateString("es-CO").replace(/\//g, "-")}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+
+      document.body.removeChild(loadingToast);
+      
+      const successToast = document.createElement("div");
+      successToast.className = "fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50";
+      successToast.style.backgroundColor = "#10b981";
+      successToast.style.color = "#ffffff";
+      successToast.textContent = "Excel descargado exitosamente";
+      document.body.appendChild(successToast);
+      setTimeout(() => document.body.removeChild(successToast), 3000);
+    } catch (error) {
+      console.error("Error generating Excel:", error);
+      alert("Error al generar el archivo Excel");
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -337,13 +512,22 @@ export default function DashboardStats() {
               Análisis de rendimiento del restaurante POTETOS
             </p>
           </div>
-          <button
-            onClick={downloadPDF}
-            className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition shadow-lg"
-          >
-            <Download size={20} />
-            Descargar PDF
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={downloadExcel}
+              className="flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition shadow-lg"
+            >
+              <FileSpreadsheet size={20} />
+              Exportar Excel
+            </button>
+            <button
+              onClick={downloadPDF}
+              className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition shadow-lg"
+            >
+              <Download size={20} />
+              Descargar PDF
+            </button>
+          </div>
         </div>
 
         {/* Period Filter */}
