@@ -28,6 +28,13 @@ const Order = sequelize.define(
         key: "id",
       },
     },
+    cashier_id: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: "users",
+        key: "id",
+      },
+    },
     status: {
       type: DataTypes.ENUM(
         "pending",
@@ -42,6 +49,13 @@ const Order = sequelize.define(
     total_amount: {
       type: DataTypes.DECIMAL(10, 2),
       defaultValue: 0,
+    },
+    tip_amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0,
+    },
+    payment_method: {
+      type: DataTypes.ENUM("cash", "card", "transfer"),
     },
     customer_name: {
       type: DataTypes.STRING(100),

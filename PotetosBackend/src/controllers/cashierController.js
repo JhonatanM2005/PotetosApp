@@ -1,0 +1,404 @@
+const { Order, OrderItem, Dish, Table, User } = require("../models");
+const { Op } = require("sequelize");
+const sequelize = require("../config/database");
+
+// Obtener órdenes pendientes de pago
+exports.getPendingPayments = async (req, res) => {
+  try {
+    const orders = await Order.findAll({
+      where: {
+        status: {
+          [Op.in]: ["delivered", "ready"],
+        },
+      },
+      include: [
+        {
+          model: OrderItem,
+          as: "items",
+          include: [{ model: Dish, as: "dish" }],
+        },
+        { model: Table, as: "table" },
+        { model: User, as: "waiter", attributes: ["id", "name"] },
+      ],
+      order: [["created_at", "ASC"]],
+    });
+
+    res.json({ orders });
+  } catch (error) {
+    console.error("Get pending payments error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Procesar pago de una orden
+exports.processPayment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { payment_method, amount_paid, tip } = req.body;
+
+    if (!payment_method || !amount_paid) {
+      return res.status(400).json({
+        message: "Payment method and amount paid are required",
+      });
+    }
+
+    const order = await Order.findByPk(id, {
+      include: [
+        {
+          model: OrderItem,
+          as: "items",
+        },
+        { model: Table, as: "table" },
+      ],
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Verificar que la orden esté lista para pago
+    if (!["delivered", "ready"].includes(order.status)) {
+      return res.status(400).json({
+        message: "Order is not ready for payment",
+      });
+    }
+
+    // Calcular totales
+    const totalAmount = parseFloat(order.total_amount);
+    const tipAmount = parseFloat(tip || 0);
+    const amountPaid = parseFloat(amount_paid);
+    const finalTotal = totalAmount + tipAmount;
+
+    // Validar que el monto pagado sea suficiente
+    if (amountPaid < finalTotal) {
+      return res.status(400).json({
+        message: "Insufficient amount paid",
+        required: finalTotal,
+        received: amountPaid,
+      });
+    }
+
+    const change = amountPaid - finalTotal;
+
+    // Guardar el estado original para verificar si liberar mesa
+    const wasDelivered = order.status === "delivered";
+
+    // Actualizar orden
+    await order.update({
+      status: "paid",
+      payment_method,
+      tip_amount: tipAmount,
+      completed_at: new Date(),
+      cashier_id: req.user.id,
+    });
+
+    // Recargar la orden con todas las relaciones
+    await order.reload({
+      include: [
+        {
+          model: OrderItem,
+          as: "items",
+        },
+        { model: Table, as: "table" },
+        { model: User, as: "waiter", attributes: ["id", "name"] },
+        { model: User, as: "cashier", attributes: ["id", "name"] },
+      ],
+    });
+
+    // Liberar mesa si existe y la orden fue entregada antes del pago
+    if (order.table_id && wasDelivered) {
+      await Table.update(
+        { status: "available", current_order_id: null },
+        { where: { id: order.table_id } }
+      );
+    }
+
+    // Emitir evento Socket.io
+    if (global.io) {
+      global.io.emit("payment:processed", {
+        orderId: order.id,
+        orderNumber: order.order_number,
+        tableId: order.table_id,
+        totalAmount,
+        tipAmount,
+        paymentMethod: payment_method,
+        timestamp: new Date(),
+      });
+
+      // Si se liberó una mesa, notificar también
+      if (order.table_id && wasDelivered) {
+        global.io.emit("table:updated", {
+          tableId: order.table_id,
+          status: "available",
+        });
+      }
+    }
+
+    res.json({
+      message: "Payment processed successfully",
+      order: {
+        ...order.toJSON(),
+        total_amount: totalAmount,
+        tip_amount: tipAmount,
+        final_total: finalTotal,
+        amount_paid: amountPaid,
+        change,
+      },
+    });
+  } catch (error) {
+    console.error("Process payment error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Obtener historial de pagos del día
+exports.getDailyPayments = async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const orders = await Order.findAll({
+      where: {
+        status: "paid",
+        completed_at: {
+          [Op.gte]: today,
+        },
+      },
+      include: [
+        {
+          model: OrderItem,
+          as: "items",
+        },
+        { model: Table, as: "table" },
+        { model: User, as: "waiter", attributes: ["id", "name"] },
+        {
+          model: User,
+          as: "cashier",
+          attributes: ["id", "name"],
+        },
+      ],
+      order: [["completed_at", "DESC"]],
+    });
+
+    res.json({ orders });
+  } catch (error) {
+    console.error("Get daily payments error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Obtener estadísticas de caja del día
+exports.getDailyCashierStats = async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const result = await Order.findAll({
+      where: {
+        status: "paid",
+        completed_at: {
+          [Op.gte]: today,
+        },
+      },
+      attributes: [
+        "payment_method",
+        [sequelize.fn("COUNT", sequelize.col("id")), "count"],
+        [sequelize.fn("SUM", sequelize.col("total_amount")), "total"],
+        [sequelize.fn("SUM", sequelize.col("tip_amount")), "tips"],
+      ],
+      group: ["payment_method"],
+      raw: true,
+    });
+
+    // Calcular totales generales
+    const totalOrders = await Order.count({
+      where: {
+        status: "paid",
+        completed_at: {
+          [Op.gte]: today,
+        },
+      },
+    });
+
+    const totals = await Order.findOne({
+      where: {
+        status: "paid",
+        completed_at: {
+          [Op.gte]: today,
+        },
+      },
+      attributes: [
+        [sequelize.fn("SUM", sequelize.col("total_amount")), "totalSales"],
+        [sequelize.fn("SUM", sequelize.col("tip_amount")), "totalTips"],
+        [sequelize.fn("AVG", sequelize.col("total_amount")), "averageOrder"],
+      ],
+      raw: true,
+    });
+
+    res.json({
+      stats: {
+        totalOrders,
+        totalSales: parseFloat(totals.totalSales || 0),
+        totalTips: parseFloat(totals.totalTips || 0),
+        averageOrder: parseFloat(totals.averageOrder || 0),
+        byPaymentMethod: result.map((r) => ({
+          method: r.payment_method,
+          count: parseInt(r.count),
+          total: parseFloat(r.total || 0),
+          tips: parseFloat(r.tips || 0),
+        })),
+      },
+    });
+  } catch (error) {
+    console.error("Get cashier stats error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Obtener resumen de cierre de caja
+exports.getCashClosing = async (req, res) => {
+  try {
+    const { date } = req.query;
+    let startDate, endDate;
+
+    if (date) {
+      startDate = new Date(date);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(date);
+      endDate.setHours(23, 59, 59, 999);
+    } else {
+      startDate = new Date();
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date();
+      endDate.setHours(23, 59, 59, 999);
+    }
+
+    const orders = await Order.findAll({
+      where: {
+        status: "paid",
+        completed_at: {
+          [Op.between]: [startDate, endDate],
+        },
+      },
+      include: [
+        {
+          model: User,
+          as: "cashier",
+          attributes: ["id", "name"],
+        },
+      ],
+    });
+
+    // Agrupar por cajero
+    const byCashier = {};
+    orders.forEach((order) => {
+      const cashierId = order.cashier_id || "unassigned";
+      const cashierName = order.cashier?.name || "Sin asignar";
+
+      if (!byCashier[cashierId]) {
+        byCashier[cashierId] = {
+          cashierId: order.cashier_id,
+          cashierName,
+          orders: 0,
+          cash: 0,
+          card: 0,
+          transfer: 0,
+          tips: 0,
+          total: 0,
+        };
+      }
+
+      byCashier[cashierId].orders++;
+      const amount = parseFloat(order.total_amount);
+      const tip = parseFloat(order.tip_amount || 0);
+
+      if (order.payment_method === "cash") {
+        byCashier[cashierId].cash += amount;
+      } else if (order.payment_method === "card") {
+        byCashier[cashierId].card += amount;
+      } else if (order.payment_method === "transfer") {
+        byCashier[cashierId].transfer += amount;
+      }
+
+      byCashier[cashierId].tips += tip;
+      byCashier[cashierId].total += amount + tip;
+    });
+
+    // Totales generales
+    const totalOrders = orders.length;
+    const totalSales = orders.reduce(
+      (sum, o) => sum + parseFloat(o.total_amount),
+      0
+    );
+    const totalTips = orders.reduce(
+      (sum, o) => sum + parseFloat(o.tip_amount || 0),
+      0
+    );
+
+    res.json({
+      date: startDate.toISOString().split("T")[0],
+      summary: {
+        totalOrders,
+        totalSales,
+        totalTips,
+        grandTotal: totalSales + totalTips,
+      },
+      byCashier: Object.values(byCashier),
+    });
+  } catch (error) {
+    console.error("Get cash closing error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Reimprimir recibo
+exports.reprintReceipt = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const order = await Order.findByPk(id, {
+      include: [
+        {
+          model: OrderItem,
+          as: "items",
+          include: [{ model: Dish, as: "dish" }],
+        },
+        { model: Table, as: "table" },
+        { model: User, as: "waiter", attributes: ["id", "name"] },
+        { model: User, as: "cashier", attributes: ["id", "name"] },
+      ],
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.status !== "paid") {
+      return res.status(400).json({ message: "Order is not paid yet" });
+    }
+
+    res.json({
+      message: "Receipt data retrieved",
+      receipt: {
+        orderNumber: order.order_number,
+        date: order.completed_at,
+        table: order.table?.table_number,
+        waiter: order.waiter?.name,
+        cashier: order.cashier?.name,
+        items: order.items.map((item) => ({
+          name: item.dish_name,
+          quantity: item.quantity,
+          unitPrice: item.unit_price,
+          subtotal: item.subtotal,
+        })),
+        subtotal: order.total_amount,
+        tip: order.tip_amount || 0,
+        total: parseFloat(order.total_amount) + parseFloat(order.tip_amount || 0),
+        paymentMethod: order.payment_method,
+      },
+    });
+  } catch (error) {
+    console.error("Reprint receipt error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

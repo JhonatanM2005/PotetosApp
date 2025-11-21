@@ -16,6 +16,10 @@ Category.hasMany(Dish, { foreignKey: "category_id", as: "dishes" });
 Order.belongsTo(User, { foreignKey: "waiter_id", as: "waiter" });
 User.hasMany(Order, { foreignKey: "waiter_id", as: "orders" });
 
+// Order - User (cashier)
+Order.belongsTo(User, { foreignKey: "cashier_id", as: "cashier" });
+User.hasMany(Order, { foreignKey: "cashier_id", as: "processedOrders" });
+
 // Order - Table
 Order.belongsTo(Table, { foreignKey: "table_id", as: "table" });
 Table.hasMany(Order, { foreignKey: "table_id", as: "orders" });

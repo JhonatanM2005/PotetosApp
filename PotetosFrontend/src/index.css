@@ -66,3 +66,59 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Estilos para impresión */
+@media print {
+  /* Ocultar elementos innecesarios */
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Ajustar colores para impresión */
+  * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Configuración de página */
+  @page {
+    margin: 1.5cm;
+    size: letter;
+  }
+
+  /* Evitar saltos de página dentro de elementos */
+  .print\:avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Remover sombras en impresión */
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  /* Asegurar bordes en impresión */
+  .print\:border {
+    border: 1px solid #e5e7eb;
+  }
+
+  /* Fondo blanco en impresión */
+  .print\:bg-white {
+    background-color: white !important;
+  }
+
+  /* Texto negro en impresión */
+  .print\:text-black {
+    color: black !important;
+  }
+
+  /* Tamaño de texto en impresión */
+  .print\:text-sm {
+    font-size: 0.875rem;
+  }
+
+  /* Asegurar que el body sea blanco */
+  body {
+    background-color: white;
+  }
+}

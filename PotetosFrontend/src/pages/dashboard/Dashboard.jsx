@@ -16,6 +16,7 @@ import {
   Settings,
   DollarSign,
   Clock,
+  FileText,
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -89,6 +90,24 @@ export default function DashboardPage() {
         roles: ["chef"],
       },
       {
+        id: "cashier",
+        title: "Caja",
+        description: "Procesa pagos y gestiona cobros",
+        icon: DollarSign,
+        path: "/dashboard/cashier",
+        iconBg: "bg-primary",
+        roles: ["cajero", "admin"],
+      },
+      {
+        id: "reports",
+        title: "Reportes",
+        description: "Reportes de caja y cierre diario",
+        icon: FileText,
+        path: "/dashboard/cashier/reports",
+        iconBg: "bg-primary",
+        roles: ["cajero", "admin"],
+      },
+      {
         id: "tables",
         title: "Mesas",
         description: "Administra las mesas del restaurante",
@@ -113,7 +132,7 @@ export default function DashboardPage() {
         icon: Settings,
         path: "/dashboard/settings",
         iconBg: "bg-primary",
-        roles: ["admin", "mesero", "chef"],
+        roles: ["admin", "mesero", "chef", "cajero"],
       },
     ];
 
@@ -128,6 +147,7 @@ export default function DashboardPage() {
       admin: "Administrador",
       mesero: "Mesero",
       chef: "Chef",
+      cajero: "Cajero",
     };
     return roleNames[role] || role;
   };
@@ -137,6 +157,7 @@ export default function DashboardPage() {
       admin: "¡Bienvenido al panel de administración!",
       mesero: "¡Bienvenido! Listo para tomar pedidos",
       chef: "¡Bienvenido a la cocina! A preparar platos deliciosos",
+      cajero: "¡Bienvenido a la caja! Gestiona los pagos del día",
     };
     return messages[user?.role] || "¡Bienvenido al sistema POTETOS!";
   };
