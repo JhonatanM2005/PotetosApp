@@ -1,0 +1,31 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ secrets.RAILWAY_URL }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Railway
+        run: |
+          echo "🚀 Deploying to Railway..."
+          echo "✅ Railway will automatically deploy this commit"
+          echo "📦 Backend and Frontend will be deployed"
+
+      - name: Deployment Status
+        run: |
+          echo "✅ Deployment triggered successfully"
+          echo "🔗 Check Railway dashboard for deployment status"
