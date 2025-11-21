@@ -145,21 +145,21 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 md:p-8">
         {/* Welcome Section */}
-        <div className="mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+        <div className="mb-8 sm:mb-10 md:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             BIENVENIDOS AL SISTEMA POTETOS
           </h2>
-          <p className="text-lg text-gray-600">{getWelcomeMessage()}</p>
+          <p className="text-base sm:text-lg text-gray-600">{getWelcomeMessage()}</p>
         </div>
 
         {/* User Info Section */}
-        <div className="bg-primary rounded-2xl shadow-lg p-8 mb-12">
-          <h3 className="text-xl font-bold text-secondary mb-6">
+        <div className="bg-primary rounded-2xl shadow-lg p-6 sm:p-8 mb-8 sm:mb-10 md:mb-12">
+          <h3 className="text-lg sm:text-xl font-bold text-secondary mb-4 sm:mb-6">
             Información del Usuario
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <InfoCard label="Rol" value={getRoleDisplayName(user?.role)} />
             <InfoCard label="Nombre" value={user?.name || "Usuario"} />
             <InfoCard
@@ -171,12 +171,12 @@ export default function DashboardPage() {
 
         {/* Quick Stats - Solo para admin*/}
         {(user?.role === "admin") && (
-          <div className="mb-12">
-            <h3 className="text-xl font-bold text-primary mb-6">
+          <div className="mb-8 sm:mb-10 md:mb-12">
+            <h3 className="text-lg sm:text-xl font-bold text-primary mb-4 sm:mb-6">
               Resumen Rápido
             </h3>
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
                 {[1, 2, 3, 4].map((i) => (
                   <div
                     key={i}
@@ -185,7 +185,7 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
                 <StatCard
                   icon={DollarSign}
                   title="Ventas Hoy"
@@ -231,10 +231,10 @@ export default function DashboardPage() {
 
         {/* Module Cards Grid */}
         <div className="mb-8">
-          <h3 className="text-xl font-bold text-primary mb-6">
+          <h3 className="text-lg sm:text-xl font-bold text-primary mb-4 sm:mb-6">
             Módulos Disponibles
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {availableCards.map((card) => (
               <ModuleCard
                 key={card.id}

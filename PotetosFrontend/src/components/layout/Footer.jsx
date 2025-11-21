@@ -7,12 +7,12 @@ import tiktokSvg from "@/assets/images/TikTok.svg";
 export default function Footer() {
   return (
     <footer className="bg-primary">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
           {/* About */}
-          <div>
-            <div className="mb-3">
-              <img src={logo} alt="Potetos" className="h-12 w-auto" />
+          <div className="text-center sm:text-left">
+            <div className="mb-3 flex justify-center sm:justify-start">
+              <img src={logo} alt="Potetos" className="h-10 sm:h-12 w-auto" />
             </div>
             <p className="text-sm text-white mb-2">
               "Crujientes por fuera, irresistibles por dentro"
@@ -23,8 +23,8 @@ export default function Footer() {
           </div>
 
           {/* Explore */}
-          <div>
-            <h3 className="font-semibold text-secondary mb-4">Explora</h3>
+          <div className="text-center sm:text-left">
+            <h3 className="font-semibold text-secondary mb-3 sm:mb-4 text-base sm:text-lg">Explora</h3>
             <ul className="space-y-2 text-sm">
               {["Inicio", "Menú", "Reservas", "Nosotros"].map((item) => (
                 <li key={item}>
@@ -40,8 +40,8 @@ export default function Footer() {
           </div>
 
           {/* Support */}
-          <div>
-            <h3 className="font-semibold text-secondary mb-4">Soporte</h3>
+          <div className="text-center sm:text-left">
+            <h3 className="font-semibold text-secondary mb-3 sm:mb-4 text-base sm:text-lg">Soporte</h3>
             <ul className="space-y-2 text-sm">
               {[
                 "Preguntas frecuentes",
@@ -61,9 +61,9 @@ export default function Footer() {
           </div>
 
           {/* Social */}
-          <div>
-            <h3 className="font-semibold text-secondary mb-4">Síguenos en</h3>
-            <div className="flex gap-4">
+          <div className="text-center sm:text-left">
+            <h3 className="font-semibold text-secondary mb-3 sm:mb-4 text-base sm:text-lg">Síguenos en</h3>
+            <div className="flex gap-4 justify-center sm:justify-start">
               {[
                 {
                   src: facebookSvg,

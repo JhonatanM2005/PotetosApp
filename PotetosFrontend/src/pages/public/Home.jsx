@@ -38,9 +38,11 @@ export default function Home() {
             TOP 3 PLATOS
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="flex flex-wrap justify-center gap-6 sm:gap-8 max-w-6xl mx-auto">
             {topProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <div key={product.id} className="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.34rem)]">
+                <ProductCard product={product} />
+              </div>
             ))}
           </div>
         </div>

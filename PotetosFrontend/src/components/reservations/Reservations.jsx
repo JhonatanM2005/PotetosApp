@@ -103,21 +103,21 @@ export default function Reservations() {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 flex items-center min-h-screen">
-          <div className="max-w-2xl">
-            <h1 className="text-4xl md:text-5xl font-bold text-secondary mb-4">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-24 flex items-center min-h-screen">
+          <div className="max-w-2xl w-full">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-secondary mb-3 sm:mb-4">
               RESERVAS
             </h1>
-            <p className="text-white text-lg mb-8">
+            <p className="text-white text-base sm:text-lg mb-6 sm:mb-8">
               Asegura tu lugar en Potatos,
               <br />
               haz tu reserva ahora
             </p>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 max-w-lg">
               {/* Fecha y Hora */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <FormField
                   icon={Calendar}
                   label="Fecha"
@@ -139,7 +139,7 @@ export default function Reservations() {
               </div>
 
               {/* Nº Personas y Teléfono */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <FormField
                   icon={Users}
                   label="Nº Personas"

@@ -13,15 +13,19 @@ import {
   Grid2x2Plus,
   BarChart3,
   Icon,
+  ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 import { chairsTablePlatter } from "@lucide/lab";
-import logo from "@/assets/images/favicon-potetos.svg";
+import favicon from "@/assets/images/favicon-potetos.svg";
+import logo from "@/assets/images/logo.png";
 
 export default function DashboardLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
 
   const menuItems = [
     {
@@ -90,31 +94,52 @@ export default function DashboardLayout({ children }) {
   return (
     <div className="flex min-h-screen bg-white">
       {/* Sidebar */}
-      <aside className="w-16 bg-primary flex flex-col items-center py-6 gap-6 fixed h-screen z-40">
+      <aside
+        onMouseEnter={() => setIsSidebarExpanded(true)}
+        onMouseLeave={() => setIsSidebarExpanded(false)}
+        className={`fixed lg:sticky top-0 left-0 h-screen bg-primary flex flex-col py-6 z-40 transition-all duration-300 ease-in-out ${
+          isSidebarExpanded ? "w-64" : "w-16"
+        }`}
+      >
         {/* Logo */}
-        <div className="mb-4">
-          <img src={logo} alt="Potetos" className="h-10 w-10 rounded-lg" />
+        <div className="mb-6 px-3 flex items-center justify-center">
+          <img 
+            src={isSidebarExpanded ? logo : favicon} 
+            alt="Potetos" 
+            className={`transition-all duration-300 rounded-lg ${
+              isSidebarExpanded ? "h-12 w-auto" : "h-10 w-10"
+            }`} 
+          />
         </div>
 
         {/* Menu Items */}
-        <nav className="flex flex-col gap-4 flex-1 overflow-y-auto scrollbar-hide">
+        <nav className="flex flex-col gap-2 flex-1 overflow-y-auto scrollbar-hide px-2">
           {filteredMenuItems.map((item) => {
             return (
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`p-3 rounded-lg transition-all ${
+                className={`flex items-center gap-3 p-3 rounded-lg transition-all group ${
                   isActive(item.path)
                     ? "bg-secondary text-primary"
                     : "text-secondary hover:bg-secondary/20"
                 }`}
                 title={item.label}
               >
-                {item.isCustomIcon ? (
-                  <Icon iconNode={item.icon} size={24} />
-                ) : (
-                  <item.icon size={24} />
-                )}
+                <div className="shrink-0">
+                  {item.isCustomIcon ? (
+                    <Icon iconNode={item.icon} size={24} />
+                  ) : (
+                    <item.icon size={24} />
+                  )}
+                </div>
+                <span
+                  className={`font-medium whitespace-nowrap transition-all duration-300 ${
+                    isSidebarExpanded ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden"
+                  }`}
+                >
+                  {item.label}
+                </span>
               </button>
             );
           })}
@@ -123,10 +148,17 @@ export default function DashboardLayout({ children }) {
         {/* Logout Button */}
         <button
           onClick={() => setShowLogoutModal(true)}
-          className="p-3 rounded-lg transition-all text-secondary hover:bg-red-600 hover:text-white mt-auto"
+          className="flex items-center gap-3 p-3 mx-2 rounded-lg transition-all text-secondary hover:bg-red-600 hover:text-white mt-auto group"
           title="Cerrar Sesión"
         >
-          <LogOut size={24} />
+          <LogOut size={24} className="shrink-0" />
+          <span
+            className={`font-medium whitespace-nowrap transition-all duration-300 ${
+              isSidebarExpanded ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden"
+            }`}
+          >
+            Cerrar Sesión
+          </span>
         </button>
       </aside>
 

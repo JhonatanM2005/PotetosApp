@@ -32,7 +32,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-end p-4 md:pr-16 lg:pr-24">
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center sm:justify-end p-4 sm:pr-8 md:pr-16 lg:pr-24">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
@@ -43,11 +43,11 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-linear-to-r from-primary to-transparent to" />
       </div>
 
-      <div className="w-full max-w-xl relative z-10">
+      <div className="w-full max-w-md sm:max-w-lg md:max-w-xl relative z-10">
         {/* Form Card */}
-        <div className="p-8">
-          <div className="text-left mb-8">
-            <h1 className="text-5xl font-bold text-secondary mb-2">
+        <div className="p-6 sm:p-8">
+          <div className="text-center sm:text-left mb-6 sm:mb-8">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-secondary mb-2">
               INICIAR SESIÓN
             </h1>
           </div>
@@ -121,7 +121,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-65 px-6 py-3 text-xl bg-secondary text-primary font-bold rounded-full hover:opacity-90 disabled:opacity-50 transition-opacity mt-6 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 text-lg sm:text-xl bg-secondary text-primary font-bold rounded-full hover:opacity-90 disabled:opacity-50 transition-opacity mt-4 sm:mt-6 flex items-center justify-center gap-2"
               >
                 {loading ? "Iniciando sesión..." : "Iniciar sesión"}
               </button>

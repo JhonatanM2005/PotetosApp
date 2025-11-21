@@ -11,7 +11,7 @@ export default function ProductCard({ product }) {
           isMenuCard
             ? "shadow-lg"
             : product.id === 2
-            ? "md:-translate-y-6 z-20 md:shadow-2xl shadow-lg"
+            ? "lg:-translate-y-6 z-20 lg:shadow-2xl shadow-lg"
             : "shadow-lg"
         }`}
         style={{
@@ -21,7 +21,7 @@ export default function ProductCard({ product }) {
       >
         {/* Image Container (top, rounded top corners preserved by parent) */}
         <div
-          className={`h-40 sm:h-48 md:h-64 flex items-center justify-center bg-gray-100`}
+          className={`h-48 sm:h-52 md:h-64 lg:h-64 flex items-center justify-center bg-gray-100`}
         >
           <img
             src={product.image || "/placeholder.svg"}
@@ -70,12 +70,12 @@ export default function ProductCard({ product }) {
               {/* Name and Price Row */}
               <div className="flex items-center justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
                 <h3
-                  className={`font-bold text-base sm:text-lg md:text-lg flex-1`}
+                  className={`font-bold text-sm sm:text-base md:text-lg lg:text-xl flex-1 leading-tight`}
                 >
                   {product.name}
                 </h3>
                 <button
-                  className={`px-8 sm:px-10 md:px-12 py-0.5 font-bold text-sm sm:text-base rounded-4xl hover:opacity-90 transition-opacity whitespace-nowrap shadow-md hover:shadow-lg ${
+                  className={`px-6 sm:px-7 md:px-8 lg:px-10 py-1 font-bold text-xs sm:text-sm md:text-base rounded-4xl hover:opacity-90 transition-opacity whitespace-nowrap shadow-md hover:shadow-lg ${
                     product.id === 2
                       ? "bg-primary text-secondary"
                       : product.id === 1 || product.id === 3
