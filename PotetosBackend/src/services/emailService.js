@@ -1,17 +1,26 @@
 const nodemailer = require("nodemailer");
 
-// Configurar transporter (usa Gmail mediante SMTP directo para evitar bloqueos)
+// Configurar transporter usando variables flexibles (por defecto Gmail con STARTTLS)
+const host = process.env.EMAIL_HOST || "smtp.gmail.com";
+const port = Number(process.env.EMAIL_PORT || 587);
+const secureEnv = process.env.EMAIL_SECURE;
+const secure =
+  typeof secureEnv === "string"
+    ? secureEnv.toLowerCase() === "true"
+    : port === 465;
+
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // Usa SSL
+  host,
+  port,
+  secure,
   auth: {
-    user: process.env.EMAIL_USER, // Email origen (debe tener App Password)
-    pass: process.env.EMAIL_PASSWORD, // Contraseña de aplicación
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
   },
-  connectionTimeout: 15000,
-  greetingTimeout: 10000,
-  socketTimeout: 20000,
+  requireTLS: !secure,
+  connectionTimeout: 20000,
+  greetingTimeout: 15000,
+  socketTimeout: 30000,
   tls: {
     rejectUnauthorized: false,
   },
