@@ -11,9 +11,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: ${{ secrets.RAILWAY_URL }}
+    environment: production
     
     steps:
       - name: Checkout code
