@@ -71,13 +71,13 @@ export default function DashboardLayout({ children }) {
       path: "/dashboard/cashier",
       icon: DollarSign,
       label: "Caja",
-      roles: ["cajero", "admin"],
+      roles: ["cajero"],
     },
     {
       path: "/dashboard/cashier/reports",
       icon: FileText,
       label: "Reportes",
-      roles: ["cajero", "admin"],
+      roles: ["cajero"],
     },
     {
       path: "/dashboard/users",
