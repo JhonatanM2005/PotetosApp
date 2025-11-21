@@ -24,7 +24,9 @@ export default function Footer() {
 
           {/* Explore */}
           <div className="text-center sm:text-left">
-            <h3 className="font-semibold text-secondary mb-3 sm:mb-4 text-base sm:text-lg">Explora</h3>
+            <h3 className="font-semibold text-secondary mb-3 sm:mb-4 text-base sm:text-lg">
+              Explora
+            </h3>
             <ul className="space-y-2 text-sm">
               {["Inicio", "Menú", "Reservas", "Nosotros"].map((item) => (
                 <li key={item}>
@@ -41,7 +43,9 @@ export default function Footer() {
 
           {/* Support */}
           <div className="text-center sm:text-left">
-            <h3 className="font-semibold text-secondary mb-3 sm:mb-4 text-base sm:text-lg">Soporte</h3>
+            <h3 className="font-semibold text-secondary mb-3 sm:mb-4 text-base sm:text-lg">
+              Soporte
+            </h3>
             <ul className="space-y-2 text-sm">
               {[
                 "Preguntas frecuentes",
@@ -62,7 +66,9 @@ export default function Footer() {
 
           {/* Social */}
           <div className="text-center sm:text-left">
-            <h3 className="font-semibold text-secondary mb-3 sm:mb-4 text-base sm:text-lg">Síguenos en</h3>
+            <h3 className="font-semibold text-secondary mb-3 sm:mb-4 text-base sm:text-lg">
+              Síguenos en
+            </h3>
             <div className="flex gap-4 justify-center sm:justify-start">
               {[
                 {

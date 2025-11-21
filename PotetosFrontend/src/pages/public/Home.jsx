@@ -1,6 +1,6 @@
-import ProductCard from "@/components/common/ProductCard"
-import HeroSection from "@/components/home/HeroSection"
-import rancheraImg from "@/assets/images/dishes/poteto-ranchera.png"
+import ProductCard from "@/components/common/ProductCard";
+import HeroSection from "@/components/home/HeroSection";
+import rancheraImg from "@/assets/images/dishes/poteto-ranchera.png";
 
 export default function Home() {
   const topProducts = [
@@ -40,7 +40,10 @@ export default function Home() {
 
           <div className="flex flex-wrap justify-center gap-6 sm:gap-8 max-w-6xl mx-auto">
             {topProducts.map((product) => (
-              <div key={product.id} className="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.34rem)]">
+              <div
+                key={product.id}
+                className="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.34rem)]"
+              >
                 <ProductCard product={product} />
               </div>
             ))}

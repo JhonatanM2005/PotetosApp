@@ -40,11 +40,11 @@ export default function About() {
               productos, la atención al cliente y un ambiente acogedor. Su
               propuesta de valor combina un menú variado con ingredientes
               frescos y un servicio ágil que busca satisfacer tanto a clientes
-              locales como a visitantes. 
+              locales como a visitantes.
               <br />
-              Actualmente, el restaurante cuenta con
-              una sola sede física, ubicada en una zona de alta concurrencia, lo
-              que le permite recibir un flujo constante de clientes.
+              Actualmente, el restaurante cuenta con una sola sede física,
+              ubicada en una zona de alta concurrencia, lo que le permite
+              recibir un flujo constante de clientes.
             </p>
           </div>
         </div>
@@ -63,7 +63,9 @@ export default function About() {
               />
             </div>
             <div className="bg-secondary text-primary p-6 sm:p-8 rounded-2xl shadow-lg md:-ml-12 md:z-10 relative mt-6 md:mt-0 md:col-span-5 text-center">
-              <h3 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4 text-primary">MISIÓN</h3>
+              <h3 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4 text-primary">
+                MISIÓN
+              </h3>
               <p className="text-sm sm:text-base leading-relaxed">
                 En POTETOS se ofrecen experiencias gastronómicas de calidad,
                 combinadas con opciones tradicionales e innovadoras y modernas
@@ -78,7 +80,9 @@ export default function About() {
           {/* Visión with image right */}
           <div className="relative grid grid-cols-1 md:grid-cols-12 gap-0 items-center">
             <div className="bg-secondary text-primary p-6 sm:p-8 rounded-2xl shadow-lg order-2 md:order-1 md:-mr-12 md:z-10 relative mt-6 md:mt-0 md:col-span-5 text-center">
-              <h3 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4 text-primary">VISIÓN</h3>
+              <h3 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4 text-primary">
+                VISIÓN
+              </h3>
               <p className="text-sm sm:text-base leading-relaxed">
                 En los próximos 5 años, POTETOS busca ser un restaurante
                 reconocido a nivel regional por la excelencia en la atención al
@@ -130,7 +134,9 @@ export default function About() {
                 <h3 className="text-lg sm:text-xl font-bold text-primary mb-2 sm:mb-3">
                   {value.title}
                 </h3>
-                <p className="text-sm sm:text-base text-gray-600">{value.description}</p>
+                <p className="text-sm sm:text-base text-gray-600">
+                  {value.description}
+                </p>
               </div>
             ))}
           </div>

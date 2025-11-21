@@ -103,12 +103,12 @@ export default function DashboardLayout({ children }) {
       >
         {/* Logo */}
         <div className="mb-6 px-3 flex items-center justify-center">
-          <img 
-            src={isSidebarExpanded ? logo : favicon} 
-            alt="Potetos" 
+          <img
+            src={isSidebarExpanded ? logo : favicon}
+            alt="Potetos"
             className={`transition-all duration-300 rounded-lg ${
               isSidebarExpanded ? "h-12 w-auto" : "h-10 w-10"
-            }`} 
+            }`}
           />
         </div>
 
@@ -135,7 +135,9 @@ export default function DashboardLayout({ children }) {
                 </div>
                 <span
                   className={`font-medium whitespace-nowrap transition-all duration-300 ${
-                    isSidebarExpanded ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden"
+                    isSidebarExpanded
+                      ? "opacity-100 w-auto"
+                      : "opacity-0 w-0 overflow-hidden"
                   }`}
                 >
                   {item.label}
@@ -154,7 +156,9 @@ export default function DashboardLayout({ children }) {
           <LogOut size={24} className="shrink-0" />
           <span
             className={`font-medium whitespace-nowrap transition-all duration-300 ${
-              isSidebarExpanded ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden"
+              isSidebarExpanded
+                ? "opacity-100 w-auto"
+                : "opacity-0 w-0 overflow-hidden"
             }`}
           >
             Cerrar Sesión

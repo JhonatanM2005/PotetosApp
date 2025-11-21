@@ -115,7 +115,10 @@ export default function Reservations() {
             </p>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 max-w-lg">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-3 sm:space-y-4 max-w-lg"
+            >
               {/* Fecha y Hora */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <FormField

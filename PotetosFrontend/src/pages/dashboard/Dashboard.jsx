@@ -151,7 +151,9 @@ export default function DashboardPage() {
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             BIENVENIDOS AL SISTEMA POTETOS
           </h2>
-          <p className="text-base sm:text-lg text-gray-600">{getWelcomeMessage()}</p>
+          <p className="text-base sm:text-lg text-gray-600">
+            {getWelcomeMessage()}
+          </p>
         </div>
 
         {/* User Info Section */}
@@ -170,7 +172,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Stats - Solo para admin*/}
-        {(user?.role === "admin") && (
+        {user?.role === "admin" && (
           <div className="mb-8 sm:mb-10 md:mb-12">
             <h3 className="text-lg sm:text-xl font-bold text-primary mb-4 sm:mb-6">
               Resumen Rápido
