@@ -28,46 +28,35 @@ module.exports = (server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log(
-      `✅ User connected: ${socket.user.email} (Role: ${socket.user.role})`
-    );
-
     // Unir a sala según rol
     if (socket.user.role === "chef") {
       socket.join("kitchen");
-      console.log(`👨‍🍳 Chef joined kitchen room`);
     }
 
     if (socket.user.role === "mesero") {
       socket.join("waiters");
-      console.log(`🍽️ Waiter joined waiters room`);
     }
 
     // Evento: Nuevo pedido creado
     socket.on("order:created", (orderData) => {
       // Enviar a cocina
       io.to("kitchen").emit("kitchen:newOrder", orderData);
-      console.log(`📋 New order sent to kitchen: #${orderData.orderNumber}`);
     });
 
     // Evento: Cambio de estado de item
     socket.on("orderItem:statusChanged", (data) => {
       // Notificar a meseros
       io.to("waiters").emit("order:itemStatusChanged", data);
-      console.log(`🔄 Order item status changed: ${data.status}`);
     });
 
     // Evento: Pedido listo
     socket.on("order:ready", (orderData) => {
       // Notificar a meseros
       io.to("waiters").emit("order:ready", orderData);
-      console.log(
-        `✅ Order ready notification sent: #${orderData.orderNumber}`
-      );
     });
 
     socket.on("disconnect", () => {
-      console.log(`❌ User disconnected: ${socket.user.email}`);
+      // Usuario desconectado
     });
   });
 

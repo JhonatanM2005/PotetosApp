@@ -37,13 +37,10 @@ const Cashier = () => {
 
     // Escuchar eventos de Socket.io para actualizaciones en tiempo real
     const handleOrderUpdate = (data) => {
-      console.log("Order updated:", data);
       fetchData(); // Recargar datos cuando hay cambios
     };
 
     const handlePaymentProcessed = (data) => {
-      console.log("Payment processed:", data);
-
       // Mostrar notificación toast cuando se procesa un pago
       if (data.orderNumber) {
         toast.success(`Pago procesado: ${data.orderNumber}`, {

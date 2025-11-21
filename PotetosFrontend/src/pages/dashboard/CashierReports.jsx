@@ -20,7 +20,6 @@ const CashierReports = () => {
 
     // Escuchar eventos de Socket.io para actualizaciones en tiempo real
     const handlePaymentProcessed = (data) => {
-      console.log("Payment processed, updating reports:", data);
       // Solo actualizar si estamos viendo el día de hoy
       const today = new Date().toISOString().split("T")[0];
       if (selectedDate === today) {
