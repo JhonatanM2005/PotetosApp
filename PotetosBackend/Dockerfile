@@ -9,7 +9,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instalar dependencias de producción
-RUN npm ci --omit=dev || npm install --omit=dev
+# Usar npm install directamente (más compatible sin package-lock.json)
+RUN npm install --omit=dev
 
 # Etapa de producción
 FROM node:20-alpine
