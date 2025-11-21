@@ -119,11 +119,11 @@ exports.getAllOrders = async (req, res) => {
     });
 
     // Serializar correctamente los datos
-    const serializedOrders = orders.map(order => {
+    const serializedOrders = orders.map((order) => {
       const orderData = order.toJSON();
       // Asegurar que los items tengan todos los campos necesarios
       if (orderData.items) {
-        orderData.items = orderData.items.map(item => ({
+        orderData.items = orderData.items.map((item) => ({
           id: item.id,
           dish_id: item.dish_id,
           dish_name: item.dish_name,
@@ -131,7 +131,7 @@ exports.getAllOrders = async (req, res) => {
           unit_price: item.unit_price,
           subtotal: item.subtotal,
           status: item.status,
-          notes: item.notes
+          notes: item.notes,
         }));
       }
       return orderData;
@@ -173,11 +173,11 @@ exports.getActiveOrders = async (req, res) => {
     });
 
     // Serializar correctamente los datos
-    const serializedOrders = orders.map(order => {
+    const serializedOrders = orders.map((order) => {
       const orderData = order.toJSON();
       // Asegurar que los items tengan todos los campos necesarios
       if (orderData.items) {
-        orderData.items = orderData.items.map(item => ({
+        orderData.items = orderData.items.map((item) => ({
           id: item.id,
           dish_id: item.dish_id,
           dish_name: item.dish_name,
@@ -185,7 +185,7 @@ exports.getActiveOrders = async (req, res) => {
           unit_price: item.unit_price,
           subtotal: item.subtotal,
           status: item.status,
-          notes: item.notes
+          notes: item.notes,
         }));
       }
       return orderData;
@@ -229,7 +229,7 @@ exports.getOrderById = async (req, res) => {
     // Serializar correctamente los datos
     const orderData = order.toJSON();
     if (orderData.items) {
-      orderData.items = orderData.items.map(item => ({
+      orderData.items = orderData.items.map((item) => ({
         id: item.id,
         dish_id: item.dish_id,
         dish_name: item.dish_name,
@@ -237,7 +237,7 @@ exports.getOrderById = async (req, res) => {
         unit_price: item.unit_price,
         subtotal: item.subtotal,
         status: item.status,
-        notes: item.notes
+        notes: item.notes,
       }));
     }
 
