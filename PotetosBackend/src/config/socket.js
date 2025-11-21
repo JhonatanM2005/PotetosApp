@@ -1,6 +1,9 @@
 const socketIo = require("socket.io");
 const jwt = require("jsonwebtoken");
 
+// Mapa para rastrear token -> socketId
+const tokenToSocketMap = new Map();
+
 module.exports = (server) => {
   const io = socketIo(server, {
     cors: {
@@ -21,6 +24,7 @@ module.exports = (server) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       socket.user = decoded;
+      socket.token = token; // Guardar token en el socket
       next();
     } catch (err) {
       next(new Error("Invalid token"));
@@ -31,6 +35,9 @@ module.exports = (server) => {
     console.log(
       `✅ User connected: ${socket.user.email} (Role: ${socket.user.role})`
     );
+
+    // Registrar token -> socketId
+    tokenToSocketMap.set(socket.token, socket.id);
 
     // Unir a sala según rol
     if (socket.user.role === "chef") {
@@ -68,8 +75,22 @@ module.exports = (server) => {
 
     socket.on("disconnect", () => {
       console.log(`❌ User disconnected: ${socket.user.email}`);
+      // Limpiar del mapa
+      tokenToSocketMap.delete(socket.token);
     });
   });
+
+  // Función helper para cerrar sesión remota por token
+  io.closeSessionByToken = (oldToken, message) => {
+    const socketId = tokenToSocketMap.get(oldToken);
+    if (socketId) {
+      io.to(socketId).emit('session:closed', { 
+        reason: 'new_login',
+        message: message || 'Tu sesión ha sido cerrada porque iniciaste sesión en otro dispositivo'
+      });
+      console.log(`🔒 Session closed remotely for socket: ${socketId}`);
+    }
+  };
 
   // Hacer io accesible globalmente
   global.io = io;

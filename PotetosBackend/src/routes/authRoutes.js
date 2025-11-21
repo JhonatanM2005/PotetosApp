@@ -5,6 +5,7 @@ const userController = require("../controllers/userController");
 const authMiddleware = require("../middlewares/authMiddleware");
 
 router.post("/login", authController.login);
+router.post("/logout", authMiddleware, authController.logout);
 router.get("/me", authMiddleware, authController.me);
 router.patch("/profile", authMiddleware, authController.updateProfile);
 router.patch("/change-password", authMiddleware, authController.changePassword);

@@ -42,6 +42,14 @@ const User = sequelize.define(
       type: DataTypes.JSON,
       defaultValue: [],
     },
+    session_token: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+    session_created_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     tableName: "users",

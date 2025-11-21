@@ -7,9 +7,14 @@ import {
 } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuthStore } from "./store/authStore";
+import useInactivityDetector from "./hooks/useInactivityDetector";
+import useSessionManager from "./hooks/useSessionManager";
 
 // Layouts
 import Layout from "./components/layout/Layout";
+
+// Common Components
+import SessionClosedModal from "./components/common/SessionClosedModal";
 
 // Public Pages
 import Home from "./pages/public/Home";
@@ -50,6 +55,12 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
 
 function App() {
   const { initializeAuth } = useAuthStore();
+  
+  // Detectar actividad del usuario para resetear timer de inactividad
+  useInactivityDetector();
+
+  // Manejar cierre de sesión remoto
+  const { showSessionModal, setShowSessionModal, sessionClosedReason } = useSessionManager();
 
   useEffect(() => {
     initializeAuth();
@@ -57,6 +68,13 @@ function App() {
 
   return (
     <Router>
+      {/* Modal de sesión cerrada */}
+      <SessionClosedModal 
+        isOpen={showSessionModal}
+        reason={sessionClosedReason}
+        onClose={() => setShowSessionModal(false)}
+      />
+
       <Routes>
         {/* Routes with Layout (Navbar + Footer) - Public Pages */}
         <Route element={<Layout />}>

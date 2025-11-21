@@ -1,11 +1,17 @@
 import { create } from "zustand";
 import api from "../services/api";
 import socketService from "../services/socket";
+import { getInactivityTimeoutMs } from "../config/auth.config";
+import toast from "react-hot-toast";
+
+// Tiempo de inactividad en milisegundos
+const INACTIVITY_TIMEOUT = getInactivityTimeoutMs();
+let inactivityTimer = null;
 
 const useAuthStore = create((set, get) => ({
-  user: JSON.parse(localStorage.getItem("user")) || null,
-  token: localStorage.getItem("token") || null,
-  isAuthenticated: !!localStorage.getItem("token"),
+  user: JSON.parse(sessionStorage.getItem("user")) || null,
+  token: sessionStorage.getItem("token") || null,
+  isAuthenticated: !!sessionStorage.getItem("token"),
   loading: false,
   error: null,
 
@@ -13,13 +19,16 @@ const useAuthStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await api.post("/auth/login", { email, password });
-      const { token, user } = response.data;
+      const { token, user, info } = response.data;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      sessionStorage.setItem("token", token);
+      sessionStorage.setItem("user", JSON.stringify(user));
 
       // Conectar socket
       socketService.connect(token);
+
+      // Iniciar timer de inactividad
+      get().resetInactivityTimer();
 
       set({
         user,
@@ -27,6 +36,11 @@ const useAuthStore = create((set, get) => ({
         isAuthenticated: true,
         loading: false,
       });
+
+      // Mostrar info si había sesión anterior
+      if (info) {
+        console.log('ℹ️', info);
+      }
 
       return { success: true };
     } catch (error) {
@@ -36,10 +50,25 @@ const useAuthStore = create((set, get) => ({
     }
   },
 
-  logout: () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  logout: async () => {
+    // Llamar al endpoint de logout para limpiar session_token
+    try {
+      await api.post("/auth/logout");
+    } catch (error) {
+      console.log("Error al llamar logout endpoint:", error);
+      // Continuar con el logout local aunque falle el servidor
+    }
+
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
     socketService.disconnect();
+    
+    // Limpiar timer de inactividad
+    if (inactivityTimer) {
+      clearTimeout(inactivityTimer);
+      inactivityTimer = null;
+    }
+    
     set({
       user: null,
       token: null,
@@ -49,8 +78,8 @@ const useAuthStore = create((set, get) => ({
   },
 
   initializeAuth: async () => {
-    const token = localStorage.getItem("token");
-    const user = JSON.parse(localStorage.getItem("user") || "null");
+    const token = sessionStorage.getItem("token");
+    const user = JSON.parse(sessionStorage.getItem("user") || "null");
 
     if (token && user) {
       set({
@@ -59,11 +88,14 @@ const useAuthStore = create((set, get) => ({
         isAuthenticated: true,
       });
       socketService.connect(token);
+      
+      // Iniciar timer de inactividad
+      get().resetInactivityTimer();
     }
   },
 
   checkAuth: async () => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) {
       set({ isAuthenticated: false, user: null });
       return false;
@@ -81,6 +113,39 @@ const useAuthStore = create((set, get) => ({
       get().logout();
       return false;
     }
+  },
+
+  // Resetear el timer de inactividad
+  resetInactivityTimer: () => {
+    // Limpiar timer anterior
+    if (inactivityTimer) {
+      clearTimeout(inactivityTimer);
+    }
+
+    // Crear nuevo timer
+    inactivityTimer = setTimeout(() => {
+      console.log("Sesión cerrada por inactividad");
+      
+      // Mostrar toast antes de cerrar sesión
+      toast.error('Tu sesión ha expirado por inactividad', {
+        duration: 4000,
+        icon: '⏱️',
+        position: 'top-center',
+        style: {
+          background: '#f59e0b',
+          color: '#fff',
+          fontWeight: 'bold',
+          fontSize: '16px',
+        },
+      });
+      
+      get().logout();
+      
+      // Pequeño delay para que se vea el toast antes de redirigir
+      setTimeout(() => {
+        window.location.href = "/login?timeout=true";
+      }, 500);
+    }, INACTIVITY_TIMEOUT);
   },
 }));
 

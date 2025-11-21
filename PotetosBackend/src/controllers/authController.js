@@ -58,12 +58,30 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Generar token
+    // Verificar si hay una sesión activa previa
+    const hadPreviousSession = !!user.session_token;
+    const previousSessionToken = user.session_token;
+
+    // Generar nuevo token
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRE || "7d" }
     );
+
+    // Guardar el nuevo token de sesión
+    await user.update({
+      session_token: token,
+      session_created_at: new Date(),
+    });
+
+    // Si había una sesión previa, notificar via socket para cerrarla
+    if (hadPreviousSession && global.io && global.io.closeSessionByToken) {
+      global.io.closeSessionByToken(
+        previousSessionToken,
+        'Tu sesión ha sido cerrada porque iniciaste sesión en otro dispositivo'
+      );
+    }
 
     res.json({
       message: "Login successful",
@@ -74,6 +92,9 @@ exports.login = async (req, res) => {
         email: user.email,
         role: user.role,
       },
+      ...(hadPreviousSession && { 
+        info: 'Sesión anterior cerrada automáticamente' 
+      })
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -87,6 +108,27 @@ exports.me = async (req, res) => {
     res.json({ user: req.user });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Logout
+exports.logout = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Limpiar session_token del usuario
+    await User.update(
+      { 
+        session_token: null, 
+        session_created_at: null 
+      },
+      { where: { id: userId } }
+    );
+
+    res.json({ message: "Logout successful" });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 

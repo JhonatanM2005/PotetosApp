@@ -18,6 +18,14 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ message: 'Invalid token or user inactive' });
     }
 
+    // Verificar que el token coincida con el session_token guardado
+    if (user.session_token && user.session_token !== token) {
+      return res.status(401).json({ 
+        message: 'Session closed from another device',
+        code: 'SESSION_REPLACED'
+      });
+    }
+
     req.user = user;
     next();
   } catch (error) {
