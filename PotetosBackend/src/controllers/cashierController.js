@@ -393,7 +393,8 @@ exports.reprintReceipt = async (req, res) => {
         })),
         subtotal: order.total_amount,
         tip: order.tip_amount || 0,
-        total: parseFloat(order.total_amount) + parseFloat(order.tip_amount || 0),
+        total:
+          parseFloat(order.total_amount) + parseFloat(order.tip_amount || 0),
         paymentMethod: order.payment_method,
       },
     });
