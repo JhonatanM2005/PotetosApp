@@ -39,7 +39,7 @@ const useAuthStore = create((set, get) => ({
 
       // Mostrar info si había sesión anterior
       if (info) {
-        console.log('ℹ️', info);
+        console.log("ℹ️", info);
       }
 
       return { success: true };
@@ -62,13 +62,13 @@ const useAuthStore = create((set, get) => ({
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
     socketService.disconnect();
-    
+
     // Limpiar timer de inactividad
     if (inactivityTimer) {
       clearTimeout(inactivityTimer);
       inactivityTimer = null;
     }
-    
+
     set({
       user: null,
       token: null,
@@ -88,7 +88,7 @@ const useAuthStore = create((set, get) => ({
         isAuthenticated: true,
       });
       socketService.connect(token);
-      
+
       // Iniciar timer de inactividad
       get().resetInactivityTimer();
     }
@@ -125,22 +125,22 @@ const useAuthStore = create((set, get) => ({
     // Crear nuevo timer
     inactivityTimer = setTimeout(() => {
       console.log("Sesión cerrada por inactividad");
-      
+
       // Mostrar toast antes de cerrar sesión
-      toast.error('Tu sesión ha expirado por inactividad', {
+      toast.error("Tu sesión ha expirado por inactividad", {
         duration: 4000,
-        icon: '⏱️',
-        position: 'top-center',
+        icon: "⏱️",
+        position: "top-center",
         style: {
-          background: '#f59e0b',
-          color: '#fff',
-          fontWeight: 'bold',
-          fontSize: '16px',
+          background: "#f59e0b",
+          color: "#fff",
+          fontWeight: "bold",
+          fontSize: "16px",
         },
       });
-      
+
       get().logout();
-      
+
       // Pequeño delay para que se vea el toast antes de redirigir
       setTimeout(() => {
         window.location.href = "/login?timeout=true";

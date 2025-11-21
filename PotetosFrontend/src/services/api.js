@@ -28,12 +28,12 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       const errorCode = error.response?.data?.code;
-      
+
       sessionStorage.removeItem("token");
       sessionStorage.removeItem("user");
-      
+
       // Si es sesión reemplazada, redirigir con parámetro especial
-      if (errorCode === 'SESSION_REPLACED') {
+      if (errorCode === "SESSION_REPLACED") {
         window.location.href = "/login?remote_logout=true";
       } else {
         window.location.href = "/login";

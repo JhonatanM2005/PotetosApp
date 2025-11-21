@@ -84,9 +84,11 @@ module.exports = (server) => {
   io.closeSessionByToken = (oldToken, message) => {
     const socketId = tokenToSocketMap.get(oldToken);
     if (socketId) {
-      io.to(socketId).emit('session:closed', { 
-        reason: 'new_login',
-        message: message || 'Tu sesión ha sido cerrada porque iniciaste sesión en otro dispositivo'
+      io.to(socketId).emit("session:closed", {
+        reason: "new_login",
+        message:
+          message ||
+          "Tu sesión ha sido cerrada porque iniciaste sesión en otro dispositivo",
       });
       console.log(`🔒 Session closed remotely for socket: ${socketId}`);
     }

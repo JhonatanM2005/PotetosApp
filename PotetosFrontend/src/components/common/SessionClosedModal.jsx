@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { AlertCircle, LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { AlertCircle, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function SessionClosedModal({ isOpen, reason, onClose }) {
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ export default function SessionClosedModal({ isOpen, reason, onClose }) {
         if (prev <= 1) {
           clearInterval(timer);
           onClose();
-          navigate('/login?remote_logout=true', { replace: true });
+          navigate("/login?remote_logout=true", { replace: true });
           return 0;
         }
         return prev - 1;
@@ -28,23 +28,25 @@ export default function SessionClosedModal({ isOpen, reason, onClose }) {
 
   const getMessage = () => {
     switch (reason) {
-      case 'new_login':
+      case "new_login":
         return {
-          title: '🔒 Sesión Cerrada',
-          message: 'Tu sesión ha sido cerrada porque iniciaste sesión en otro dispositivo o navegador.',
-          icon: <LogOut className="w-16 h-16 text-yellow-500" />
+          title: "🔒 Sesión Cerrada",
+          message:
+            "Tu sesión ha sido cerrada porque iniciaste sesión en otro dispositivo o navegador.",
+          icon: <LogOut className="w-16 h-16 text-yellow-500" />,
         };
-      case 'session_replaced':
+      case "session_replaced":
         return {
-          title: '🔄 Sesión Reemplazada',
-          message: 'Alguien más inició sesión con tu cuenta desde otro lugar.',
-          icon: <AlertCircle className="w-16 h-16 text-orange-500" />
+          title: "🔄 Sesión Reemplazada",
+          message: "Alguien más inició sesión con tu cuenta desde otro lugar.",
+          icon: <AlertCircle className="w-16 h-16 text-orange-500" />,
         };
       default:
         return {
-          title: '⚠️ Sesión Terminada',
-          message: 'Tu sesión ha finalizado. Por favor, inicia sesión nuevamente.',
-          icon: <AlertCircle className="w-16 h-16 text-red-500" />
+          title: "⚠️ Sesión Terminada",
+          message:
+            "Tu sesión ha finalizado. Por favor, inicia sesión nuevamente.",
+          icon: <AlertCircle className="w-16 h-16 text-red-500" />,
         };
     }
   };
@@ -61,29 +63,27 @@ export default function SessionClosedModal({ isOpen, reason, onClose }) {
               {icon}
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-white text-center">
-            {title}
-          </h2>
+          <h2 className="text-2xl font-bold text-white text-center">{title}</h2>
         </div>
 
         {/* Contenido */}
         <div className="p-6">
-          <p className="text-gray-700 text-center mb-6 text-lg">
-            {message}
-          </p>
+          <p className="text-gray-700 text-center mb-6 text-lg">{message}</p>
 
           <div className="bg-gray-100 rounded-lg p-4 mb-6">
             <p className="text-sm text-gray-600 text-center">
-              Redirigiendo al inicio de sesión en{' '}
-              <span className="font-bold text-primary text-xl">{countdown}</span>{' '}
-              segundo{countdown !== 1 ? 's' : ''}...
+              Redirigiendo al inicio de sesión en{" "}
+              <span className="font-bold text-primary text-xl">
+                {countdown}
+              </span>{" "}
+              segundo{countdown !== 1 ? "s" : ""}...
             </p>
           </div>
 
           <button
             onClick={() => {
               onClose();
-              navigate('/login?remote_logout=true', { replace: true });
+              navigate("/login?remote_logout=true", { replace: true });
             }}
             className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
           >

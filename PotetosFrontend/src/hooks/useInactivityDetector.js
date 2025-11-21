@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import { useAuthStore } from '../store/authStore';
-import { authConfig } from '../config/auth.config';
+import { useEffect } from "react";
+import { useAuthStore } from "../store/authStore";
+import { authConfig } from "../config/auth.config";
 
 /**
  * Hook para detectar actividad del usuario y resetear el timer de inactividad
@@ -20,13 +20,13 @@ const useInactivityDetector = () => {
     };
 
     // Agregar listeners para cada evento
-    events.forEach(event => {
+    events.forEach((event) => {
       document.addEventListener(event, handleActivity);
     });
 
     // Cleanup: remover listeners
     return () => {
-      events.forEach(event => {
+      events.forEach((event) => {
         document.removeEventListener(event, handleActivity);
       });
     };

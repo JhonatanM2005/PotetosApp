@@ -79,7 +79,7 @@ exports.login = async (req, res) => {
     if (hadPreviousSession && global.io && global.io.closeSessionByToken) {
       global.io.closeSessionByToken(
         previousSessionToken,
-        'Tu sesión ha sido cerrada porque iniciaste sesión en otro dispositivo'
+        "Tu sesión ha sido cerrada porque iniciaste sesión en otro dispositivo"
       );
     }
 
@@ -92,9 +92,9 @@ exports.login = async (req, res) => {
         email: user.email,
         role: user.role,
       },
-      ...(hadPreviousSession && { 
-        info: 'Sesión anterior cerrada automáticamente' 
-      })
+      ...(hadPreviousSession && {
+        info: "Sesión anterior cerrada automáticamente",
+      }),
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -118,9 +118,9 @@ exports.logout = async (req, res) => {
 
     // Limpiar session_token del usuario
     await User.update(
-      { 
-        session_token: null, 
-        session_created_at: null 
+      {
+        session_token: null,
+        session_created_at: null,
       },
       { where: { id: userId } }
     );

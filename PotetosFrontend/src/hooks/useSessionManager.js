@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useAuthStore } from '../store/authStore';
-import socketService from '../services/socket';
-import toast from 'react-hot-toast';
+import { useEffect, useState } from "react";
+import { useAuthStore } from "../store/authStore";
+import socketService from "../services/socket";
+import toast from "react-hot-toast";
 
 /**
  * Hook para detectar y manejar el cierre de sesión remoto
@@ -16,22 +16,22 @@ const useSessionManager = () => {
 
     // Configurar listener para sesión cerrada remotamente
     const handleSessionClosed = (data) => {
-      console.log('🔒 Sesión cerrada remotamente:', data);
-      
+      console.log("🔒 Sesión cerrada remotamente:", data);
+
       // Mostrar toast inmediato
-      toast.error('Tu sesión ha sido cerrada desde otro dispositivo', {
+      toast.error("Tu sesión ha sido cerrada desde otro dispositivo", {
         duration: 4000,
-        icon: '🔒',
-        position: 'top-center',
+        icon: "🔒",
+        position: "top-center",
         style: {
-          background: '#ef4444',
-          color: '#fff',
-          fontWeight: 'bold',
+          background: "#ef4444",
+          color: "#fff",
+          fontWeight: "bold",
         },
       });
 
       // Mostrar modal
-      setSessionClosedReason(data.reason || 'new_login');
+      setSessionClosedReason(data.reason || "new_login");
       setShowSessionModal(true);
 
       // Ejecutar logout local

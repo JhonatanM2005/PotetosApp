@@ -14,16 +14,19 @@ export default function LoginPage() {
 
   // Mostrar mensaje si la sesión expiró por inactividad o fue cerrada remotamente
   useEffect(() => {
-    if (searchParams.get('timeout') === 'true') {
-      toast.error('Tu sesión ha expirado por inactividad', {
+    if (searchParams.get("timeout") === "true") {
+      toast.error("Tu sesión ha expirado por inactividad", {
         duration: 5000,
-        icon: '⏱️'
+        icon: "⏱️",
       });
-    } else if (searchParams.get('remote_logout') === 'true') {
-      toast.error('Tu sesión fue cerrada porque iniciaste sesión en otro dispositivo', {
-        duration: 6000,
-        icon: '🔒'
-      });
+    } else if (searchParams.get("remote_logout") === "true") {
+      toast.error(
+        "Tu sesión fue cerrada porque iniciaste sesión en otro dispositivo",
+        {
+          duration: 6000,
+          icon: "🔒",
+        }
+      );
     }
   }, [searchParams]);
 

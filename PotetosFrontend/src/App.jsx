@@ -55,12 +55,13 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
 
 function App() {
   const { initializeAuth } = useAuthStore();
-  
+
   // Detectar actividad del usuario para resetear timer de inactividad
   useInactivityDetector();
 
   // Manejar cierre de sesión remoto
-  const { showSessionModal, setShowSessionModal, sessionClosedReason } = useSessionManager();
+  const { showSessionModal, setShowSessionModal, sessionClosedReason } =
+    useSessionManager();
 
   useEffect(() => {
     initializeAuth();
@@ -69,7 +70,7 @@ function App() {
   return (
     <Router>
       {/* Modal de sesión cerrada */}
-      <SessionClosedModal 
+      <SessionClosedModal
         isOpen={showSessionModal}
         reason={sessionClosedReason}
         onClose={() => setShowSessionModal(false)}
