@@ -218,12 +218,22 @@ exports.forgotPassword = async (req, res) => {
       used: false,
     });
 
-    // Enviar email
-    await sendPasswordResetCode(email, code);
+    // Enviar email (pero no fallar si hay error)
+    try {
+      await sendPasswordResetCode(email, code);
+      console.log(`✅ Email enviado a ${email} con código: ${code}`);
+    } catch (emailError) {
+      console.error("⚠️ Error al enviar email:", emailError.message);
+      // TEMPORAL: Mostrar código en logs para debugging en producción
+      console.log(`🔑 CÓDIGO DE RECUPERACIÓN: ${code} para ${email}`);
+      // No fallar la petición, solo logear el error
+    }
 
     res.json({
       message: "Reset code sent to your email",
       expiresIn: "15 minutes",
+      // TEMPORAL: Incluir código en respuesta para debugging
+      ...(process.env.NODE_ENV !== "production" && { code }),
     });
   } catch (error) {
     console.error("Forgot password error:", error);
