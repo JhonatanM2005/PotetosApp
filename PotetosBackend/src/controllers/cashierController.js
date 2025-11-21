@@ -466,7 +466,8 @@ exports.splitBill = async (req, res) => {
 exports.processPartialPayment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { payment_method, amount_paid, tip, personNumber, totalPeople } = req.body;
+    const { payment_method, amount_paid, tip, personNumber, totalPeople } =
+      req.body;
 
     if (!payment_method || !amount_paid) {
       return res.status(400).json({

@@ -30,6 +30,9 @@ router.get("/reprint-receipt/:id", cashierController.reprintReceipt);
 router.post("/split-bill/:id", cashierController.splitBill);
 
 // Procesar pago parcial (para cuentas divididas)
-router.post("/process-partial-payment/:id", cashierController.processPartialPayment);
+router.post(
+  "/process-partial-payment/:id",
+  cashierController.processPartialPayment
+);
 
 module.exports = router;

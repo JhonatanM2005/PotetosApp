@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { DollarSign, CreditCard, Receipt, TrendingUp, Users, User } from "lucide-react";
+import {
+  DollarSign,
+  CreditCard,
+  Receipt,
+  TrendingUp,
+  Users,
+  User,
+} from "lucide-react";
 import api from "../../services/api";
 import StatCard from "../../components/common/StatCard";
 import DashboardLayout from "../../components/layout/DashboardLayout";
@@ -22,7 +29,7 @@ const Cashier = () => {
     numberOfPeople: 2,
     amountPerPerson: 0,
     currentPerson: 1,
-    payments: []
+    payments: [],
   });
 
   useEffect(() => {
@@ -87,7 +94,7 @@ const Cashier = () => {
       numberOfPeople: 2,
       amountPerPerson: 0,
       currentPerson: 1,
-      payments: []
+      payments: [],
     });
     setShowPaymentModal(true);
   };
@@ -133,28 +140,35 @@ const Cashier = () => {
 
   const handleEnableSplitMode = async () => {
     try {
-      const response = await api.post(`/cashier/split-bill/${selectedOrder.id}`, {
-        numberOfPeople: splitData.numberOfPeople
-      });
-      
+      const response = await api.post(
+        `/cashier/split-bill/${selectedOrder.id}`,
+        {
+          numberOfPeople: splitData.numberOfPeople,
+        }
+      );
+
       setSplitData({
         ...splitData,
         amountPerPerson: response.data.amountPerPerson,
         currentPerson: 1,
-        payments: []
+        payments: [],
       });
-      
+
       setPaymentData({
         payment_method: "cash",
         amount_paid: response.data.amountPerPerson.toFixed(2),
         tip: "0",
       });
-      
+
       setSplitMode(true);
-      toast.success(`Cuenta dividida entre ${splitData.numberOfPeople} personas`);
+      toast.success(
+        `Cuenta dividida entre ${splitData.numberOfPeople} personas`
+      );
     } catch (error) {
       console.error("Error splitting bill:", error);
-      toast.error(error.response?.data?.message || "Error al dividir la cuenta");
+      toast.error(
+        error.response?.data?.message || "Error al dividir la cuenta"
+      );
     }
   };
 
@@ -167,15 +181,18 @@ const Cashier = () => {
         amount_paid: parseFloat(paymentData.amount_paid),
         tip: parseFloat(paymentData.tip || 0),
         personNumber: splitData.currentPerson,
-        totalPeople: splitData.numberOfPeople
+        totalPeople: splitData.numberOfPeople,
       });
 
-      const newPayments = [...splitData.payments, {
-        person: splitData.currentPerson,
-        amount: parseFloat(paymentData.amount_paid),
-        tip: parseFloat(paymentData.tip || 0),
-        method: paymentData.payment_method
-      }];
+      const newPayments = [
+        ...splitData.payments,
+        {
+          person: splitData.currentPerson,
+          amount: parseFloat(paymentData.amount_paid),
+          tip: parseFloat(paymentData.tip || 0),
+          method: paymentData.payment_method,
+        },
+      ];
 
       if (splitData.currentPerson >= splitData.numberOfPeople) {
         toast.success("¡Todos los pagos procesados exitosamente!");
@@ -184,11 +201,13 @@ const Cashier = () => {
         setSplitMode(false);
         fetchData();
       } else {
-        toast.success(`Pago ${splitData.currentPerson}/${splitData.numberOfPeople} procesado`);
+        toast.success(
+          `Pago ${splitData.currentPerson}/${splitData.numberOfPeople} procesado`
+        );
         setSplitData({
           ...splitData,
           currentPerson: splitData.currentPerson + 1,
-          payments: newPayments
+          payments: newPayments,
         });
         setPaymentData({
           payment_method: "cash",
@@ -198,7 +217,9 @@ const Cashier = () => {
       }
     } catch (error) {
       console.error("Error processing split payment:", error);
-      toast.error(error.response?.data?.message || "Error al procesar el pago parcial");
+      toast.error(
+        error.response?.data?.message || "Error al procesar el pago parcial"
+      );
     }
   };
 
@@ -449,7 +470,11 @@ const Cashier = () => {
                 </div>
 
                 {/* Formulario de pago */}
-                <form onSubmit={splitMode ? handleProcessSplitPayment : handleProcessPayment}>
+                <form
+                  onSubmit={
+                    splitMode ? handleProcessSplitPayment : handleProcessPayment
+                  }
+                >
                   <div className="space-y-6">
                     {/* Modo de división de cuenta */}
                     {!splitMode && (
@@ -473,8 +498,21 @@ const Cashier = () => {
                               min="2"
                               max="20"
                               value={splitData.numberOfPeople}
-                              onChange={(e) => setSplitData({ ...splitData, numberOfPeople: e.target.value ? parseInt(e.target.value) : '' })}
-                              onBlur={(e) => !e.target.value && setSplitData({ ...splitData, numberOfPeople: 2 })}
+                              onChange={(e) =>
+                                setSplitData({
+                                  ...splitData,
+                                  numberOfPeople: e.target.value
+                                    ? parseInt(e.target.value)
+                                    : "",
+                                })
+                              }
+                              onBlur={(e) =>
+                                !e.target.value &&
+                                setSplitData({
+                                  ...splitData,
+                                  numberOfPeople: 2,
+                                })
+                              }
                               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
                           </div>
@@ -497,7 +535,8 @@ const Cashier = () => {
                           <div className="flex items-center gap-3">
                             <User className="w-6 h-6" />
                             <h4 className="font-bold text-lg">
-                              Procesando Pago {splitData.currentPerson}/{splitData.numberOfPeople}
+                              Procesando Pago {splitData.currentPerson}/
+                              {splitData.numberOfPeople}
                             </h4>
                           </div>
                           <span className="bg-white/20 px-4 py-2 rounded-xl font-bold">
@@ -507,7 +546,7 @@ const Cashier = () => {
                         <p className="text-blue-100 text-sm">
                           Monto por persona (sin propina)
                         </p>
-                        
+
                         {splitData.payments.length > 0 && (
                           <div className="mt-4 pt-4 border-t border-white/20">
                             <p className="text-sm text-blue-100 mb-2 font-semibold">
@@ -515,10 +554,14 @@ const Cashier = () => {
                             </p>
                             <div className="space-y-2">
                               {splitData.payments.map((payment, idx) => (
-                                <div key={idx} className="flex justify-between items-center text-sm bg-white/10 rounded-lg px-3 py-2">
+                                <div
+                                  key={idx}
+                                  className="flex justify-between items-center text-sm bg-white/10 rounded-lg px-3 py-2"
+                                >
                                   <span>Persona {payment.person}</span>
                                   <span className="font-semibold">
-                                    ${(payment.amount + payment.tip).toFixed(2)} ({payment.method})
+                                    ${(payment.amount + payment.tip).toFixed(2)}{" "}
+                                    ({payment.method})
                                   </span>
                                 </div>
                               ))}
@@ -606,7 +649,10 @@ const Cashier = () => {
                               tip: e.target.value,
                             })
                           }
-                          onFocus={(e) => e.target.value === '0' && setPaymentData({...paymentData, tip: ''})}
+                          onFocus={(e) =>
+                            e.target.value === "0" &&
+                            setPaymentData({ ...paymentData, tip: "" })
+                          }
                           className="w-full pl-8 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                           placeholder="0.00"
                         />
