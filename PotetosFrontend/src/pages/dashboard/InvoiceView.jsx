@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { cashierService } from "../../services";
 import { ArrowLeft, Printer, Download, FileText } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const InvoiceView = () => {
   const { paymentId } = useParams();
@@ -74,46 +76,213 @@ const InvoiceView = () => {
 
   const handleDownloadPDF = async () => {
     try {
-      const { jsPDF } = await import("jspdf");
-      const html2canvas = (await import("html2canvas")).default;
+      console.log("📥 Iniciando generación de PDF...");
 
-      const element = document.getElementById("invoice-content");
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-      });
-
-      const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
         format: "a4",
       });
 
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
+      const darkGray = [50, 50, 50];
+      const lightGray = [200, 200, 200];
+      const grayText = [85, 85, 85];
 
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= 297;
+      let yPosition = 15;
 
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= 297;
+      // Header - POTETOS
+      pdf.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+      pdf.setFontSize(24);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("POTETOS", 105, yPosition, { align: "center" });
+
+      yPosition += 8;
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(grayText[0], grayText[1], grayText[2]);
+      pdf.text("Restaurante & Bar", 105, yPosition, { align: "center" });
+
+      yPosition += 4;
+      pdf.setFontSize(9);
+      pdf.text("Factura de Pago", 105, yPosition, { align: "center" });
+
+      yPosition += 10;
+
+      // Línea separadora
+      pdf.setDrawColor(lightGray[0], lightGray[1], lightGray[2]);
+      pdf.line(15, yPosition, 195, yPosition);
+
+      yPosition += 8;
+
+      // Info de la factura - 2 columnas
+      pdf.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+      pdf.setFontSize(9);
+
+      // Columna izquierda
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Factura #:", 15, yPosition);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(String(payment.id), 45, yPosition);
+
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Orden #:", 15, yPosition + 6);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(payment.order?.order_number || "N/A", 45, yPosition + 6);
+
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Fecha:", 15, yPosition + 12);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(formatDate(payment.paid_at), 45, yPosition + 12);
+
+      // Columna derecha
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Mesa:", 120, yPosition);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(String(payment.order?.table?.table_number || "N/A"), 150, yPosition);
+
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Mesero:", 120, yPosition + 6);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(payment.order?.waiter?.name || "N/A", 150, yPosition + 6);
+
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Cajero:", 120, yPosition + 12);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(payment.cashier?.name || "N/A", 150, yPosition + 12);
+
+      yPosition += 25;
+
+      // Título Items
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+      pdf.setFontSize(10);
+      pdf.text("ITEMS DEL PEDIDO", 15, yPosition);
+
+      yPosition += 8;
+
+      // Tabla de items
+      const tableData = payment.order?.items && payment.order.items.length > 0
+        ? payment.order.items.map((item) => [
+            item.dish_name,
+            String(item.quantity),
+            formatCurrency(item.unit_price || item.subtotal / item.quantity),
+            formatCurrency(item.subtotal),
+          ])
+        : [["No hay items registrados", "", "", ""]];
+
+      autoTable(pdf, {
+        startY: yPosition,
+        head: [["Producto", "Cant.", "Precio Unit.", "Total"]],
+        body: tableData,
+        headStyles: {
+          fillColor: [50, 50, 50],
+          textColor: [255, 255, 255],
+          fontStyle: "bold",
+          fontSize: 9,
+          halign: "left",
+        },
+        bodyStyles: {
+          fontSize: 9,
+          textColor: darkGray,
+        },
+        columnStyles: {
+          1: { halign: "center" },
+          2: { halign: "right" },
+          3: { halign: "right", fontStyle: "bold" },
+        },
+        margin: { left: 15, right: 15 },
+        didDrawPage: function () {
+          // Nada aquí
+        },
+      });
+
+      yPosition = pdf.lastAutoTable.finalY + 10;
+
+      // Línea separadora
+      pdf.setDrawColor(lightGray[0], lightGray[1], lightGray[2]);
+      pdf.line(15, yPosition, 195, yPosition);
+
+      yPosition += 8;
+
+      // Totales - Alineados a la derecha
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(grayText[0], grayText[1], grayText[2]);
+
+      pdf.text("Subtotal:", 150, yPosition);
+      pdf.text(formatCurrency(payment.order?.total_amount || 0), 185, yPosition, {
+        align: "right",
+      });
+
+      yPosition += 6;
+      pdf.setTextColor(150, 150, 150);
+      pdf.setFontSize(8);
+      pdf.text("IVA (incluido)", 150, yPosition);
+
+      yPosition += 8;
+
+      // Línea antes del total
+      pdf.setDrawColor(lightGray[0], lightGray[1], lightGray[2]);
+      pdf.line(150, yPosition - 1, 190, yPosition - 1);
+
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+      pdf.setFontSize(11);
+      pdf.text("Total:", 140, yPosition + 3);
+      pdf.text(formatCurrency(payment.amount), 185, yPosition + 3, {
+        align: "right",
+      });
+
+      yPosition += 15;
+
+      // Método de pago
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+      pdf.text("Método de Pago:", 15, yPosition);
+
+      yPosition += 6;
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(grayText[0], grayText[1], grayText[2]);
+
+      if (payment.splits && payment.splits.length > 0) {
+        payment.splits.forEach((split) => {
+          pdf.text(
+            `• ${getPaymentMethodLabel(split.payment_method)}: ${formatCurrency(
+              split.amount
+            )}`,
+            20,
+            yPosition
+          );
+          yPosition += 5;
+        });
+      } else {
+        pdf.text(
+          `• ${getPaymentMethodLabel(payment.payment_method)}`,
+          20,
+          yPosition
+        );
       }
 
+      // Footer
+      yPosition = pdf.internal.pageSize.getHeight() - 15;
+      pdf.setFontSize(8);
+      pdf.setTextColor(150, 150, 150);
+      pdf.text("¡Gracias por su compra!", 105, yPosition, { align: "center" });
+      pdf.text("Vuelve pronto a POTETOS", 105, yPosition + 5, { align: "center" });
+
+      // Guardar el PDF
       const fileName = `Factura_Orden_${payment.order?.order_number}_${new Date(
         payment.paid_at
       )
         .toISOString()
         .split("T")[0]}.pdf`;
+
+      console.log(`✅ Descargando PDF como: ${fileName}`);
       pdf.save(fileName);
     } catch (error) {
-      console.error("Error downloading PDF:", error);
+      console.error("❌ Error descargando PDF:", error);
+      alert("Error al descargar el PDF: " + error.message);
     }
   };
 
