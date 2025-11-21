@@ -1,22 +1,31 @@
 const nodemailer = require("nodemailer");
 
-// Configurar transporter (usa Gmail como ejemplo)
+// Configurar transporter (usa Gmail mediante SMTP directo para evitar bloqueos)
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true, // Usa SSL
   auth: {
-    user: process.env.EMAIL_USER, // Tu email de Gmail
-    pass: process.env.EMAIL_PASSWORD, // Contraseña de aplicación de Gmail
+    user: process.env.EMAIL_USER, // Email origen (debe tener App Password)
+    pass: process.env.EMAIL_PASSWORD, // Contraseña de aplicación
+  },
+  connectionTimeout: 15000,
+  greetingTimeout: 10000,
+  socketTimeout: 20000,
+  tls: {
+    rejectUnauthorized: false,
   },
 });
 
-// Verificar conexión
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("❌ Error al configurar email:", error);
-  } else {
+// Verificar conexión sin bloquear la aplicación
+transporter
+  .verify()
+  .then(() => {
     console.log("✅ Servicio de email configurado correctamente");
-  }
-});
+  })
+  .catch((error) => {
+    console.error("❌ Error al configurar email:", error);
+  });
 
 /**
  * Enviar código de recuperación de contraseña
