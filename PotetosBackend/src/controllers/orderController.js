@@ -305,13 +305,30 @@ exports.updateOrderStatus = async (req, res) => {
     const oldStatus = order.status;
     await order.update({ status });
 
-    // Si se marca como pagado, liberar mesa
+    // Liberar mesa solo cuando la orden está completada (pagada Y entregada)
     if (status === "paid" && order.table_id) {
-      await Table.update(
-        { status: "available", current_order_id: null },
-        { where: { id: order.table_id } }
-      );
-      await order.update({ completed_at: new Date() });
+      // Solo liberar si ya fue entregada o si se marca como paid después de delivered
+      if (oldStatus === "delivered") {
+        await Table.update(
+          { status: "available", current_order_id: null },
+          { where: { id: order.table_id } }
+        );
+        await order.update({ completed_at: new Date() });
+      } else {
+        // Solo marcar como pagada pero mantener mesa ocupada hasta que se entregue
+        await order.update({ completed_at: new Date() });
+      }
+    }
+
+    // Si se entrega después de pagar, liberar la mesa
+    if (status === "delivered" && order.table_id) {
+      const isPaid = oldStatus === "paid" || order.status === "paid";
+      if (isPaid) {
+        await Table.update(
+          { status: "available", current_order_id: null },
+          { where: { id: order.table_id } }
+        );
+      }
     }
 
     // Emitir eventos según el cambio de estado
