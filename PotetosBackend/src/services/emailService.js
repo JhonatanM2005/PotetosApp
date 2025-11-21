@@ -2,8 +2,7 @@ const BREVO_API_URL =
   process.env.BREVO_API_URL || "https://api.brevo.com/v3/smtp/email";
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL;
-const BREVO_SENDER_NAME =
-  process.env.BREVO_SENDER_NAME || "POTETOS Restaurant";
+const BREVO_SENDER_NAME = process.env.BREVO_SENDER_NAME || "POTETOS Restaurant";
 
 const isBrevoConfigured = () => {
   if (!BREVO_API_KEY || !BREVO_SENDER_EMAIL) {
