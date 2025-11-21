@@ -6,10 +6,9 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copiar archivos de dependencias
-COPY package*.json ./
+COPY package.json ./
 
 # Instalar dependencias de producción
-# Usar npm install directamente (más compatible sin package-lock.json)
 RUN npm install --omit=dev
 
 # Etapa de producción
