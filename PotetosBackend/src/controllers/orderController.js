@@ -118,7 +118,26 @@ exports.getAllOrders = async (req, res) => {
       order: [["created_at", "DESC"]],
     });
 
-    res.json({ orders });
+    // Serializar correctamente los datos
+    const serializedOrders = orders.map(order => {
+      const orderData = order.toJSON();
+      // Asegurar que los items tengan todos los campos necesarios
+      if (orderData.items) {
+        orderData.items = orderData.items.map(item => ({
+          id: item.id,
+          dish_id: item.dish_id,
+          dish_name: item.dish_name,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          subtotal: item.subtotal,
+          status: item.status,
+          notes: item.notes
+        }));
+      }
+      return orderData;
+    });
+
+    res.json({ orders: serializedOrders });
   } catch (error) {
     console.error("Get all orders error:", error);
     res.status(500).json({ message: "Server error" });
@@ -153,7 +172,26 @@ exports.getActiveOrders = async (req, res) => {
       order: [["created_at", "DESC"]],
     });
 
-    res.json({ orders });
+    // Serializar correctamente los datos
+    const serializedOrders = orders.map(order => {
+      const orderData = order.toJSON();
+      // Asegurar que los items tengan todos los campos necesarios
+      if (orderData.items) {
+        orderData.items = orderData.items.map(item => ({
+          id: item.id,
+          dish_id: item.dish_id,
+          dish_name: item.dish_name,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          subtotal: item.subtotal,
+          status: item.status,
+          notes: item.notes
+        }));
+      }
+      return orderData;
+    });
+
+    res.json({ orders: serializedOrders });
   } catch (error) {
     console.error("Get orders error:", error);
     res.status(500).json({ message: "Server error" });
@@ -188,7 +226,22 @@ exports.getOrderById = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    res.json({ order });
+    // Serializar correctamente los datos
+    const orderData = order.toJSON();
+    if (orderData.items) {
+      orderData.items = orderData.items.map(item => ({
+        id: item.id,
+        dish_id: item.dish_id,
+        dish_name: item.dish_name,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        subtotal: item.subtotal,
+        status: item.status,
+        notes: item.notes
+      }));
+    }
+
+    res.json({ order: orderData });
   } catch (error) {
     console.error("Get order error:", error);
     res.status(500).json({ message: "Server error" });

@@ -820,27 +820,32 @@ export default function OrdersPage() {
                 {/* Items */}
                 <div>
                   <h3 className="font-bold text-lg mb-4">Items de la orden</h3>
-                  <div className="space-y-3">
-                    {viewingOrder.items?.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-center bg-gray-50 p-4 rounded-lg"
-                      >
-                        <div className="flex-1">
-                          <p className="font-semibold">{item.name}</p>
-                          <p className="text-sm text-gray-600">
-                            Cantidad: {item.quantity}
+                  {!viewingOrder.items || viewingOrder.items.length === 0 ? (
+                    <p className="text-gray-500 text-center py-4">
+                      No hay items en esta orden
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {viewingOrder.items.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="flex justify-between items-center bg-gray-50 p-4 rounded-lg"
+                        >
+                          <div className="flex-1">
+                            <p className="font-semibold">
+                              {item.dish_name || item.name}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              Cantidad: {item.quantity}
+                            </p>
+                          </div>
+                          <p className="font-bold text-secondary">
+                            ${parseFloat(item.subtotal || 0).toLocaleString()}
                           </p>
                         </div>
-                        <p className="font-bold text-secondary">
-                          $
-                          {(
-                            parseFloat(item.price || 0) * item.quantity
-                          ).toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Notes */}
