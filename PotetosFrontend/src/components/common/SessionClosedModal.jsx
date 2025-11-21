@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function SessionClosedModal({ isOpen, reason, onClose }) {
   const navigate = useNavigate();
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(15);
 
   useEffect(() => {
     if (!isOpen) return;
