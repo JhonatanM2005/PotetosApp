@@ -55,7 +55,11 @@ const Order = sequelize.define(
       defaultValue: 0,
     },
     payment_method: {
-      type: DataTypes.ENUM("cash", "card", "transfer"),
+      type: DataTypes.ENUM("cash", "card", "transfer", "split"),
+    },
+    metadata: {
+      type: DataTypes.JSONB,
+      defaultValue: {},
     },
     customer_name: {
       type: DataTypes.STRING(100),

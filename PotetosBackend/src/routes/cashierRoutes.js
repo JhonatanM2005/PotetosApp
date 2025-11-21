@@ -26,4 +26,10 @@ router.get("/cash-closing", cashierController.getCashClosing);
 // Reimprimir recibo
 router.get("/reprint-receipt/:id", cashierController.reprintReceipt);
 
+// Dividir cuenta
+router.post("/split-bill/:id", cashierController.splitBill);
+
+// Procesar pago parcial (para cuentas divididas)
+router.post("/process-partial-payment/:id", cashierController.processPartialPayment);
+
 module.exports = router;

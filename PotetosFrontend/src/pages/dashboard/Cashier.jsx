@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DollarSign, CreditCard, Receipt, TrendingUp } from "lucide-react";
+import { DollarSign, CreditCard, Receipt, TrendingUp, Users, User } from "lucide-react";
 import api from "../../services/api";
 import StatCard from "../../components/common/StatCard";
 import DashboardLayout from "../../components/layout/DashboardLayout";
@@ -16,6 +16,13 @@ const Cashier = () => {
     payment_method: "cash",
     amount_paid: "",
     tip: "0",
+  });
+  const [splitMode, setSplitMode] = useState(false);
+  const [splitData, setSplitData] = useState({
+    numberOfPeople: 2,
+    amountPerPerson: 0,
+    currentPerson: 1,
+    payments: []
   });
 
   useEffect(() => {
@@ -75,6 +82,13 @@ const Cashier = () => {
       amount_paid: order.total_amount,
       tip: "0",
     });
+    setSplitMode(false);
+    setSplitData({
+      numberOfPeople: 2,
+      amountPerPerson: 0,
+      currentPerson: 1,
+      payments: []
+    });
     setShowPaymentModal(true);
   };
 
@@ -115,6 +129,77 @@ const Cashier = () => {
     const paid = parseFloat(paymentData.amount_paid || 0);
     const change = paid - total;
     return change >= 0 ? change.toFixed(2) : "0.00";
+  };
+
+  const handleEnableSplitMode = async () => {
+    try {
+      const response = await api.post(`/cashier/split-bill/${selectedOrder.id}`, {
+        numberOfPeople: splitData.numberOfPeople
+      });
+      
+      setSplitData({
+        ...splitData,
+        amountPerPerson: response.data.amountPerPerson,
+        currentPerson: 1,
+        payments: []
+      });
+      
+      setPaymentData({
+        payment_method: "cash",
+        amount_paid: response.data.amountPerPerson.toFixed(2),
+        tip: "0",
+      });
+      
+      setSplitMode(true);
+      toast.success(`Cuenta dividida entre ${splitData.numberOfPeople} personas`);
+    } catch (error) {
+      console.error("Error splitting bill:", error);
+      toast.error(error.response?.data?.message || "Error al dividir la cuenta");
+    }
+  };
+
+  const handleProcessSplitPayment = async (e) => {
+    e.preventDefault();
+
+    try {
+      await api.post(`/cashier/process-partial-payment/${selectedOrder.id}`, {
+        payment_method: paymentData.payment_method,
+        amount_paid: parseFloat(paymentData.amount_paid),
+        tip: parseFloat(paymentData.tip || 0),
+        personNumber: splitData.currentPerson,
+        totalPeople: splitData.numberOfPeople
+      });
+
+      const newPayments = [...splitData.payments, {
+        person: splitData.currentPerson,
+        amount: parseFloat(paymentData.amount_paid),
+        tip: parseFloat(paymentData.tip || 0),
+        method: paymentData.payment_method
+      }];
+
+      if (splitData.currentPerson >= splitData.numberOfPeople) {
+        toast.success("¡Todos los pagos procesados exitosamente!");
+        setShowPaymentModal(false);
+        setSelectedOrder(null);
+        setSplitMode(false);
+        fetchData();
+      } else {
+        toast.success(`Pago ${splitData.currentPerson}/${splitData.numberOfPeople} procesado`);
+        setSplitData({
+          ...splitData,
+          currentPerson: splitData.currentPerson + 1,
+          payments: newPayments
+        });
+        setPaymentData({
+          payment_method: "cash",
+          amount_paid: splitData.amountPerPerson.toFixed(2),
+          tip: "0",
+        });
+      }
+    } catch (error) {
+      console.error("Error processing split payment:", error);
+      toast.error(error.response?.data?.message || "Error al procesar el pago parcial");
+    }
   };
 
   if (loading) {
@@ -364,8 +449,85 @@ const Cashier = () => {
                 </div>
 
                 {/* Formulario de pago */}
-                <form onSubmit={handleProcessPayment}>
+                <form onSubmit={splitMode ? handleProcessSplitPayment : handleProcessPayment}>
                   <div className="space-y-6">
+                    {/* Modo de división de cuenta */}
+                    {!splitMode && (
+                      <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Users className="w-6 h-6 text-blue-600" />
+                          <h4 className="font-bold text-lg text-blue-900">
+                            Dividir Cuenta
+                          </h4>
+                        </div>
+                        <p className="text-sm text-blue-700 mb-4">
+                          ¿Desea dividir la cuenta entre varias personas?
+                        </p>
+                        <div className="flex items-center gap-4">
+                          <div className="flex-1">
+                            <label className="block text-sm font-bold text-gray-700 mb-2">
+                              Número de personas
+                            </label>
+                            <input
+                              type="number"
+                              min="2"
+                              max="20"
+                              value={splitData.numberOfPeople}
+                              onChange={(e) => setSplitData({ ...splitData, numberOfPeople: e.target.value ? parseInt(e.target.value) : '' })}
+                              onBlur={(e) => !e.target.value && setSplitData({ ...splitData, numberOfPeople: 2 })}
+                              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleEnableSplitMode}
+                            className="mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all hover:shadow-lg flex items-center gap-2"
+                          >
+                            <Users className="w-5 h-5" />
+                            Activar
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Indicador de pago actual en modo división */}
+                    {splitMode && (
+                      <div className="bg-linear-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <User className="w-6 h-6" />
+                            <h4 className="font-bold text-lg">
+                              Procesando Pago {splitData.currentPerson}/{splitData.numberOfPeople}
+                            </h4>
+                          </div>
+                          <span className="bg-white/20 px-4 py-2 rounded-xl font-bold">
+                            ${splitData.amountPerPerson.toFixed(2)}
+                          </span>
+                        </div>
+                        <p className="text-blue-100 text-sm">
+                          Monto por persona (sin propina)
+                        </p>
+                        
+                        {splitData.payments.length > 0 && (
+                          <div className="mt-4 pt-4 border-t border-white/20">
+                            <p className="text-sm text-blue-100 mb-2 font-semibold">
+                              Pagos procesados:
+                            </p>
+                            <div className="space-y-2">
+                              {splitData.payments.map((payment, idx) => (
+                                <div key={idx} className="flex justify-between items-center text-sm bg-white/10 rounded-lg px-3 py-2">
+                                  <span>Persona {payment.person}</span>
+                                  <span className="font-semibold">
+                                    ${(payment.amount + payment.tip).toFixed(2)} ({payment.method})
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* Método de pago */}
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-3">
@@ -444,6 +606,7 @@ const Cashier = () => {
                               tip: e.target.value,
                             })
                           }
+                          onFocus={(e) => e.target.value === '0' && setPaymentData({...paymentData, tip: ''})}
                           className="w-full pl-8 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                           placeholder="0.00"
                         />

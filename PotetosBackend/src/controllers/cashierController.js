@@ -403,3 +403,195 @@ exports.reprintReceipt = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// Dividir cuenta entre varios clientes
+exports.splitBill = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { numberOfPeople } = req.body;
+
+    if (!numberOfPeople || numberOfPeople < 2) {
+      return res.status(400).json({
+        message: "Number of people must be at least 2",
+      });
+    }
+
+    const order = await Order.findByPk(id, {
+      include: [
+        {
+          model: OrderItem,
+          as: "items",
+          include: [{ model: Dish, as: "dish" }],
+        },
+        { model: Table, as: "table" },
+        { model: User, as: "waiter", attributes: ["id", "name"] },
+      ],
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Verificar que la orden esté lista para división
+    if (!["delivered", "ready"].includes(order.status)) {
+      return res.status(400).json({
+        message: "Order is not ready for bill splitting",
+      });
+    }
+
+    const totalAmount = parseFloat(order.total_amount);
+    const amountPerPerson = totalAmount / numberOfPeople;
+
+    res.json({
+      orderId: order.id,
+      orderNumber: order.order_number,
+      totalAmount,
+      numberOfPeople,
+      amountPerPerson: parseFloat(amountPerPerson.toFixed(2)),
+      items: order.items.map((item) => ({
+        id: item.id,
+        name: item.dish_name,
+        quantity: item.quantity,
+        unitPrice: parseFloat(item.unit_price),
+        subtotal: parseFloat(item.subtotal),
+      })),
+    });
+  } catch (error) {
+    console.error("Split bill error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Procesar pago parcial (para cuentas divididas)
+exports.processPartialPayment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { payment_method, amount_paid, tip, personNumber, totalPeople } = req.body;
+
+    if (!payment_method || !amount_paid) {
+      return res.status(400).json({
+        message: "Payment method and amount paid are required",
+      });
+    }
+
+    const order = await Order.findByPk(id, {
+      include: [
+        {
+          model: OrderItem,
+          as: "items",
+        },
+        { model: Table, as: "table" },
+        { model: User, as: "waiter", attributes: ["id", "name"] },
+      ],
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Verificar que la orden esté lista para pago
+    if (!["delivered", "ready"].includes(order.status)) {
+      return res.status(400).json({
+        message: "Order is not ready for payment",
+      });
+    }
+
+    const tipAmount = parseFloat(tip || 0);
+    const amountPaidValue = parseFloat(amount_paid);
+    const change = amountPaidValue - (parseFloat(amount_paid) + tipAmount);
+
+    // Registrar el pago parcial en metadata (puedes crear una tabla separada si prefieres)
+    const partialPayments = order.metadata?.partialPayments || [];
+    partialPayments.push({
+      personNumber,
+      paymentMethod: payment_method,
+      amount: amountPaidValue,
+      tip: tipAmount,
+      cashierId: req.user.id,
+      cashierName: req.user.name,
+      timestamp: new Date(),
+    });
+
+    // Verificar si todos pagaron
+    const allPaid = partialPayments.length >= totalPeople;
+
+    if (allPaid) {
+      // Calcular totales
+      const totalPaid = partialPayments.reduce((sum, p) => sum + p.amount, 0);
+      const totalTips = partialPayments.reduce((sum, p) => sum + p.tip, 0);
+
+      // Actualizar orden a pagada
+      await order.update({
+        status: "paid",
+        payment_method: "split", // Indicar que fue pago dividido
+        tip_amount: totalTips,
+        completed_at: new Date(),
+        cashier_id: req.user.id,
+        metadata: { partialPayments },
+      });
+
+      // Recargar con relaciones
+      await order.reload({
+        include: [
+          {
+            model: OrderItem,
+            as: "items",
+          },
+          { model: Table, as: "table" },
+          { model: User, as: "waiter", attributes: ["id", "name"] },
+          { model: User, as: "cashier", attributes: ["id", "name"] },
+        ],
+      });
+
+      // Liberar mesa si existe
+      if (order.table_id) {
+        await Table.update(
+          { status: "available", current_order_id: null },
+          { where: { id: order.table_id } }
+        );
+
+        if (global.io) {
+          global.io.emit("table:updated", {
+            tableId: order.table_id,
+            status: "available",
+          });
+        }
+      }
+
+      // Emitir evento Socket.io
+      if (global.io) {
+        global.io.emit("payment:processed", {
+          orderId: order.id,
+          orderNumber: order.order_number,
+          tableId: order.table_id,
+          totalAmount: order.total_amount,
+          tipAmount: totalTips,
+          paymentMethod: "split",
+          timestamp: new Date(),
+        });
+      }
+
+      res.json({
+        message: "All payments received. Order completed",
+        completed: true,
+        order: order.toJSON(),
+        partialPayments,
+      });
+    } else {
+      // Actualizar metadata con el pago parcial
+      await order.update({
+        metadata: { partialPayments },
+      });
+
+      res.json({
+        message: `Payment ${partialPayments.length}/${totalPeople} received`,
+        completed: false,
+        remaining: totalPeople - partialPayments.length,
+        partialPayments,
+      });
+    }
+  } catch (error) {
+    console.error("Process partial payment error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
