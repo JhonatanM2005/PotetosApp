@@ -172,14 +172,15 @@ exports.changePassword = async (req, res) => {
     const isSameAsCurrentPassword = await user.comparePassword(newPassword);
     if (isSameAsCurrentPassword) {
       return res.status(400).json({
-        message: "La nueva contraseña no puede ser igual a la contraseña actual",
+        message:
+          "La nueva contraseña no puede ser igual a la contraseña actual",
       });
     }
 
     // Verificar que no esté en el historial de contraseñas (últimas 3)
     const passwordHistory = user.password_history || [];
-    const bcrypt = require('bcryptjs');
-    
+    const bcrypt = require("bcryptjs");
+
     for (const oldPasswordHash of passwordHistory) {
       const isReused = await bcrypt.compare(newPassword, oldPasswordHash);
       if (isReused) {
@@ -191,11 +192,11 @@ exports.changePassword = async (req, res) => {
 
     // Actualizar historial de contraseñas
     const updatedHistory = [user.password, ...passwordHistory].slice(0, 3);
-    
+
     // Actualizar contraseña
-    await user.update({ 
+    await user.update({
       password: newPassword,
-      password_history: updatedHistory
+      password_history: updatedHistory,
     });
 
     res.json({ message: "Password changed successfully" });
@@ -378,14 +379,15 @@ exports.resetPassword = async (req, res) => {
     const isSameAsCurrentPassword = await user.comparePassword(newPassword);
     if (isSameAsCurrentPassword) {
       return res.status(400).json({
-        message: "La nueva contraseña no puede ser igual a la contraseña actual",
+        message:
+          "La nueva contraseña no puede ser igual a la contraseña actual",
       });
     }
 
     // Verificar que no esté en el historial de contraseñas (últimas 3)
     const passwordHistory = user.password_history || [];
-    const bcrypt = require('bcryptjs');
-    
+    const bcrypt = require("bcryptjs");
+
     for (const oldPasswordHash of passwordHistory) {
       const isReused = await bcrypt.compare(newPassword, oldPasswordHash);
       if (isReused) {
@@ -399,9 +401,9 @@ exports.resetPassword = async (req, res) => {
     const updatedHistory = [user.password, ...passwordHistory].slice(0, 3);
 
     // Actualizar contraseña
-    await user.update({ 
+    await user.update({
       password: newPassword,
-      password_history: updatedHistory
+      password_history: updatedHistory,
     });
 
     // Marcar código como usado
