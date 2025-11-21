@@ -8,7 +8,11 @@ if (!process.env.DATABASE_URL) {
 
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "postgres",
-  logging: process.env.NODE_ENV === "development" ? console.log : false,
+  // Opciones de logging:
+  // false: Sin logs
+  // console.log: Todos los logs (actual en dev)
+  // (msg) => console.log(msg): Solo mostrar ciertos mensajes
+  logging: false, // Desactivar logs SQL para producción y desarrollo limpio
   dialectOptions: {
     ssl: {
       require: true,
