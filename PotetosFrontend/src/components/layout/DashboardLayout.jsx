@@ -34,7 +34,7 @@ export default function DashboardLayout({ children }) {
       path: "/dashboard",
       icon: Home,
       label: "Dashboard",
-      roles: ["admin", "mesero", "chef"],
+      roles: ["admin", "mesero", "chef","cajero"],
     },
     {
       path: "/dashboard/stats",
@@ -89,7 +89,7 @@ export default function DashboardLayout({ children }) {
       path: "/dashboard/settings",
       icon: Settings,
       label: "Configuración",
-      roles: ["admin", "mesero", "chef"],
+      roles: ["admin", "mesero", "chef","cajero"],
     },
   ];
 

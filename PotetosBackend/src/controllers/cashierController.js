@@ -184,15 +184,19 @@ exports.processPayment = async (req, res) => {
       );
     }
 
-    // Emitir evento Socket.io
+    // Emitir evento Socket.io a sala cashier
     if (global.io) {
-      global.io.emit("payment:completed", {
+      console.log("📤 Emitiendo evento payment:processed a sala cashier");
+      global.io.to("cashier").emit("payment:processed", {
         orderId: order.id,
         orderNumber: order.order_number,
         amount,
         cashier: req.user.name,
         tableId: order.table_id,
+        timestamp: new Date(),
       });
+    } else {
+      console.error("❌ global.io no disponible");
     }
 
     res.json({

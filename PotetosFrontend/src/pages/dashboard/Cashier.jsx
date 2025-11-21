@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import { cashierService } from "../../services";
 import { useAuthStore } from "../../store/authStore";
+import socketService from "../../services/socket";
+import toast from "react-hot-toast";
 import { CreditCard, DollarSign, Users, Clock, MapPin, ChefHat, History } from "lucide-react";
 import PaymentModal from "./PaymentModal";
 
 export default function CashierPage() {
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,9 +18,29 @@ export default function CashierPage() {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
+    console.log("🔧 [Cashier] useEffect inicial iniciado");
+    
     fetchDeliveredOrders();
     fetchStats();
-  }, []);
+
+    // Conectar socket
+    if (token) {
+      console.log("📡 Conectando socket con token...");
+      socketService.connect(token);
+
+      // Escuchar evento cuando una orden cambia de estado a "delivered"
+      socketService.on("order:statusChanged", handleOrderStatusChanged);
+      
+      // Escuchar evento cuando pago se procesa
+      socketService.on("payment:processed", handlePaymentProcessed);
+    }
+
+    // Cleanup
+    return () => {
+      socketService.off("order:statusChanged", handleOrderStatusChanged);
+      socketService.off("payment:processed", handlePaymentProcessed);
+    };
+  }, [token]);
 
   const fetchDeliveredOrders = async () => {
     try {
@@ -39,6 +61,34 @@ export default function CashierPage() {
     } catch (error) {
       console.error("Error fetching stats:", error);
     }
+  };
+
+  const handleOrderStatusChanged = (data) => {
+    console.log("📊 Evento order:statusChanged recibido:", data);
+    
+    // Si la orden fue marcada como "delivered", recargar lista
+    if (data.newStatus === "delivered") {
+      console.log(`✅ Nueva orden entregada detectada: #${data.orderNumber}`);
+      fetchDeliveredOrders();
+      fetchStats();
+      toast.success(`¡Nueva orden lista para pagar! #${data.orderNumber}`);
+    }
+  };
+
+  const handlePaymentProcessed = (data) => {
+    console.log("💳 Evento payment:processed recibido:", data);
+    // Recargar órdenes
+    fetchDeliveredOrders();
+    // Actualizar estadísticas
+    fetchStats();
+    // Notificar
+    toast.success(`¡Pago procesado! Orden #${data.orderNumber}`);
+  };
+
+  const handleCashierUpdated = (data) => {
+    console.log("🔄 Evento cashier:updated recibido");
+    // Recargar órdenes
+    fetchDeliveredOrders();
   };
 
   const handlePayment = (order) => {
