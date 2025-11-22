@@ -44,8 +44,12 @@ exports.login = async (req, res) => {
         .json({ message: "Email and password are required" });
     }
 
-    // Buscar usuario
-    const user = await User.findOne({ where: { email } });
+    // Buscar usuario (búsqueda insensible a mayúsculas usando Op.iLike)
+    const user = await User.findOne({ 
+      where: { 
+        email: { [Op.iLike]: email } 
+      } 
+    });
 
     if (!user || !user.is_active) {
       return res.status(401).json({ message: "Invalid credentials" });
@@ -145,17 +149,22 @@ exports.updateProfile = async (req, res) => {
     }
 
     // Verificar si el email ya existe (en otro usuario)
-    if (email && email !== user.email) {
-      const existingUser = await User.findOne({ where: { email } });
+    // Usar Op.iLike para comparación insensible a mayúsculas
+    if (email && email.toLowerCase() !== user.email.toLowerCase()) {
+      const existingUser = await User.findOne({ 
+        where: { 
+          email: { [Op.iLike]: email } 
+        } 
+      });
       if (existingUser) {
         return res.status(400).json({ message: "Email already exists" });
       }
     }
 
-    // Actualizar campos
+    // Actualizar campos (convertir email a minúsculas para guardar consistentemente)
     await user.update({
       name: name || user.name,
-      email: email || user.email,
+      email: email ? email.toLowerCase() : user.email,
       phone: phone !== undefined ? phone : user.phone,
     });
 
@@ -257,8 +266,12 @@ exports.forgotPassword = async (req, res) => {
       return res.status(400).json({ message: "Email is required" });
     }
 
-    // Verificar que el usuario existe
-    const user = await User.findOne({ where: { email } });
+    // Verificar que el usuario existe (búsqueda insensible a mayúsculas)
+    const user = await User.findOne({ 
+      where: { 
+        email: { [Op.iLike]: email } 
+      } 
+    });
 
     if (!user) {
       // Por seguridad, no revelar si el email existe o no
@@ -276,12 +289,12 @@ exports.forgotPassword = async (req, res) => {
     // Invalidar códigos anteriores del mismo email
     await PasswordReset.update(
       { used: true },
-      { where: { email, used: false } }
+      { where: { email: email.toLowerCase(), used: false } }
     );
 
-    // Crear nuevo código
+    // Crear nuevo código (guardar email en minúsculas)
     await PasswordReset.create({
-      email,
+      email: email.toLowerCase(),
       code,
       expiresAt,
       attempts: 0,
@@ -320,10 +333,10 @@ exports.verifyResetCode = async (req, res) => {
       return res.status(400).json({ message: "Email and code are required" });
     }
 
-    // Buscar código válido
+    // Buscar código válido (convertir email a minúsculas)
     const resetCode = await PasswordReset.findOne({
       where: {
-        email,
+        email: email.toLowerCase(),
         code,
         used: false,
         expiresAt: { [Op.gt]: new Date() },
@@ -356,7 +369,7 @@ exports.verifyResetCode = async (req, res) => {
 
     // Código válido - generar token temporal para resetear contraseña
     const resetToken = jwt.sign(
-      { email, resetCodeId: resetCode.id },
+      { email: email.toLowerCase(), resetCodeId: resetCode.id },
       process.env.JWT_SECRET,
       { expiresIn: "10m" } // 10 minutos para cambiar la contraseña
     );
@@ -410,8 +423,12 @@ exports.resetPassword = async (req, res) => {
         .json({ message: "Reset code has already been used" });
     }
 
-    // Buscar usuario
-    const user = await User.findOne({ where: { email } });
+    // Buscar usuario (búsqueda insensible a mayúsculas)
+    const user = await User.findOne({ 
+      where: { 
+        email: { [Op.iLike]: email } 
+      } 
+    });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

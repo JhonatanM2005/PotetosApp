@@ -178,7 +178,7 @@ export default function PaymentHistoryPage() {
         body: tableData,
         startY: yPosition,
         theme: "grid",
-        
+
         headerStyles: {
           darkGray: [255, 255, 255],
           fillColor: [200, 200, 200],
