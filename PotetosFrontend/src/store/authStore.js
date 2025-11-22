@@ -9,9 +9,9 @@ const INACTIVITY_TIMEOUT = getInactivityTimeoutMs();
 let inactivityTimer = null;
 
 const useAuthStore = create((set, get) => ({
-  user: JSON.parse(sessionStorage.getItem("user")) || null,
-  token: sessionStorage.getItem("token") || null,
-  isAuthenticated: !!sessionStorage.getItem("token"),
+  user: null,
+  token: null,
+  isAuthenticated: false,
   loading: false,
   error: null,
 

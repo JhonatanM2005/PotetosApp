@@ -61,7 +61,7 @@ export default function SessionClosedModal({ isOpen, reason, onClose }) {
     <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden animate-fade-in">
         {/* Header con gradiente */}
-        <div className="bg-linear-to-r from-primary to-secondary p-6">
+        <div className="bg-primary p-6">
           <div className="flex justify-center mb-4">
             <div className="bg-white/10 backdrop-blur-md rounded-full p-4">
               {icon}
