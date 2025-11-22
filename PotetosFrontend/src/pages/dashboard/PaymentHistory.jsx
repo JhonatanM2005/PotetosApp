@@ -11,6 +11,9 @@ import {
   Download,
   FileText,
 } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import toast from "react-hot-toast";
 
 export default function PaymentHistoryPage() {
   const navigate = useNavigate();
@@ -102,6 +105,139 @@ export default function PaymentHistoryPage() {
     }
   };
 
+  const handleDownloadPDF = () => {
+    try {
+      toast.loading("Generando PDF...", { id: "pdf-generation" });
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const darkGray = [50, 50, 50];
+      const lightGray = [200, 200, 200];
+      const grayText = [85, 85, 85];
+      const primaryColor = [59, 130, 246]; // primary blue
+
+      let yPosition = 15;
+
+      // Header - POTETOS
+      pdf.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+      pdf.setFontSize(24);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("POTETOS", 105, yPosition, { align: "center" });
+
+      yPosition += 8;
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(grayText[0], grayText[1], grayText[2]);
+      pdf.text("Restaurante & Bar", 105, yPosition, { align: "center" });
+
+      yPosition += 6;
+      pdf.setFontSize(9);
+      pdf.text("Historial de Pagos", 105, yPosition, { align: "center" });
+
+      yPosition += 10;
+
+      // Línea separadora
+      pdf.setDrawColor(lightGray[0], lightGray[1], lightGray[2]);
+      pdf.line(15, yPosition, 195, yPosition);
+
+      yPosition += 8;
+
+      // Fecha de generación
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(grayText[0], grayText[1], grayText[2]);
+      pdf.text(
+        `Generado: ${new Date().toLocaleDateString("es-ES", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        })}`,
+        15,
+        yPosition
+      );
+
+      yPosition += 12;
+
+      // Tabla de pagos
+      const tableData = filteredPayments.map((payment) => [
+        `#${payment.order?.order_number || "N/A"}`,
+        formatDate(payment.created_at).split(" ")[0],
+        getPaymentMethodLabel(payment.payment_method),
+        formatCurrency(payment.amount),
+        payment.cashier?.name || "N/A",
+      ]);
+
+      autoTable(pdf, {
+        head: [["Orden", "Fecha", "Método", "Monto", "Cajero"]],
+        body: tableData,
+        startY: yPosition,
+        theme: "grid",
+        
+        headerStyles: {
+          darkGray: [255, 255, 255],
+          fillColor: [200, 200, 200],
+          textColor: [50, 50, 50],
+          fontStyle: "bold",
+          fontSize: 10,
+        },
+        bodyStyles: {
+          fontSize: 9,
+          textColor: grayText,
+        },
+        alternateRowStyles: {
+          fillColor: [245, 245, 245],
+        },
+        columnStyles: {
+          3: { halign: "right" },
+        },
+        margin: { left: 15, right: 15 },
+      });
+
+      yPosition = pdf.lastAutoTable.finalY + 10;
+
+      // Totales
+      pdf.setFontSize(11);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+
+      const totalAmount = filteredPayments.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+      const totalCount = filteredPayments.length;
+
+      pdf.text(`Total de Transacciones: ${totalCount}`, 15, yPosition);
+      yPosition += 8;
+      pdf.text(`Monto Total: ${formatCurrency(totalAmount)}`, 15, yPosition);
+
+      yPosition += 12;
+
+      // Línea separadora final
+      pdf.setDrawColor(lightGray[0], lightGray[1], lightGray[2]);
+      pdf.line(15, yPosition, 195, yPosition);
+
+      yPosition += 8;
+
+      // Footer
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(grayText[0], grayText[1], grayText[2]);
+      pdf.text("¡Gracias por usar POTETOS!", 105, yPosition, { align: "center" });
+
+      // Guardar PDF
+      const fileName = `Historial-Pagos-${new Date().toISOString().split("T")[0]}.pdf`;
+      pdf.save(fileName);
+
+      toast.success("PDF descargado correctamente", { id: "pdf-generation" });
+    } catch (error) {
+      console.error("Error generando PDF:", error);
+      toast.error("Error al descargar el PDF", { id: "pdf-generation" });
+    }
+  };
+
   const filteredPayments = payments.filter((payment) => {
     if (!filters.searchTerm) return true;
     return (
@@ -118,13 +254,22 @@ export default function PaymentHistoryPage() {
     <DashboardLayout>
       <div className="p-4 sm:p-6 md:p-8">
         {/* Header */}
-        <div className="mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            HISTORIAL DE PAGOS
-          </h2>
-          <p className="text-gray-600">
-            Visualiza todos los pagos procesados con detalles completos.
-          </p>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+              HISTORIAL DE PAGOS
+            </h2>
+            <p className="text-gray-600">
+              Visualiza todos los pagos procesados con detalles completos.
+            </p>
+          </div>
+          <button
+            onClick={handleDownloadPDF}
+            className="flex items-center gap-2 bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg transition font-semibold whitespace-nowrap"
+          >
+            <Download className="w-4 h-4" />
+            Descargar PDF
+          </button>
         </div>
 
         {/* Filters */}
@@ -237,7 +382,7 @@ export default function PaymentHistoryPage() {
               {/* Payments Table */}
               <div className="bg-white rounded-2xl shadow-md overflow-hidden">
                 <table className="w-full">
-                  <thead className="bg-primary text-white">
+                  <thead className="bg-gray-200 text-gray-900">
                     <tr>
                       <th className="px-6 py-4 text-left font-semibold">
                         Fecha
