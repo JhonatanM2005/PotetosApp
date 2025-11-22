@@ -117,14 +117,23 @@ const useAuthStore = create((set, get) => ({
 
   // Resetear el timer de inactividad
   resetInactivityTimer: () => {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString();
+    
     // Limpiar timer anterior
     if (inactivityTimer) {
       clearTimeout(inactivityTimer);
+      console.log(`🔄 [${timeString}] Timer de inactividad reseteado`);
+    } else {
+      console.log(`▶️ [${timeString}] Timer de inactividad iniciado`);
     }
+
+    console.log(`⏰ La sesión expirará en ${INACTIVITY_TIMEOUT / 1000 / 60} minutos (${INACTIVITY_TIMEOUT} ms)`);
 
     // Crear nuevo timer
     inactivityTimer = setTimeout(() => {
-      console.log("Sesión cerrada por inactividad");
+      const expireTime = new Date().toLocaleTimeString();
+      console.log(`⏱️ [${expireTime}] Sesión cerrada por inactividad`);
 
       // Mostrar toast antes de cerrar sesión
       toast.error("Tu sesión ha expirado por inactividad", {
