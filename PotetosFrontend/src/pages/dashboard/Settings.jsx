@@ -244,54 +244,165 @@ export default function SettingsPage() {
                 📊 Mis Estadísticas
               </h3>
               <div className="space-y-3">
-                <div className="bg-linear-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
-                  <p className="text-xs text-blue-600 font-semibold uppercase mb-1">
-                    Total Órdenes
-                  </p>
-                  <p className="text-2xl font-bold text-blue-700">
-                    {userStats.totalOrders || 0}
-                  </p>
-                </div>
-                <div className="bg-linear-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
-                  <p className="text-xs text-green-600 font-semibold uppercase mb-1">
-                    Completadas
-                  </p>
-                  <p className="text-2xl font-bold text-green-700">
-                    {userStats.completedOrders || 0}
-                  </p>
-                </div>
-                <div className="bg-linear-to-r from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
-                  <p className="text-xs text-orange-600 font-semibold uppercase mb-1">
-                    Pendientes
-                  </p>
-                  <p className="text-2xl font-bold text-orange-700">
-                    {userStats.pendingOrders || 0}
-                  </p>
-                </div>
-                <div className="bg-linear-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
-                  <p className="text-xs text-purple-600 font-semibold uppercase mb-1">
-                    Hoy
-                  </p>
-                  <p className="text-2xl font-bold text-purple-700">
-                    {userStats.todayOrders || 0}
-                  </p>
-                </div>
-                <div className="bg-linear-to-r from-indigo-50 to-indigo-100 p-4 rounded-lg border border-indigo-200">
-                  <p className="text-xs text-indigo-600 font-semibold uppercase mb-1">
-                    Esta Semana
-                  </p>
-                  <p className="text-2xl font-bold text-indigo-700">
-                    {userStats.weekOrders || 0}
-                  </p>
-                </div>
-                <div className="bg-linear-to-r from-pink-50 to-pink-100 p-4 rounded-lg border border-pink-200">
-                  <p className="text-xs text-pink-600 font-semibold uppercase mb-1">
-                    Este Mes
-                  </p>
-                  <p className="text-2xl font-bold text-pink-700">
-                    {userStats.monthOrders || 0}
-                  </p>
-                </div>
+                {/* Estadísticas para Admin */}
+                {user?.role === "admin" && (
+                  <>
+                    <div className="bg-linear-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                      <p className="text-xs text-blue-600 font-semibold uppercase mb-1">
+                        Total Órdenes
+                      </p>
+                      <p className="text-2xl font-bold text-blue-700">
+                        {userStats.totalOrders || 0}
+                      </p>
+                    </div>
+                    <div className="bg-linear-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                      <p className="text-xs text-green-600 font-semibold uppercase mb-1">
+                        Completadas
+                      </p>
+                      <p className="text-2xl font-bold text-green-700">
+                        {userStats.completedOrders || 0}
+                      </p>
+                    </div>
+                    <div className="bg-linear-to-r from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
+                      <p className="text-xs text-orange-600 font-semibold uppercase mb-1">
+                        Pendientes
+                      </p>
+                      <p className="text-2xl font-bold text-orange-700">
+                        {userStats.pendingOrders || 0}
+                      </p>
+                    </div>
+                    <div className="bg-linear-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                      <p className="text-xs text-purple-600 font-semibold uppercase mb-1">
+                        Este Mes
+                      </p>
+                      <p className="text-2xl font-bold text-purple-700">
+                        {userStats.monthOrders || 0}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {/* Estadísticas para Mesero */}
+                {user?.role === "mesero" && (
+                  <>
+                    <div className="bg-linear-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                      <p className="text-xs text-blue-600 font-semibold uppercase mb-1">
+                        Mis Órdenes
+                      </p>
+                      <p className="text-2xl font-bold text-blue-700">
+                        {userStats.totalOrders || 0}
+                      </p>
+                    </div>
+                    <div className="bg-linear-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                      <p className="text-xs text-purple-600 font-semibold uppercase mb-1">
+                        Hoy
+                      </p>
+                      <p className="text-2xl font-bold text-purple-700">
+                        {userStats.todayOrders || 0}
+                      </p>
+                    </div>
+                    <div className="bg-linear-to-r from-indigo-50 to-indigo-100 p-4 rounded-lg border border-indigo-200">
+                      <p className="text-xs text-indigo-600 font-semibold uppercase mb-1">
+                        Esta Semana
+                      </p>
+                      <p className="text-2xl font-bold text-indigo-700">
+                        {userStats.weekOrders || 0}
+                      </p>
+                    </div>
+                    <div className="bg-linear-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                      <p className="text-xs text-green-600 font-semibold uppercase mb-1">
+                        Completadas
+                      </p>
+                      <p className="text-2xl font-bold text-green-700">
+                        {userStats.completedOrders || 0}
+                      </p>
+                    </div>
+                    <div className="bg-linear-to-r from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
+                      <p className="text-xs text-orange-600 font-semibold uppercase mb-1">
+                        Pendientes
+                      </p>
+                      <p className="text-2xl font-bold text-orange-700">
+                        {userStats.pendingOrders || 0}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {/* Estadísticas para Chef */}
+                {user?.role === "chef" && (
+                  <>
+                    <div className="bg-linear-to-r from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
+                      <p className="text-xs text-orange-600 font-semibold uppercase mb-1">
+                        En Preparación
+                      </p>
+                      <p className="text-2xl font-bold text-orange-700">
+                        {userStats.pendingOrders || 0}
+                      </p>
+                    </div>
+                    <div className="bg-linear-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                      <p className="text-xs text-green-600 font-semibold uppercase mb-1">
+                        Completadas Hoy
+                      </p>
+                      <p className="text-2xl font-bold text-green-700">
+                        {userStats.todayOrders || 0}
+                      </p>
+                    </div>
+                    <div className="bg-linear-to-r from-indigo-50 to-indigo-100 p-4 rounded-lg border border-indigo-200">
+                      <p className="text-xs text-indigo-600 font-semibold uppercase mb-1">
+                        Esta Semana
+                      </p>
+                      <p className="text-2xl font-bold text-indigo-700">
+                        {userStats.weekOrders || 0}
+                      </p>
+                    </div>
+                    <div className="bg-linear-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                      <p className="text-xs text-blue-600 font-semibold uppercase mb-1">
+                        Total Preparadas
+                      </p>
+                      <p className="text-2xl font-bold text-blue-700">
+                        {userStats.completedOrders || 0}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {/* Estadísticas para Cajero */}
+                {user?.role === "cajero" && (
+                  <>
+                    <div className="bg-linear-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                      <p className="text-xs text-green-600 font-semibold uppercase mb-1">
+                        Pagos Hoy
+                      </p>
+                      <p className="text-2xl font-bold text-green-700">
+                        {userStats.todayOrders || 0}
+                      </p>
+                    </div>
+                    <div className="bg-linear-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                      <p className="text-xs text-blue-600 font-semibold uppercase mb-1">
+                        Total Procesados
+                      </p>
+                      <p className="text-2xl font-bold text-blue-700">
+                        {userStats.completedOrders || 0}
+                      </p>
+                    </div>
+                    <div className="bg-linear-to-r from-indigo-50 to-indigo-100 p-4 rounded-lg border border-indigo-200">
+                      <p className="text-xs text-indigo-600 font-semibold uppercase mb-1">
+                        Esta Semana
+                      </p>
+                      <p className="text-2xl font-bold text-indigo-700">
+                        {userStats.weekOrders || 0}
+                      </p>
+                    </div>
+                    <div className="bg-linear-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                      <p className="text-xs text-purple-600 font-semibold uppercase mb-1">
+                        Este Mes
+                      </p>
+                      <p className="text-2xl font-bold text-purple-700">
+                        {userStats.monthOrders || 0}
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 

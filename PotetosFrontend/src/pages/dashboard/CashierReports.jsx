@@ -43,7 +43,7 @@ const CashierReports = () => {
     setLoading(true);
     try {
       const [paymentsRes, closingRes] = await Promise.all([
-        api.get("/cashier/daily-payments"),
+        api.get(`/cashier/daily-payments?date=${selectedDate}`),
         api.get(`/cashier/cash-closing?date=${selectedDate}`),
       ]);
 
@@ -106,10 +106,22 @@ const CashierReports = () => {
     doc.text("Resumen del Día", 14, 45);
 
     const summaryData = [
-      ["Total del Día", `$${(cashClosing.total || 0).toFixed(2)}`],
-      ["Propinas", `$${(cashClosing.tips || 0).toFixed(2)}`],
-      ["Órdenes Procesadas", (cashClosing.totalOrders || 0).toString()],
-      ["Ticket Promedio", `$${(cashClosing.averageTicket || 0).toFixed(2)}`],
+      [
+        "Total del Día",
+        `$${(cashClosing.summary?.totalSales || 0).toFixed(2)}`,
+      ],
+      ["Propinas", `$${(cashClosing.summary?.totalTips || 0).toFixed(2)}`],
+      [
+        "Órdenes Procesadas",
+        (cashClosing.summary?.totalOrders || 0).toString(),
+      ],
+      [
+        "Ticket Promedio",
+        `$${(
+          (cashClosing.summary?.totalSales || 0) /
+          (cashClosing.summary?.totalOrders || 1)
+        ).toFixed(2)}`,
+      ],
     ];
 
     autoTable(doc, {

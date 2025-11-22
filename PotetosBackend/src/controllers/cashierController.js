@@ -154,14 +154,27 @@ exports.processPayment = async (req, res) => {
 // Obtener historial de pagos del día
 exports.getDailyPayments = async (req, res) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const { date } = req.query;
+    let startDate, endDate;
+
+    if (date) {
+      // Parsear la fecha como local, no como UTC
+      const [year, month, day] = date.split("-").map(Number);
+      startDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+      endDate = new Date(year, month - 1, day, 23, 59, 59, 999);
+    } else {
+      // Si no se especifica fecha, usar hoy
+      startDate = new Date();
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date();
+      endDate.setHours(23, 59, 59, 999);
+    }
 
     const orders = await Order.findAll({
       where: {
         status: "paid",
         completed_at: {
-          [Op.gte]: today,
+          [Op.between]: [startDate, endDate],
         },
       },
       include: [
@@ -262,10 +275,10 @@ exports.getCashClosing = async (req, res) => {
     let startDate, endDate;
 
     if (date) {
-      startDate = new Date(date);
-      startDate.setHours(0, 0, 0, 0);
-      endDate = new Date(date);
-      endDate.setHours(23, 59, 59, 999);
+      // Parsear la fecha como local, no como UTC
+      const [year, month, day] = date.split("-").map(Number);
+      startDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+      endDate = new Date(year, month - 1, day, 23, 59, 59, 999);
     } else {
       startDate = new Date();
       startDate.setHours(0, 0, 0, 0);
