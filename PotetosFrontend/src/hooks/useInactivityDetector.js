@@ -16,8 +16,9 @@ const useInactivityDetector = () => {
 
     // Handler que resetea el timer
     const handleActivity = () => {
-      console.log("👆 Actividad detectada - reseteando timer");
-      resetInactivityTimer();
+      if (isAuthenticated) {
+        resetInactivityTimer();
+      }
     };
 
     // Agregar listeners para cada evento

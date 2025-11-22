@@ -9,6 +9,9 @@ export default function SessionClosedModal({ isOpen, reason, onClose }) {
   useEffect(() => {
     if (!isOpen) return;
 
+    // Reset countdown when modal opens
+    setCountdown(15);
+
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -22,7 +25,8 @@ export default function SessionClosedModal({ isOpen, reason, onClose }) {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isOpen, navigate, onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

@@ -24,7 +24,6 @@ class SocketService {
 
     // Escuchar evento de sesión cerrada desde otro dispositivo
     this.socket.on("session:closed", (data) => {
-      console.log("⚠️ Sesión cerrada remotamente:", data);
       if (this.sessionClosedCallback) {
         this.sessionClosedCallback(data);
       }

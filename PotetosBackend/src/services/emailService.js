@@ -172,7 +172,7 @@ const sendPasswordResetCode = async (email, code) => {
       subject: "🔐 Código de Recuperación de Contraseña - POTETOS",
       html,
     });
-    console.log("✅ Email enviado:", response.messageId || response.message);
+    // Email enviado exitosamente
     return { success: true, response };
   } catch (error) {
     console.error("❌ Error al enviar email:", error);

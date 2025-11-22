@@ -9,7 +9,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login, loading } = useAuthStore();
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
 
   // Mostrar mensaje si la sesión expiró por inactividad o fue cerrada remotamente
