@@ -8,10 +8,34 @@ import toast from "react-hot-toast";
 const INACTIVITY_TIMEOUT = getInactivityTimeoutMs();
 let inactivityTimer = null;
 
+// Función para obtener el estado inicial del sessionStorage
+// Solo se ejecuta una vez cuando se crea el store
+const getInitialAuthState = () => {
+  try {
+    const token = sessionStorage.getItem("token");
+    const userStr = sessionStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    
+    return {
+      user,
+      token,
+      isAuthenticated: !!(token && user),
+    };
+  } catch (error) {
+    return {
+      user: null,
+      token: null,
+      isAuthenticated: false,
+    };
+  }
+};
+
+const initialState = getInitialAuthState();
+
 const useAuthStore = create((set, get) => ({
-  user: null,
-  token: null,
-  isAuthenticated: false,
+  user: initialState.user,
+  token: initialState.token,
+  isAuthenticated: initialState.isAuthenticated,
   loading: false,
   error: null,
 
