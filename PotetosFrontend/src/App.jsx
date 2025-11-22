@@ -13,6 +13,9 @@ import useSessionManager from "./hooks/useSessionManager";
 // Layouts
 import Layout from "./components/layout/Layout";
 
+// Route Components
+import PublicRoute from "./components/routes/PublicRoute";
+
 // Common Components
 import SessionClosedModal from "./components/common/SessionClosedModal";
 
@@ -79,15 +82,15 @@ function App() {
       <Routes>
         {/* Routes with Layout (Navbar + Footer) - Public Pages */}
         <Route element={<Layout />}>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/menu" element={<MenuPage />} />
-          <Route path="/reservations" element={<ReservationsPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/verify-code" element={<VerifyCodePage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          {/* Public Routes - Wrapped with PublicRoute */}
+          <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
+          <Route path="/menu" element={<PublicRoute><MenuPage /></PublicRoute>} />
+          <Route path="/reservations" element={<PublicRoute><ReservationsPage /></PublicRoute>} />
+          <Route path="/about" element={<PublicRoute><AboutPage /></PublicRoute>} />
+          <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+          <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
+          <Route path="/verify-code" element={<PublicRoute><VerifyCodePage /></PublicRoute>} />
+          <Route path="/reset-password" element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
         </Route>
 
         {/* Protected Routes - Without Layout (Dashboard has its own sidebar) */}

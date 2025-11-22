@@ -13,15 +13,13 @@ export default function Navbar() {
 
   const isActive = (path) => location.pathname === path;
 
-  // Navbar sólo muestra enlaces públicos. Si el usuario está autenticado,
-  // añadimos únicamente un acceso al panel (/dashboard). El sidebar del
-  // dashboard se encarga de las rutas internas.
-  const navigationItems = [
+  // Si el usuario está autenticado, no mostramos enlaces de navegación
+  // Solo mostramos el ícono de usuario que lleva a Settings
+  const navigationItems = isAuthenticated ? [] : [
     { href: "/", label: "Inicio" },
     { href: "/menu", label: "Menú" },
     { href: "/reservations", label: "Reservas" },
     { href: "/about", label: "Nosotros" },
-    ...(isAuthenticated ? [{ href: "/dashboard", label: "Panel" }] : []),
   ];
 
   const handleLogout = () => {
@@ -67,33 +65,14 @@ export default function Navbar() {
             </button>
 
             {isAuthenticated ? (
-              <>
-                {/* User Info - Desktop */}
-                <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-secondary rounded-lg">
-                  <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
-                    <img
-                      src={userIcon}
-                      alt="User"
-                      className="w-8 h-8 rounded-full"
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <p className="text-xs text-primary">Hola</p>
-                    <p className="text-sm font-semibold text-primary">
-                      {user?.name}
-                    </p>
-                  </div>
-                </div>
-
-                {/* User Menu - Desktop */}
-                <button
-                  onClick={handleLogout}
-                  className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors shadow-md hover:shadow-lg"
-                  title="Salir"
-                >
-                  <LogOut size={18} />
-                </button>
-              </>
+              // Solo mostrar ícono de usuario que lleva a Settings
+              <Link
+                to="/dashboard/settings"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary text-primary hover:opacity-90 transition-colors shadow-md hover:shadow-lg"
+                title="Configuración"
+              >
+                <img src={userIcon} alt="User" className="w-6 h-6" />
+              </Link>
             ) : (
               <Link
                 to="/login"
@@ -125,27 +104,15 @@ export default function Navbar() {
               ))}
 
               {isAuthenticated && (
-                <>
-                  {/* User Info Mobile */}
-                  <div className="px-4 py-3 mt-2 bg-secondary rounded-lg border-l-4 border-primary">
-                    <p className="text-xs text-primary/70 mb-1">Usuario</p>
-                    <p className="text-sm font-semibold text-primary mb-2">
-                      {user?.name}
-                    </p>
-                    <p className="text-xs text-primary/80 capitalize">
-                      Rol: {user?.role}
-                    </p>
-                  </div>
-
-                  {/* Logout Button Mobile */}
-                  <button
-                    onClick={handleLogout}
-                    className="w-full px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2 justify-center mt-2"
-                  >
-                    <LogOut size={16} />
-                    Salir
-                  </button>
-                </>
+                // Link a Settings en mobile
+                <Link
+                  to="/dashboard/settings"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full px-4 py-3 text-sm font-medium text-primary bg-secondary hover:bg-secondary/90 rounded-lg transition-colors flex items-center gap-2 justify-center mt-2"
+                >
+                  <Settings size={16} />
+                  Ir a Configuración
+                </Link>
               )}
             </nav>
           </div>
