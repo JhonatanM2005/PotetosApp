@@ -50,6 +50,11 @@ module.exports = (server) => {
       console.log(`🍽️ Waiter joined waiters room`);
     }
 
+    if (socket.user.role === "cajero" || socket.user.role === "admin") {
+      socket.join("cashier");
+      console.log(`💳 Cashier joined cashier room`);
+    }
+
     // Evento: Nuevo pedido creado
     socket.on("order:created", (orderData) => {
       // Enviar a cocina

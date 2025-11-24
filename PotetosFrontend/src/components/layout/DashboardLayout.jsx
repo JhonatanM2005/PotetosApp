@@ -15,6 +15,9 @@ import {
   Icon,
   ChevronRight,
   ChevronLeft,
+  CreditCard,
+  History,
+  FileText,
 } from "lucide-react";
 import { chairsTablePlatter } from "@lucide/lab";
 import favicon from "@/assets/images/favicon-potetos.svg";
@@ -32,7 +35,7 @@ export default function DashboardLayout({ children }) {
       path: "/dashboard",
       icon: Home,
       label: "Dashboard",
-      roles: ["admin", "mesero", "chef"],
+      roles: ["admin", "mesero", "chef","cajero"],
     },
     {
       path: "/dashboard/stats",
@@ -66,6 +69,24 @@ export default function DashboardLayout({ children }) {
       roles: ["chef"],
     },
     {
+      path: "/dashboard/cashier",
+      icon: CreditCard,
+      label: "Cajero",
+      roles: ["admin", "cajero"],
+    },
+    {
+      path: "/dashboard/payment-history",
+      icon: History,
+      label: "Historial",
+      roles: ["admin", "cajero"],
+    },
+    {
+      path: "/dashboard/invoices",
+      icon: FileText,
+      label: "Facturas",
+      roles: ["admin", "cajero"],
+    },
+    {
       path: "/dashboard/users",
       icon: Users,
       label: "Usuarios",
@@ -75,7 +96,7 @@ export default function DashboardLayout({ children }) {
       path: "/dashboard/settings",
       icon: Settings,
       label: "Configuración",
-      roles: ["admin", "mesero", "chef"],
+      roles: ["admin", "mesero", "chef","cajero"],
     },
   ];
 

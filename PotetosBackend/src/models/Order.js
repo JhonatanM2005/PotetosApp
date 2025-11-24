@@ -28,6 +28,13 @@ const Order = sequelize.define(
         key: "id",
       },
     },
+    cashier_id: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: "users",
+        key: "id",
+      },
+    },
     status: {
       type: DataTypes.ENUM(
         "pending",
