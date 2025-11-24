@@ -42,6 +42,14 @@ const User = sequelize.define(
       type: DataTypes.JSON,
       defaultValue: [],
     },
+    session_token: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+    session_created_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     tableName: "users",
@@ -50,11 +58,19 @@ const User = sequelize.define(
     updatedAt: "updated_at",
     hooks: {
       beforeCreate: async (user) => {
+        // Convertir email a minúsculas
+        if (user.email) {
+          user.email = user.email.toLowerCase();
+        }
         if (user.password) {
           user.password = await bcrypt.hash(user.password, 10);
         }
       },
       beforeUpdate: async (user) => {
+        // Convertir email a minúsculas
+        if (user.changed("email") && user.email) {
+          user.email = user.email.toLowerCase();
+        }
         if (user.changed("password")) {
           user.password = await bcrypt.hash(user.password, 10);
         }

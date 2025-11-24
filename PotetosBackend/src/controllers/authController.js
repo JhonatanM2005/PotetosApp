@@ -44,8 +44,12 @@ exports.login = async (req, res) => {
         .json({ message: "Email and password are required" });
     }
 
-    // Buscar usuario
-    const user = await User.findOne({ where: { email } });
+    // Buscar usuario (búsqueda insensible a mayúsculas usando Op.iLike)
+    const user = await User.findOne({ 
+      where: { 
+        email: { [Op.iLike]: email } 
+      } 
+    });
 
     if (!user || !user.is_active) {
       return res.status(401).json({ message: "Invalid credentials" });
@@ -58,12 +62,30 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Generar token
+    // Verificar si hay una sesión activa previa
+    const hadPreviousSession = !!user.session_token;
+    const previousSessionToken = user.session_token;
+
+    // Generar nuevo token
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRE || "7d" }
     );
+
+    // Guardar el nuevo token de sesión
+    await user.update({
+      session_token: token,
+      session_created_at: new Date(),
+    });
+
+    // Si había una sesión previa, notificar via socket para cerrarla
+    if (hadPreviousSession && global.io && global.io.closeSessionByToken) {
+      global.io.closeSessionByToken(
+        previousSessionToken,
+        "Tu sesión ha sido cerrada porque iniciaste sesión en otro dispositivo"
+      );
+    }
 
     res.json({
       message: "Login successful",
@@ -74,6 +96,9 @@ exports.login = async (req, res) => {
         email: user.email,
         role: user.role,
       },
+      ...(hadPreviousSession && {
+        info: "Sesión anterior cerrada automáticamente",
+      }),
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -90,6 +115,27 @@ exports.me = async (req, res) => {
   }
 };
 
+// Logout
+exports.logout = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Limpiar session_token del usuario
+    await User.update(
+      {
+        session_token: null,
+        session_created_at: null,
+      },
+      { where: { id: userId } }
+    );
+
+    res.json({ message: "Logout successful" });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 // Update profile
 exports.updateProfile = async (req, res) => {
   try {
@@ -103,17 +149,22 @@ exports.updateProfile = async (req, res) => {
     }
 
     // Verificar si el email ya existe (en otro usuario)
-    if (email && email !== user.email) {
-      const existingUser = await User.findOne({ where: { email } });
+    // Usar Op.iLike para comparación insensible a mayúsculas
+    if (email && email.toLowerCase() !== user.email.toLowerCase()) {
+      const existingUser = await User.findOne({ 
+        where: { 
+          email: { [Op.iLike]: email } 
+        } 
+      });
       if (existingUser) {
         return res.status(400).json({ message: "Email already exists" });
       }
     }
 
-    // Actualizar campos
+    // Actualizar campos (convertir email a minúsculas para guardar consistentemente)
     await user.update({
       name: name || user.name,
-      email: email || user.email,
+      email: email ? email.toLowerCase() : user.email,
       phone: phone !== undefined ? phone : user.phone,
     });
 
@@ -215,8 +266,12 @@ exports.forgotPassword = async (req, res) => {
       return res.status(400).json({ message: "Email is required" });
     }
 
-    // Verificar que el usuario existe
-    const user = await User.findOne({ where: { email } });
+    // Verificar que el usuario existe (búsqueda insensible a mayúsculas)
+    const user = await User.findOne({ 
+      where: { 
+        email: { [Op.iLike]: email } 
+      } 
+    });
 
     if (!user) {
       // Por seguridad, no revelar si el email existe o no
@@ -234,12 +289,12 @@ exports.forgotPassword = async (req, res) => {
     // Invalidar códigos anteriores del mismo email
     await PasswordReset.update(
       { used: true },
-      { where: { email, used: false } }
+      { where: { email: email.toLowerCase(), used: false } }
     );
 
-    // Crear nuevo código
+    // Crear nuevo código (guardar email en minúsculas)
     await PasswordReset.create({
-      email,
+      email: email.toLowerCase(),
       code,
       expiresAt,
       attempts: 0,
@@ -251,8 +306,6 @@ exports.forgotPassword = async (req, res) => {
       await sendPasswordResetCode(email, code);
     } catch (emailError) {
       console.error("⚠️ Error al enviar email:", emailError.message);
-      // TEMPORAL: Mostrar código en logs para debugging en producción
-      console.log(`🔑 CÓDIGO DE RECUPERACIÓN: ${code} para ${email}`);
       // No fallar la petición, solo logear el error
     }
 
@@ -277,10 +330,10 @@ exports.verifyResetCode = async (req, res) => {
       return res.status(400).json({ message: "Email and code are required" });
     }
 
-    // Buscar código válido
+    // Buscar código válido (convertir email a minúsculas)
     const resetCode = await PasswordReset.findOne({
       where: {
-        email,
+        email: email.toLowerCase(),
         code,
         used: false,
         expiresAt: { [Op.gt]: new Date() },
@@ -313,7 +366,7 @@ exports.verifyResetCode = async (req, res) => {
 
     // Código válido - generar token temporal para resetear contraseña
     const resetToken = jwt.sign(
-      { email, resetCodeId: resetCode.id },
+      { email: email.toLowerCase(), resetCodeId: resetCode.id },
       process.env.JWT_SECRET,
       { expiresIn: "10m" } // 10 minutos para cambiar la contraseña
     );
@@ -367,8 +420,12 @@ exports.resetPassword = async (req, res) => {
         .json({ message: "Reset code has already been used" });
     }
 
-    // Buscar usuario
-    const user = await User.findOne({ where: { email } });
+    // Buscar usuario (búsqueda insensible a mayúsculas)
+    const user = await User.findOne({ 
+      where: { 
+        email: { [Op.iLike]: email } 
+      } 
+    });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

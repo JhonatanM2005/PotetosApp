@@ -3,6 +3,7 @@ import { io } from "socket.io-client";
 class SocketService {
   constructor() {
     this.socket = null;
+    this.sessionClosedCallback = null;
   }
 
   connect(token) {
@@ -21,6 +22,13 @@ class SocketService {
       }
     );
 
+    // Escuchar evento de sesión cerrada desde otro dispositivo
+    this.socket.on("session:closed", (data) => {
+      if (this.sessionClosedCallback) {
+        this.sessionClosedCallback(data);
+      }
+    });
+
     return this.socket;
   }
 
@@ -29,6 +37,10 @@ class SocketService {
       this.socket.disconnect();
       this.socket = null;
     }
+  }
+
+  onSessionClosed(callback) {
+    this.sessionClosedCallback = callback;
   }
 
   on(event, callback) {

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 import toast from "react-hot-toast";
 import { Mail, Lock, LogIn, Eye, EyeOff } from "lucide-react";
@@ -7,9 +7,28 @@ import imgChef from "@/assets/images/chef-manos.png";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login, loading } = useAuthStore();
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
+
+  // Mostrar mensaje si la sesión expiró por inactividad o fue cerrada remotamente
+  useEffect(() => {
+    if (searchParams.get("timeout") === "true") {
+      toast.error("Tu sesión ha expirado por inactividad", {
+        duration: 5000,
+        icon: "⏱️",
+      });
+    } else if (searchParams.get("remote_logout") === "true") {
+      toast.error(
+        "Tu sesión fue cerrada porque iniciaste sesión en otro dispositivo",
+        {
+          duration: 6000,
+          icon: "🔒",
+        }
+      );
+    }
+  }, [searchParams]);
 
   const handleChange = (e) => {
     setFormData({

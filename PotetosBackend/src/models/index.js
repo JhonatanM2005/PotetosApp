@@ -6,6 +6,8 @@ const Order = require("./Order");
 const OrderItem = require("./OrderItem");
 const Table = require("./Table");
 const PasswordReset = require("./PasswordReset");
+const Payment = require("./Payment");
+const PaymentSplit = require("./PaymentSplit");
 
 // Relaciones
 // Dish - Category
@@ -32,6 +34,18 @@ OrderItem.belongsTo(Order, { foreignKey: "order_id", as: "order" });
 OrderItem.belongsTo(Dish, { foreignKey: "dish_id", as: "dish" });
 Dish.hasMany(OrderItem, { foreignKey: "dish_id", as: "orderItems" });
 
+// Payment - Order
+Payment.belongsTo(Order, { foreignKey: "order_id", as: "order" });
+Order.hasMany(Payment, { foreignKey: "order_id", as: "payments" });
+
+// Payment - User (cashier)
+Payment.belongsTo(User, { foreignKey: "cashier_id", as: "cashier" });
+User.hasMany(Payment, { foreignKey: "cashier_id", as: "payments" });
+
+// PaymentSplit - Payment
+PaymentSplit.belongsTo(Payment, { foreignKey: "payment_id", as: "payment" });
+Payment.hasMany(PaymentSplit, { foreignKey: "payment_id", as: "splits" });
+
 module.exports = {
   sequelize,
   User,
@@ -41,4 +55,6 @@ module.exports = {
   OrderItem,
   Table,
   PasswordReset,
+  Payment,
+  PaymentSplit,
 };
