@@ -44,7 +44,6 @@ import OrdersPage from "./pages/dashboard/Orders";
 import MenuManagementPage from "./pages/dashboard/MenuManagement";
 import TablesPage from "./pages/dashboard/Tables";
 import SettingsPage from "./pages/dashboard/Settings";
-import CashierPage from "./pages/dashboard/Cashier";
 import CashierReportsPage from "./pages/dashboard/CashierReports";
 
 // Protected Route
@@ -133,15 +132,6 @@ function App() {
           element={
             <ProtectedRoute requiredRole="chef">
               <KitchenPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/dashboard/cashier"
-          element={
-            <ProtectedRoute>
-              <CashierPage />
             </ProtectedRoute>
           }
         />
