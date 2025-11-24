@@ -32,6 +32,10 @@ module.exports = (server) => {
   });
 
   io.on("connection", (socket) => {
+    // Guardar mapeo de token a socket ID
+    tokenToSocketMap.set(socket.token, socket.id);
+    console.log(`✅ Socket connected: ${socket.id} for user ${socket.user.email}`);
+
     // Unir a sala según rol
     if (socket.user.role === "chef") {
       socket.join("kitchen");
@@ -65,7 +69,9 @@ module.exports = (server) => {
     });
 
     socket.on("disconnect", () => {
-      // Usuario desconectado
+      // Limpiar mapeo cuando el socket se desconecta
+      tokenToSocketMap.delete(socket.token);
+      console.log(`❌ Socket disconnected: ${socket.id}`);
     });
   });
 

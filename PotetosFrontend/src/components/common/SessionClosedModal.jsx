@@ -34,7 +34,7 @@ export default function SessionClosedModal({ isOpen, reason, onClose }) {
     switch (reason) {
       case "new_login":
         return {
-          title: "🔒 Sesión Cerrada",
+          title: "Sesión Cerrada",
           message:
             "Tu sesión ha sido cerrada porque iniciaste sesión en otro dispositivo o navegador.",
           icon: <LogOut className="w-16 h-16 text-yellow-500" />,

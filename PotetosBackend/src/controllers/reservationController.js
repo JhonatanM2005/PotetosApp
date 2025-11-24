@@ -1,7 +1,14 @@
 const { Reservation } = require("../models");
 const { Op } = require("sequelize");
+const {
+  sendReservationCreatedEmail,
+  sendReservationConfirmedEmail,
+  sendReservationCancelledEmail,
+} = require("../services/emailService");
 
-// Crear nueva reserva (público - sin autenticación)
+/**
+ * Crear una nueva reserva (público)
+ */
 exports.createReservation = async (req, res) => {
   try {
     const {
@@ -37,6 +44,22 @@ exports.createReservation = async (req, res) => {
       notes,
       status: "pending",
     });
+
+    // Intentar enviar email de confirmación (no bloquear si falla)
+    try {
+      await sendReservationCreatedEmail({
+        email: reservation.email,
+        customer_name: reservation.customer_name,
+        reservation_date: reservation.reservation_date,
+        reservation_time: reservation.reservation_time,
+        number_of_people: reservation.number_of_people,
+        notes: reservation.notes,
+      });
+      console.log(`✅ Email de reserva enviado a ${reservation.email}`);
+    } catch (emailError) {
+      console.error("⚠️ Error al enviar email de reserva:", emailError.message);
+      // No fallar la creación de la reserva si el email falla
+    }
 
     res.status(201).json({
       success: true,
@@ -192,7 +215,37 @@ exports.updateReservationStatus = async (req, res) => {
       });
     }
 
+    const oldStatus = reservation.status;
+
+    // Actualizar estado
     await reservation.updateStatus(status);
+
+    // Enviar email según el cambio de estado (no bloquear si falla)
+    try {
+      const reservationData = {
+        email: reservation.email,
+        customer_name: reservation.customer_name,
+        reservation_date: reservation.reservation_date,
+        reservation_time: reservation.reservation_time,
+        number_of_people: reservation.number_of_people,
+        notes: reservation.notes,
+      };
+
+      // pending → confirmed: Email de confirmación
+      if (oldStatus === "pending" && status === "confirmed") {
+        await sendReservationConfirmedEmail(reservationData);
+        console.log(`✅ Email de confirmación enviado a ${reservation.email}`);
+      }
+      
+      // cualquier estado → cancelled: Email de cancelación
+      if (status === "cancelled") {
+        await sendReservationCancelledEmail(reservationData);
+        console.log(`✅ Email de cancelación enviado a ${reservation.email}`);
+      }
+    } catch (emailError) {
+      console.error("⚠️ Error al enviar email:", emailError.message);
+      // No fallar la actualización si el email falla
+    }
 
     res.json({
       success: true,
