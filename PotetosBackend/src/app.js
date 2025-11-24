@@ -13,6 +13,7 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const dishRoutes = require("./routes/dishRoutes");
 const tableRoutes = require("./routes/tableRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const cashierRoutes = require("./routes/cashierRoutes");
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.get("/", (req, res) => {
       dishes: "/api/dishes",
       tables: "/api/tables",
       dashboard: "/api/dashboard",
+      cashier: "/api/cashier",
     },
   });
 });
@@ -63,6 +65,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/dishes", dishRoutes);
 app.use("/api/tables", tableRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/cashier", cashierRoutes);
 
 // Manejo de errores
 app.use(errorMiddleware);

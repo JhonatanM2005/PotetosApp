@@ -44,6 +44,8 @@ import OrdersPage from "./pages/dashboard/Orders";
 import MenuManagementPage from "./pages/dashboard/MenuManagement";
 import TablesPage from "./pages/dashboard/Tables";
 import SettingsPage from "./pages/dashboard/Settings";
+import CashierPage from "./pages/dashboard/Cashier";
+import CashierReportsPage from "./pages/dashboard/CashierReports";
 
 // Protected Route
 const ProtectedRoute = ({ children, requiredRole = null }) => {
@@ -53,8 +55,18 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to="/dashboard" replace />;
+  if (requiredRole) {
+    // Si requiredRole es un array, verificar si el usuario tiene uno de esos roles
+    if (Array.isArray(requiredRole)) {
+      if (!requiredRole.includes(user?.role)) {
+        return <Navigate to="/dashboard" replace />;
+      }
+    } else {
+      // Si es un solo rol
+      if (user?.role !== requiredRole) {
+        return <Navigate to="/dashboard" replace />;
+      }
+    }
   }
 
   return children;
@@ -202,6 +214,24 @@ function App() {
           element={
             <ProtectedRoute>
               <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/cashier"
+          element={
+            <ProtectedRoute requiredRole={["cajero", "admin"]}>
+              <CashierPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/cashier/reports"
+          element={
+            <ProtectedRoute requiredRole={["cajero", "admin"]}>
+              <CashierReportsPage />
             </ProtectedRoute>
           }
         />

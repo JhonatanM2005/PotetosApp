@@ -16,8 +16,7 @@ import {
   Settings,
   DollarSign,
   Clock,
-  CreditCard,
-  History,
+  FileText,
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -92,21 +91,21 @@ export default function DashboardPage() {
       },
       {
         id: "cashier",
-        title: "Cajero",
-        description: "Procesa pagos y divisiones de cuenta",
-        icon: CreditCard,
+        title: "Caja",
+        description: "Procesa pagos y gestiona cobros",
+        icon: DollarSign,
         path: "/dashboard/cashier",
         iconBg: "bg-primary",
-        roles: ["admin", "cajero"],
+        roles: ["cajero", "admin"],
       },
       {
-        id: "payment-history",
-        title: "Historial de Pagos",
-        description: "Visualiza el registro de todas las transacciones",
-        icon: History,
-        path: "/dashboard/payment-history",
+        id: "reports",
+        title: "Reportes",
+        description: "Reportes de caja y cierre diario",
+        icon: FileText,
+        path: "/dashboard/cashier/reports",
         iconBg: "bg-primary",
-        roles: ["admin", "cajero"],
+        roles: ["cajero", "admin"],
       },
       {
         id: "tables",
@@ -133,7 +132,7 @@ export default function DashboardPage() {
         icon: Settings,
         path: "/dashboard/settings",
         iconBg: "bg-primary",
-        roles: ["admin", "mesero", "chef"],
+        roles: ["admin", "mesero", "chef", "cajero"],
       },
     ];
 
@@ -148,6 +147,7 @@ export default function DashboardPage() {
       admin: "Administrador",
       mesero: "Mesero",
       chef: "Chef",
+      cajero: "Cajero",
     };
     return roleNames[role] || role;
   };
@@ -157,6 +157,7 @@ export default function DashboardPage() {
       admin: "¡Bienvenido al panel de administración!",
       mesero: "¡Bienvenido! Listo para tomar pedidos",
       chef: "¡Bienvenido a la cocina! A preparar platos deliciosos",
+      cajero: "¡Bienvenido a la caja! Gestiona los pagos del día",
     };
     return messages[user?.role] || "¡Bienvenido al sistema POTETOS!";
   };

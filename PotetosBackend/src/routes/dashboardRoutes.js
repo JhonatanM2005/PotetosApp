@@ -20,4 +20,11 @@ router.get(
   dashboardController.getTodayStats
 );
 
+// Exportar datos para Excel
+router.get(
+  "/export",
+  roleMiddleware("admin"),
+  dashboardController.getExportData
+);
+
 module.exports = router;

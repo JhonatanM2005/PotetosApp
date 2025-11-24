@@ -672,8 +672,11 @@ export default function OrdersPage() {
                         min="1"
                         value={quantity}
                         onChange={(e) =>
-                          setQuantity(parseInt(e.target.value) || 1)
+                          setQuantity(
+                            e.target.value ? parseInt(e.target.value) : ""
+                          )
                         }
+                        onBlur={(e) => !e.target.value && setQuantity(1)}
                         className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary outline-none"
                       />
                     </div>
