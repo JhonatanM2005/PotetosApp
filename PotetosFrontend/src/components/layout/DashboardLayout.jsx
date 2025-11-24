@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   DollarSign,
   FileText,
+  Calendar,
 } from "lucide-react";
 import { chairsTablePlatter } from "@lucide/lab";
 import favicon from "@/assets/images/favicon-potetos.svg";
@@ -59,6 +60,12 @@ export default function DashboardLayout({ children }) {
       path: "/dashboard/orders",
       icon: NotebookPen,
       label: "Órdenes",
+      roles: ["admin", "mesero"],
+    },
+    {
+      path: "/dashboard/reservations",
+      icon: Calendar,
+      label: "Reservas",
       roles: ["admin", "mesero"],
     },
     {

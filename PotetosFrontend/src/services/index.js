@@ -331,6 +331,58 @@ export const dashboardService = {
   },
 };
 
+// ========== RESERVATIONS ==========
+
+export const reservationService = {
+  // Crear reserva (público - sin autenticación)
+  create: async (data) => {
+    const response = await api.post("/reservations", data);
+    return response.data;
+  },
+
+  // Obtener todas las reservas (autenticado)
+  getAll: async (filters = {}) => {
+    const response = await api.get("/reservations", { params: filters });
+    return response.data;
+  },
+
+  // Obtener reservas del día (autenticado)
+  getToday: async () => {
+    const response = await api.get("/reservations/today");
+    return response.data;
+  },
+
+  // Obtener próximas reservas (autenticado)
+  getUpcoming: async () => {
+    const response = await api.get("/reservations/upcoming");
+    return response.data;
+  },
+
+  // Obtener reserva por ID (autenticado)
+  getById: async (id) => {
+    const response = await api.get(`/reservations/${id}`);
+    return response.data;
+  },
+
+  // Actualizar estado de reserva (autenticado)
+  updateStatus: async (id, status) => {
+    const response = await api.patch(`/reservations/${id}/status`, { status });
+    return response.data;
+  },
+
+  // Eliminar reserva (admin)
+  delete: async (id) => {
+    const response = await api.delete(`/reservations/${id}`);
+    return response.data;
+  },
+
+  // Obtener estadísticas (autenticado)
+  getStats: async () => {
+    const response = await api.get("/reservations/stats");
+    return response.data;
+  },
+};
+
 // ========== CASHIER ==========
 
 export const cashierService = {
@@ -376,5 +428,6 @@ export default {
   user: userService,
   auth: authService,
   dashboard: dashboardService,
+  reservation: reservationService,
   cashier: cashierService,
 };

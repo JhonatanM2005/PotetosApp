@@ -45,6 +45,7 @@ import MenuManagementPage from "./pages/dashboard/MenuManagement";
 import TablesPage from "./pages/dashboard/Tables";
 import SettingsPage from "./pages/dashboard/Settings";
 import CashierReportsPage from "./pages/dashboard/CashierReports";
+import ReservationsManagement from "./pages/dashboard/ReservationsManagement";
 
 // Protected Route
 const ProtectedRoute = ({ children, requiredRole = null }) => {
@@ -204,6 +205,15 @@ function App() {
           element={
             <ProtectedRoute>
               <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/reservations"
+          element={
+            <ProtectedRoute requiredRole={["admin", "mesero"]}>
+              <ReservationsManagement />
             </ProtectedRoute>
           }
         />

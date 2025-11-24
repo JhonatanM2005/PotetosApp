@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Calendar, Clock, Users, Phone, Mail, User } from "lucide-react";
 import imgHero from "@/assets/images/papas-fritas-crujientes-mano.png";
+import { reservationService } from "@/services";
 
 const dateTimeInputStyles = `
   input[type="date"]::-webkit-calendar-picker-indicator,
@@ -60,9 +61,18 @@ export default function Reservations() {
     telefono: "",
     nombre: "",
     correo: "",
+    notas: "",
   });
 
+  const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+
+  // Obtener fecha mínima (hoy)
+  const getMinDate = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,22 +80,55 @@ export default function Reservations() {
       ...prev,
       [name]: value,
     }));
+    // Limpiar error al escribir
+    if (error) setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({
-        fecha: "",
-        hora: "",
-        personas: "",
-        telefono: "",
-        nombre: "",
-        correo: "",
-      });
-    }, 3000);
+    setLoading(true);
+    setError("");
+
+    try {
+      // Preparar datos para el backend
+      const reservationData = {
+        reservation_date: formData.fecha,
+        reservation_time: formData.hora,
+        number_of_people: parseInt(formData.personas),
+        phone: formData.telefono,
+        customer_name: formData.nombre,
+        email: formData.correo,
+        notes: formData.notas || null,
+      };
+
+      // Enviar al backend
+      await reservationService.create(reservationData);
+
+      // Mostrar éxito
+      setSubmitted(true);
+
+      // Resetear formulario después de 4 segundos
+      setTimeout(() => {
+        setSubmitted(false);
+        setFormData({
+          fecha: "",
+          hora: "",
+          personas: "",
+          telefono: "",
+          nombre: "",
+          correo: "",
+          notas: "",
+        });
+      }, 4000);
+    } catch (err) {
+      console.error("Error al crear reserva:", err);
+      setError(
+        err.response?.data?.message ||
+          "Error al crear la reserva. Por favor, intenta de nuevo."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -129,6 +172,7 @@ export default function Reservations() {
                   name="fecha"
                   value={formData.fecha}
                   onChange={handleChange}
+                  min={getMinDate()}
                 />
                 <FormField
                   icon={Clock}
@@ -191,12 +235,43 @@ export default function Reservations() {
                 placeholder="tu@correo.com"
               />
 
+              {/* Notas opcionales */}
+              <div className="bg-[#272159] rounded-3xl p-4">
+                <label
+                  htmlFor="notas"
+                  className="block text-sm font-medium text-white mb-2"
+                >
+                  Notas adicionales (opcional)
+                </label>
+                <textarea
+                  id="notas"
+                  name="notas"
+                  value={formData.notas}
+                  onChange={handleChange}
+                  placeholder="Alguna solicitud especial..."
+                  rows="3"
+                  className="w-full px-4 py-2 bg-transparent text-white focus:outline-none resize-none"
+                />
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-500/20 border border-red-500 rounded-full px-4 py-3 text-center">
+                  <p className="text-red-200 text-sm">{error}</p>
+                </div>
+              )}
+
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full px-6 py-3 bg-secondary text-primary font-bold rounded-full hover:opacity-90 transition-opacity mt-6"
+                disabled={loading || submitted}
+                className="w-full px-6 py-3 bg-secondary text-primary font-bold rounded-full hover:opacity-90 transition-opacity mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {submitted ? "✓ Reserva confirmada" : "Confirmar reserva"}
+                {loading
+                  ? "Procesando..."
+                  : submitted
+                  ? "✓ Reserva confirmada"
+                  : "Confirmar reserva"}
               </button>
 
               {submitted && (

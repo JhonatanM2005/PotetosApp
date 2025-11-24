@@ -8,6 +8,7 @@ const Table = require("./Table");
 const PasswordReset = require("./PasswordReset");
 const Payment = require("./Payment");
 const PaymentSplit = require("./PaymentSplit");
+const Reservation = require("./Reservation");
 
 // Relaciones
 // Dish - Category
@@ -57,4 +58,5 @@ module.exports = {
   PasswordReset,
   Payment,
   PaymentSplit,
+  Reservation,
 };
