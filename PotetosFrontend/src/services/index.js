@@ -329,6 +329,12 @@ export const dashboardService = {
     const response = await api.get("/dashboard/today");
     return response.data;
   },
+
+  // Obtener estadísticas para el resumen admin
+  getAdminStats: async () => {
+    const response = await api.get("/dashboard/admin-stats");
+    return response.data;
+  },
 };
 
 // ========== RESERVATIONS ==========

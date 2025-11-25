@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import PasswordStrengthIndicator from "../../components/common/PasswordStrengthIndicator";
-import { userService, orderService } from "../../services";
+import { userService, orderService, dashboardService } from "../../services";
 import toast from "react-hot-toast";
 
 export default function SettingsPage() {
@@ -29,6 +29,11 @@ export default function SettingsPage() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [adminStats, setAdminStats] = useState({
+    totalUsers: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+  });
   const [userStats, setUserStats] = useState({
     totalOrders: 0,
     completedOrders: 0,
@@ -57,7 +62,20 @@ export default function SettingsPage() {
         phone: user.phone || "",
       });
     }
+    // Cargar estadísticas de admin si el usuario es admin
+    if (user?.role === "admin") {
+      fetchAdminStats();
+    }
   }, [user]);
+
+  const fetchAdminStats = async () => {
+    try {
+      const data = await dashboardService.getAdminStats();
+      setAdminStats(data);
+    } catch (error) {
+      console.error("Error cargando stats admin", error);
+    }
+  };
 
   const fetchUserStats = async () => {
     try {
@@ -141,6 +159,14 @@ export default function SettingsPage() {
       cajero: "Cajero",
     };
     return roles[role] || role;
+  };
+
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      minimumFractionDigits: 0,
+    }).format(value);
   };
 
   return (
@@ -369,6 +395,52 @@ export default function SettingsPage() {
                     </>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* Resumen del Sistema - Solo para Admin */}
+            {user?.role === "admin" && (
+              <div className="bg-white rounded-2xl shadow-md p-6">
+                <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  📈 Resumen del Sistema
+                </h3>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="bg-linear-to-r from-indigo-50 to-indigo-100 p-4 rounded-lg border border-indigo-200">
+                    <p className="text-xs text-indigo-600 font-semibold uppercase mb-1">
+                      Usuarios Registrados
+                    </p>
+                    <p className="text-2xl font-bold text-indigo-700">
+                      {adminStats.totalUsers}
+                    </p>
+                  </div>
+
+                  <div className="bg-linear-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                    <p className="text-xs text-blue-600 font-semibold uppercase mb-1">
+                      Órdenes Totales
+                    </p>
+                    <p className="text-2xl font-bold text-blue-700">
+                      {adminStats.totalOrders}
+                    </p>
+                  </div>
+
+                  <div className="bg-linear-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                    <p className="text-xs text-green-600 font-semibold uppercase mb-1">
+                      Ingresos (COP)
+                    </p>
+                    <p className="text-2xl font-bold text-green-700">
+                      {formatCurrency(adminStats.totalRevenue)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Enlace rápido a la gestión de usuarios */}
+                <button
+                  onClick={() => navigate("/dashboard/users")}
+                  className="mt-4 w-full flex items-center justify-center gap-2 bg-primary text-secondary py-2 rounded-lg hover:bg-primary/90 transition font-semibold"
+                >
+                  <User size={16} />
+                  Gestionar Usuarios
+                </button>
               </div>
             )}
 

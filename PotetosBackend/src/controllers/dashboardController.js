@@ -516,3 +516,38 @@ exports.getExportData = async (req, res) => {
     });
   }
 };
+
+// Obtener estadísticas para resumen admin en Settings
+exports.getAdminStats = async (req, res) => {
+  try {
+    // Total de usuarios registrados
+    const totalUsers = await User.count();
+
+    // Total de órdenes pagadas
+    const totalOrders = await Order.count({
+      where: {
+        status: "paid",
+      },
+    });
+
+    // Ingresos totales
+    const totalRevenue = await Order.sum("total_amount", {
+      where: {
+        status: "paid",
+      },
+    });
+
+    res.json({
+      totalUsers,
+      totalOrders,
+      totalRevenue: parseFloat(totalRevenue || 0),
+    });
+  } catch (error) {
+    console.error("Get admin stats error:", error);
+    res.status(500).json({
+      message: "Error al obtener estadísticas del sistema",
+      error: error.message,
+    });
+  }
+};
+

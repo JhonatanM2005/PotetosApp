@@ -20,6 +20,13 @@ router.get(
   dashboardController.getTodayStats
 );
 
+// Estadísticas para el resumen admin
+router.get(
+  "/admin-stats",
+  roleMiddleware("admin"),
+  dashboardController.getAdminStats
+);
+
 // Exportar datos para Excel
 router.get(
   "/export",
