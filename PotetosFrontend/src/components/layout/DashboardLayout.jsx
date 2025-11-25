@@ -34,10 +34,10 @@ export default function DashboardLayout({ children }) {
     {
       path: "/dashboard",
       icon: Home,
-      label: "Dashboard",
+      label: "Inicio",
       roles: ["admin", "mesero", "chef", "cajero"],
     },
-    {
+        {
       path: "/dashboard/stats",
       icon: BarChart3,
       label: "Estadísticas",
