@@ -945,7 +945,7 @@ export default function DashboardStats() {
                         </thead>
                         <tbody className="divide-y divide-gray-200">
                           {stats.topDishes.map((dish, index) => (
-                            <tr key={dish.dishId} className="hover:bg-gray-50">
+                            <tr key={`${dish.dishId}-${index}`} className="hover:bg-gray-50">
                               <td className="px-4 py-3">
                                 <div className="flex items-center">
                                   <div
