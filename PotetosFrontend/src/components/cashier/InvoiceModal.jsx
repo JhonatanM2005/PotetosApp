@@ -1,42 +1,8 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import DashboardLayout from "../../components/layout/DashboardLayout";
-import { cashierService } from "../../services";
-import { ArrowLeft, Printer, Download, FileText } from "lucide-react";
+import { X, Printer, Download } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-const InvoiceView = () => {
-  const { paymentId } = useParams();
-  const navigate = useNavigate();
-  const [payment, setPayment] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchPaymentDetail();
-  }, [paymentId]);
-
-  const fetchPaymentDetail = async () => {
-    try {
-      setLoading(true);
-      const data = await cashierService.getPaymentHistory();
-      const foundPayment = data.payments?.find(
-        (p) => p.id === parseInt(paymentId)
-      );
-      if (foundPayment) {
-        console.log("✅ Payment found:", foundPayment);
-        console.log("📦 Order items:", foundPayment.order?.items);
-        setPayment(foundPayment);
-      } else {
-        console.warn("❌ Payment not found with ID:", paymentId);
-      }
-    } catch (error) {
-      console.error("Error fetching payment:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export default function InvoiceModal({ payment, onClose }) {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("es-ES", {
       style: "currency",
@@ -63,6 +29,7 @@ const InvoiceView = () => {
         return "Tarjeta";
       case "transfer":
         return "Transferencia";
+      case "split":
       case "mixed":
         return "Mixto";
       default:
@@ -71,13 +38,17 @@ const InvoiceView = () => {
   };
 
   const handlePrint = () => {
+    const printContent = document.getElementById("invoice-content");
+    const originalContents = document.body.innerHTML;
+    
+    document.body.innerHTML = printContent.innerHTML;
     window.print();
+    document.body.innerHTML = originalContents;
+    window.location.reload(); // Reload to restore event listeners
   };
 
   const handleDownloadPDF = async () => {
     try {
-      console.log("📥 Iniciando generación de PDF...");
-
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -132,7 +103,7 @@ const InvoiceView = () => {
       pdf.setFont("helvetica", "bold");
       pdf.text("Fecha:", 15, yPosition + 12);
       pdf.setFont("helvetica", "normal");
-      pdf.text(formatDate(payment.paid_at), 45, yPosition + 12);
+      pdf.text(formatDate(payment.paid_at || payment.created_at), 45, yPosition + 12);
 
       // Columna derecha
       pdf.setFont("helvetica", "bold");
@@ -161,14 +132,15 @@ const InvoiceView = () => {
       yPosition += 8;
 
       // Tabla de items
-      const tableData = payment.order?.items && payment.order.items.length > 0
-        ? payment.order.items.map((item) => [
-            item.dish_name,
-            String(item.quantity),
-            formatCurrency(item.unit_price || item.subtotal / item.quantity),
-            formatCurrency(item.subtotal),
-          ])
-        : [["No hay items registrados", "", "", ""]];
+      const tableData =
+        payment.order?.items && payment.order.items.length > 0
+          ? payment.order.items.map((item) => [
+              item.dish_name,
+              String(item.quantity),
+              formatCurrency(item.unit_price || item.subtotal / item.quantity),
+              formatCurrency(item.subtotal),
+            ])
+          : [["No hay items registrados", "", "", ""]];
 
       autoTable(pdf, {
         startY: yPosition,
@@ -191,9 +163,6 @@ const InvoiceView = () => {
           3: { halign: "right", fontStyle: "bold" },
         },
         margin: { left: 15, right: 15 },
-        didDrawPage: function () {
-          // Nada aquí
-        },
       });
 
       yPosition = pdf.lastAutoTable.finalY + 10;
@@ -257,11 +226,7 @@ const InvoiceView = () => {
           yPosition += 5;
         });
       } else {
-        pdf.text(
-          `• ${getPaymentMethodLabel(payment.payment_method)}`,
-          20,
-          yPosition
-        );
+        pdf.text(`• ${getPaymentMethodLabel(payment.payment_method)}`, 20, yPosition);
       }
 
       // Footer
@@ -272,84 +237,57 @@ const InvoiceView = () => {
       pdf.text("Vuelve pronto a POTETOS", 105, yPosition + 5, { align: "center" });
 
       // Guardar el PDF
-      const fileName = `Factura_Orden_${payment.order?.order_number}_${new Date(
-        payment.paid_at
-      )
-        .toISOString()
-        .split("T")[0]}.pdf`;
+      const fileName = `Factura_Orden_${payment.order?.order_number}_${
+        new Date(payment.paid_at || payment.created_at).toISOString().split("T")[0]
+      }.pdf`;
 
-      console.log(`✅ Descargando PDF como: ${fileName}`);
       pdf.save(fileName);
     } catch (error) {
-      console.error("❌ Error descargando PDF:", error);
+      console.error("Error descargando PDF:", error);
       alert("Error al descargar el PDF: " + error.message);
     }
   };
 
-  if (loading) {
-    return (
-      <DashboardLayout>
-        <div className="p-8 flex items-center justify-center min-h-screen">
-          <div className="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full"></div>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (!payment) {
-    return (
-      <DashboardLayout>
-        <div className="p-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-primary hover:text-primary/80 mb-4"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Volver
-          </button>
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-600">Factura no encontrada</p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  if (!payment) return null;
 
   return (
-    <DashboardLayout>
-      <div className="p-8 bg-gray-50 min-h-screen">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-primary hover:text-primary/80 font-semibold"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Volver
-          </button>
-          <div className="flex gap-2">
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg transition font-semibold"
-            >
-              <Printer className="w-4 h-4" />
-              Imprimir
-            </button>
-            <button
-              onClick={handleDownloadPDF}
-              className="flex items-center gap-2 bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg transition font-semibold"
-            >
-              <Download className="w-4 h-4" />
-              Descargar PDF
-            </button>
+        <div className="bg-linear-to-br from-primary to-primary/90 text-white px-8 py-6 rounded-t-3xl sticky top-0 z-10">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-2xl md:text-3xl font-bold mb-2">Factura de Pago</h3>
+              <p className="text-white/80">Factura #{payment.id}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handlePrint}
+                className="p-2 bg-white/20 hover:bg-white/30 rounded-xl transition"
+                title="Imprimir"
+              >
+                <Printer className="w-5 h-5" />
+              </button>
+              <button
+                onClick={handleDownloadPDF}
+                className="p-2 bg-white/20 hover:bg-white/30 rounded-xl transition"
+                title="Descargar PDF"
+              >
+                <Download className="w-5 h-5" />
+              </button>
+              <button
+                onClick={onClose}
+                className="p-2 bg-white/20 hover:bg-white/30 rounded-xl transition"
+                title="Cerrar"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Invoice */}
-        <div
-          id="invoice-content"
-          className="bg-white rounded-lg shadow-lg p-12 max-w-2xl mx-auto"
-        >
+        {/* Invoice Content */}
+        <div id="invoice-content" className="p-8">
           {/* Header */}
           <div className="border-b-2 border-gray-300 pb-6 mb-6 text-center">
             <h1 className="text-3xl font-bold text-gray-900 mb-1">POTETOS</h1>
@@ -364,12 +302,11 @@ const InvoiceView = () => {
                 <span className="font-bold">Factura #:</span> {payment.id}
               </p>
               <p className="text-gray-600 text-sm mb-4">
-                <span className="font-bold">Orden #:</span>{" "}
-                {payment.order?.order_number}
+                <span className="font-bold">Orden #:</span> {payment.order?.order_number}
               </p>
               <p className="text-gray-600 text-sm">
                 <span className="font-bold">Fecha:</span>{" "}
-                {formatDate(payment.paid_at)}
+                {formatDate(payment.paid_at || payment.created_at)}
               </p>
             </div>
             <div className="text-right">
@@ -382,8 +319,7 @@ const InvoiceView = () => {
                 {payment.order?.waiter?.name || "N/A"}
               </p>
               <p className="text-gray-600 text-sm">
-                <span className="font-bold">Cajero:</span>{" "}
-                {payment.cashier?.name}
+                <span className="font-bold">Cajero:</span> {payment.cashier?.name || "N/A"}
               </p>
             </div>
           </div>
@@ -394,9 +330,7 @@ const InvoiceView = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b-2 border-gray-300">
-                  <th className="text-left py-2 px-2 font-bold text-gray-900">
-                    Producto
-                  </th>
+                  <th className="text-left py-2 px-2 font-bold text-gray-900">Producto</th>
                   <th className="text-center py-2 px-2 font-bold text-gray-900 w-16">
                     Cant.
                   </th>
@@ -413,13 +347,9 @@ const InvoiceView = () => {
                   payment.order.items.map((item) => (
                     <tr key={item.id} className="border-b border-gray-200">
                       <td className="py-3 px-2 text-gray-700">{item.dish_name}</td>
-                      <td className="text-center py-3 px-2 text-gray-700">
-                        {item.quantity}
-                      </td>
+                      <td className="text-center py-3 px-2 text-gray-700">{item.quantity}</td>
                       <td className="text-right py-3 px-2 text-gray-700">
-                        {formatCurrency(
-                          item.unit_price || item.subtotal / item.quantity
-                        )}
+                        {formatCurrency(item.unit_price || item.subtotal / item.quantity)}
                       </td>
                       <td className="text-right py-3 px-2 font-semibold text-gray-900">
                         {formatCurrency(item.subtotal)}
@@ -444,13 +374,11 @@ const InvoiceView = () => {
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-700">Subtotal:</span>
                   <span className="text-gray-700">
-                    {formatCurrency(payment.order?.total_amount)}
+                    {formatCurrency(payment.order?.total_amount || 0)}
                   </span>
                 </div>
                 <div className="flex justify-between mb-3 pb-3 border-b border-gray-300">
-                  <span className="text-gray-600 text-sm">
-                    IVA (incluido)
-                  </span>
+                  <span className="text-gray-600 text-sm">IVA (incluido)</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold text-gray-900">
                   <span>Total:</span>
@@ -465,8 +393,8 @@ const InvoiceView = () => {
             <p className="font-bold text-gray-900 mb-2">Método de Pago:</p>
             {payment.splits && payment.splits.length > 0 ? (
               <div className="text-sm text-gray-700 space-y-1">
-                {payment.splits.map((split) => (
-                  <p key={split.id}>
+                {payment.splits.map((split, idx) => (
+                  <p key={idx}>
                     • {getPaymentMethodLabel(split.payment_method)}:{" "}
                     {formatCurrency(split.amount)}
                   </p>
@@ -492,21 +420,14 @@ const InvoiceView = () => {
           body {
             background: white;
           }
-          .p-8 {
+          #invoice-content {
             padding: 0;
           }
-          #invoice-content {
-            box-shadow: none;
-            border: none;
-            max-width: 100%;
-          }
           button {
-            display: none;
+            display: none !important;
           }
         }
       `}</style>
-    </DashboardLayout>
+    </div>
   );
-};
-
-export default InvoiceView;
+}

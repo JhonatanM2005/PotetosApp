@@ -36,9 +36,6 @@ import DashboardPage from "./pages/dashboard/Dashboard";
 import DashboardStats from "./pages/dashboard/Stats";
 import KitchenPage from "./pages/dashboard/Kitchen";
 import CashierPage from "./pages/dashboard/Cashier";
-import PaymentHistoryPage from "./pages/dashboard/PaymentHistory";
-import InvoiceViewPage from "./pages/dashboard/InvoiceView";
-import InvoicesPage from "./pages/dashboard/Invoices";
 import UsersPage from "./pages/dashboard/Users";
 import OrdersPage from "./pages/dashboard/Orders";
 import MenuManagementPage from "./pages/dashboard/MenuManagement";
@@ -137,32 +134,7 @@ function App() {
           }
         />
 
-        <Route
-          path="/dashboard/payment-history"
-          element={
-            <ProtectedRoute>
-              <PaymentHistoryPage />
-            </ProtectedRoute>
-          }
-        />
 
-        <Route
-          path="/dashboard/invoice/:paymentId"
-          element={
-            <ProtectedRoute>
-              <InvoiceViewPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/dashboard/invoices"
-          element={
-            <ProtectedRoute>
-              <InvoicesPage />
-            </ProtectedRoute>
-          }
-        />
 
         <Route
           path="/dashboard/users"

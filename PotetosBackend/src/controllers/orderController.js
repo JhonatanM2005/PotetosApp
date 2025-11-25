@@ -121,6 +121,12 @@ exports.getAllOrders = async (req, res) => {
     // Serializar correctamente los datos
     const serializedOrders = orders.map((order) => {
       const orderData = order.toJSON();
+      
+      // Log para verificar payment_method
+      if (orderData.status === 'paid' && !orderData.payment_method) {
+        console.warn(`⚠️ Orden ${orderData.order_number} está pagada pero no tiene payment_method`);
+      }
+      
       // Asegurar que los items tengan todos los campos necesarios
       if (orderData.items) {
         orderData.items = orderData.items.map((item) => ({
@@ -303,7 +309,14 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     const oldStatus = order.status;
+    
+    // Log para rastrear payment_method
+    console.log(`🔄 Actualizando orden ${order.order_number} de ${oldStatus} a ${status}`);
+    console.log(`   payment_method antes: ${order.payment_method || 'null'}`);
+    
     await order.update({ status });
+    
+    console.log(`   payment_method después: ${order.payment_method || 'null'}`);
 
     // Liberar mesa solo cuando la orden está completada (pagada Y entregada)
     if (status === "paid" && order.table_id) {

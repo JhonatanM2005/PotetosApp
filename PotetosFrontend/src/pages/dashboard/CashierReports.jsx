@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { FileText, Download, Calendar, Receipt, Users } from "lucide-react";
+import { FileText, Download, Calendar, Receipt, Users, Eye } from "lucide-react";
 import api from "../../services/api";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import socketService from "../../services/socket";
+import InvoiceModal from "../../components/cashier/InvoiceModal";
 import toast from "react-hot-toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -14,6 +15,8 @@ const CashierReports = () => {
     new Date().toISOString().split("T")[0]
   );
   const [loading, setLoading] = useState(true);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
   useEffect(() => {
     fetchReports();
@@ -219,6 +222,23 @@ const CashierReports = () => {
     toast.success("Reporte generado exitosamente", {
       duration: 3000,
     });
+  };
+
+  const handleViewInvoice = (order) => {
+    // Convertir order a formato de payment para el InvoiceModal
+    const paymentData = {
+      id: order.id,
+      order_number: order.order_number,
+      amount: order.total_amount,
+      payment_method: order.payment_method,
+      paid_at: order.completed_at,
+      created_at: order.created_at,
+      order: order,
+      cashier: order.cashier,
+      splits: order.splits || [],
+    };
+    setSelectedPayment(paymentData);
+    setShowInvoiceModal(true);
   };
 
   if (loading) {
@@ -437,6 +457,9 @@ const CashierReports = () => {
                     <th className="px-4 py-3 text-left text-xs font-bold text-primary uppercase tracking-wider print:text-black">
                       Fecha
                     </th>
+                    <th className="px-4 py-3 text-center text-xs font-bold text-primary uppercase tracking-wider print:text-black print:hidden">
+                      Acciones
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
@@ -485,6 +508,16 @@ const CashierReports = () => {
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 print:text-black">
                         {formatDate(order.completed_at)}
                       </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-center print:hidden">
+                        <button
+                          onClick={() => handleViewInvoice(order)}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-all duration-200 hover:shadow-lg hover:scale-105"
+                          title="Ver Factura"
+                        >
+                          <Eye className="w-4 h-4" />
+                          Ver Factura
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -492,6 +525,17 @@ const CashierReports = () => {
             </div>
           )}
         </div>
+
+        {/* Invoice Modal */}
+        {showInvoiceModal && selectedPayment && (
+          <InvoiceModal
+            payment={selectedPayment}
+            onClose={() => {
+              setShowInvoiceModal(false);
+              setSelectedPayment(null);
+            }}
+          />
+        )}
       </div>
     </DashboardLayout>
   );

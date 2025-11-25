@@ -11,6 +11,7 @@ import {
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import ConfirmModal from "../../components/common/ConfirmModal";
 import { tableService } from "../../services";
+import socketService from "../../services/socket";
 import toast from "react-hot-toast";
 
 export default function TablesPage() {
@@ -30,6 +31,19 @@ export default function TablesPage() {
 
   useEffect(() => {
     fetchTables();
+    
+    // Escuchar eventos de Socket.io para actualizaciones de mesas
+    const handleTableUpdated = (data) => {
+      console.log("📡 Evento table:updated recibido:", data);
+      fetchTables(); // Recargar mesas cuando se actualiza una
+    };
+
+    socketService.on("table:updated", handleTableUpdated);
+
+    // Cleanup: remover listener cuando el componente se desmonte
+    return () => {
+      socketService.off("table:updated", handleTableUpdated);
+    };
   }, []);
 
   const fetchTables = async () => {

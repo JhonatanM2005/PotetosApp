@@ -34,7 +34,7 @@ exports.getPendingPayments = async (req, res) => {
 exports.processPayment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { payment_method, amount_paid, tip } = req.body;
+    const { payment_method, amount_paid, tip, customer_name } = req.body;
 
     if (!payment_method || !amount_paid) {
       return res.status(400).json({
@@ -80,17 +80,41 @@ exports.processPayment = async (req, res) => {
 
     const change = amountPaid - finalTotal;
 
-    // Guardar el estado original para verificar si liberar mesa
-    const wasDelivered = order.status === "delivered";
-
     // Actualizar orden
-    await order.update({
+    console.log(`💰 Procesando pago para orden ${order.order_number}`);
+    console.log(`   Método de pago: ${payment_method}`);
+    console.log(`   Usuario autenticado: ${req.user?.name || 'NO DISPONIBLE'} (ID: ${req.user?.id || 'NO DISPONIBLE'})`);
+    console.log(`   Rol del usuario: ${req.user?.role || 'NO DISPONIBLE'}`);
+    console.log(`   Nombre del cliente: ${customer_name || 'No especificado'}`);
+    
+    // Verificar que req.user existe
+    if (!req.user || !req.user.id) {
+      console.error('❌ ERROR: req.user no está disponible en processPayment');
+      return res.status(500).json({ 
+        message: "Error de autenticación: usuario no disponible",
+        error: "req.user is undefined" 
+      });
+    }
+    
+    // Preparar datos de actualización
+    const updateData = {
       status: "paid",
       payment_method,
       tip_amount: tipAmount,
       completed_at: new Date(),
       cashier_id: req.user.id,
-    });
+    };
+    
+    // Agregar customer_name si se proporcionó
+    if (customer_name) {
+      updateData.customer_name = customer_name;
+    }
+    
+    await order.update(updateData);
+    
+    console.log(`   payment_method guardado: ${order.payment_method}`);
+    console.log(`   cashier_id guardado: ${order.cashier_id}`);
+    console.log(`   customer_name guardado: ${order.customer_name || 'N/A'}`);
 
     // Recargar la orden con todas las relaciones
     await order.reload({
@@ -105,8 +129,9 @@ exports.processPayment = async (req, res) => {
       ],
     });
 
-    // Liberar mesa si existe y la orden fue entregada antes del pago
-    if (order.table_id && wasDelivered) {
+    // Liberar mesa SIEMPRE que exista (el pago completa la orden)
+    if (order.table_id) {
+      console.log(`🔓 Liberando mesa ${order.table?.table_number || order.table_id}`);
       await Table.update(
         { status: "available", current_order_id: null },
         { where: { id: order.table_id } }
@@ -115,6 +140,7 @@ exports.processPayment = async (req, res) => {
 
     // Emitir evento Socket.io
     if (global.io) {
+      // Evento de pago procesado
       global.io.emit("payment:processed", {
         orderId: order.id,
         orderNumber: order.order_number,
@@ -125,8 +151,9 @@ exports.processPayment = async (req, res) => {
         timestamp: new Date(),
       });
 
-      // Si se liberó una mesa, notificar también
-      if (order.table_id && wasDelivered) {
+      // Evento de mesa actualizada (para que los meseros vean la mesa disponible)
+      if (order.table_id) {
+        console.log(`📡 Emitiendo evento table:updated para mesa ${order.table_id}`);
         global.io.emit("table:updated", {
           tableId: order.table_id,
           status: "available",
@@ -514,6 +541,18 @@ exports.processPartialPayment = async (req, res) => {
     const amountPaidValue = parseFloat(amount_paid);
     const change = amountPaidValue - (parseFloat(amount_paid) + tipAmount);
 
+    // Verificar que req.user existe
+    if (!req.user || !req.user.id) {
+      console.error('❌ ERROR: req.user no está disponible en processPartialPayment');
+      return res.status(500).json({ 
+        message: "Error de autenticación: usuario no disponible",
+        error: "req.user is undefined" 
+      });
+    }
+
+    console.log(`💰 Procesando pago parcial ${personNumber}/${totalPeople} para orden ${order.order_number}`);
+    console.log(`   Cajero: ${req.user.name} (ID: ${req.user.id})`);
+
     // Registrar el pago parcial en metadata (puedes crear una tabla separada si prefieres)
     const partialPayments = order.metadata?.partialPayments || [];
     partialPayments.push({
@@ -534,6 +573,9 @@ exports.processPartialPayment = async (req, res) => {
       const totalPaid = partialPayments.reduce((sum, p) => sum + p.amount, 0);
       const totalTips = partialPayments.reduce((sum, p) => sum + p.tip, 0);
 
+      console.log(`✅ Completando pago dividido para orden ${order.order_number}`);
+      console.log(`   Cajero final: ${req.user.name} (ID: ${req.user.id})`);
+
       // Actualizar orden a pagada
       await order.update({
         status: "paid",
@@ -543,6 +585,8 @@ exports.processPartialPayment = async (req, res) => {
         cashier_id: req.user.id,
         metadata: { partialPayments },
       });
+      
+      console.log(`   cashier_id guardado: ${order.cashier_id}`);
 
       // Recargar con relaciones
       await order.reload({
