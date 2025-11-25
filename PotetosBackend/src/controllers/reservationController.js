@@ -55,7 +55,7 @@ exports.createReservation = async (req, res) => {
         number_of_people: reservation.number_of_people,
         notes: reservation.notes,
       });
-      console.log(`✅ Email de reserva enviado a ${reservation.email}`);
+
     } catch (emailError) {
       console.error("⚠️ Error al enviar email de reserva:", emailError.message);
       // No fallar la creación de la reserva si el email falla
@@ -234,13 +234,13 @@ exports.updateReservationStatus = async (req, res) => {
       // pending → confirmed: Email de confirmación
       if (oldStatus === "pending" && status === "confirmed") {
         await sendReservationConfirmedEmail(reservationData);
-        console.log(`✅ Email de confirmación enviado a ${reservation.email}`);
+
       }
       
       // cualquier estado → cancelled: Email de cancelación
       if (status === "cancelled") {
         await sendReservationCancelledEmail(reservationData);
-        console.log(`✅ Email de cancelación enviado a ${reservation.email}`);
+
       }
     } catch (emailError) {
       console.error("⚠️ Error al enviar email:", emailError.message);

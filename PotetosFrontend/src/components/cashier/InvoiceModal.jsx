@@ -1,12 +1,14 @@
-import { X, Printer, Download } from "lucide-react";
+import { X, Printer, Download, Receipt } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import logo from "../../assets/images/logo.png";
 
 export default function InvoiceModal({ payment, onClose }) {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("es-ES", {
       style: "currency",
       currency: "COP",
+      maximumFractionDigits: 0, // Sin decimales para ahorrar espacio en POS
     }).format(amount);
   };
 
@@ -47,6 +49,257 @@ export default function InvoiceModal({ payment, onClose }) {
     window.location.reload(); // Reload to restore event listeners
   };
 
+  const getImageBase64 = (url) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.setAttribute("crossOrigin", "anonymous");
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        const dataURL = canvas.toDataURL("image/png");
+        resolve(dataURL);
+      };
+      img.onerror = (error) => {
+        reject(error);
+      };
+      img.src = url;
+    });
+  };
+
+  const handleDownloadPOS = async () => {
+    try {
+      // 1. Calcular la altura necesaria
+      let calculatedHeight = 10; // Margen inicial
+      const margin = 5;
+      const pageWidth = 80;
+      
+      // Logo
+      calculatedHeight += 30 + 5; // Altura logo + espacio
+      
+      // Encabezado (Restaurante, Nit, Dir, Tel)
+      calculatedHeight += 4 + 4 + 4 + 4 + 8;
+      
+      // Separador
+      calculatedHeight += 5;
+      
+      // Info Orden (Orden, Fecha, Mesa, Mesero, Cajero)
+      calculatedHeight += 5 + 5 + 5 + 5 + 5 + 8;
+      
+      // Separador
+      calculatedHeight += 5;
+      
+      // Títulos Items
+      calculatedHeight += 5;
+      
+      // Items (Cálculo dinámico)
+      if (payment.order?.items) {
+        // Creamos un doc temporal para calcular alturas de texto
+        const tempPdf = new jsPDF();
+        tempPdf.setFont("courier", "normal");
+        tempPdf.setFontSize(9);
+        
+        payment.order.items.forEach((item) => {
+          const quantity = item.quantity;
+          const productName = item.dish_name;
+          
+          // Calculamos altura del texto del nombre con ancho máx de 45mm
+          // jsPDF usa puntos por defecto, convertimos mm a puntos aprox para splitTextToSize si fuera necesario,
+          // pero splitTextToSize toma unidades del documento.
+          // Mejor estimación:
+          const splitTitle = tempPdf.splitTextToSize(`${quantity}x ${productName}`, 45);
+          const titleHeight = splitTitle.length * 4; // 4mm por línea aprox
+          
+          calculatedHeight += Math.max(titleHeight, 5);
+        });
+      }
+      
+      calculatedHeight += 3; // Espacio antes de línea
+      calculatedHeight += 5; // Separador
+      
+      // Totales
+      calculatedHeight += 5; // Subtotal
+      
+      const tip = parseFloat(payment.tip || 0);
+      if (tip > 0) {
+        calculatedHeight += 5; // Propina
+      }
+      
+      calculatedHeight += 8; // Total
+      
+      // Método de Pago
+      calculatedHeight += 5; // Título
+      if (payment.splits && payment.splits.length > 0) {
+        calculatedHeight += payment.splits.length * 5;
+      } else {
+        calculatedHeight += 5;
+      }
+      
+      calculatedHeight += 10; // Espacio antes de footer
+      
+      // Footer
+      calculatedHeight += 4 + 4; // Gracias + Software
+      calculatedHeight += 10; // Margen final
+      
+      // 2. Generar PDF con altura calculada
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: [80, calculatedHeight],
+      });
+
+      let yPosition = 10;
+
+      // Estilos
+      pdf.setFont("courier", "normal");
+      pdf.setFontSize(9);
+      pdf.setTextColor(0, 0, 0);
+
+      // Logo
+      try {
+        const logoBase64 = await getImageBase64(logo);
+        const logoWidth = 30;
+        const logoX = (pageWidth - logoWidth) / 2;
+        pdf.addImage(logoBase64, "PNG", logoX, yPosition, logoWidth, logoWidth);
+        yPosition += logoWidth + 5;
+      } catch (error) {
+        console.error("Error loading logo for POS:", error);
+        pdf.setFontSize(14);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("POTETOS", pageWidth / 2, yPosition, { align: "center" });
+        yPosition += 8;
+      }
+
+      // Encabezado
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      pdf.text("Restaurante & Bar", pageWidth / 2, yPosition, { align: "center" });
+      yPosition += 4;
+      pdf.text("Nit: 900.123.456-7", pageWidth / 2, yPosition, { align: "center" });
+      yPosition += 4;
+      pdf.text("Calle 123 # 45-67, Ciudad", pageWidth / 2, yPosition, { align: "center" });
+      yPosition += 4;
+      pdf.text("Tel: 300 123 4567", pageWidth / 2, yPosition, { align: "center" });
+      yPosition += 8;
+
+      // Separador
+      pdf.setDrawColor(0, 0, 0);
+      pdf.setLineWidth(0.1);
+      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 5;
+
+      // Info Orden
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(`Orden: #${payment.order?.order_number || "N/A"}`, margin, yPosition);
+      yPosition += 5;
+      pdf.setFont("helvetica", "normal");
+      pdf.text(`Fecha: ${formatDate(payment.paid_at || payment.created_at)}`, margin, yPosition);
+      yPosition += 5;
+      pdf.text(`Mesa: ${payment.order?.table?.table_number || "N/A"}`, margin, yPosition);
+      yPosition += 5;
+      pdf.text(`Mesero: ${payment.order?.waiter?.name || "N/A"}`, margin, yPosition);
+      yPosition += 5;
+      pdf.text(`Cajero: ${payment.cashier?.name || "N/A"}`, margin, yPosition);
+      yPosition += 8;
+
+      // Separador
+      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 5;
+
+      // Items
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Cant. Producto", margin, yPosition);
+      pdf.text("Total", pageWidth - margin, yPosition, { align: "right" });
+      yPosition += 5;
+      pdf.setFont("helvetica", "normal");
+
+      if (payment.order?.items) {
+        payment.order.items.forEach((item) => {
+          const productName = item.dish_name;
+          const quantity = item.quantity;
+          const total = formatCurrency(item.subtotal);
+
+          // Primera línea: Cantidad y Nombre
+          pdf.text(`${quantity}x ${productName}`, margin, yPosition, { maxWidth: 45 });
+          
+          const splitTitle = pdf.splitTextToSize(`${quantity}x ${productName}`, 45);
+          const titleHeight = splitTitle.length * 4;
+          
+          pdf.text(total, pageWidth - margin, yPosition, { align: "right" });
+          
+          yPosition += Math.max(titleHeight, 5);
+        });
+      }
+
+      yPosition += 3;
+      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 5;
+
+      // Totales
+      pdf.setFont("helvetica", "bold");
+      
+      // Subtotal
+      pdf.text("Subtotal:", margin, yPosition);
+      pdf.text(formatCurrency(payment.order?.total_amount || 0), pageWidth - margin, yPosition, { align: "right" });
+      yPosition += 5;
+
+      // Propina (si hay)
+      if (tip > 0) {
+        pdf.text("Propina:", margin, yPosition);
+        pdf.text(formatCurrency(tip), pageWidth - margin, yPosition, { align: "right" });
+        yPosition += 5;
+      }
+
+      // Total
+      pdf.setFontSize(11);
+      pdf.text("TOTAL:", margin, yPosition);
+      pdf.text(formatCurrency(payment.amount), pageWidth - margin, yPosition, { align: "right" });
+      yPosition += 8;
+
+      // Método de Pago
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "normal");
+      pdf.text("Forma de Pago:", margin, yPosition);
+      yPosition += 5;
+
+      if (payment.splits && payment.splits.length > 0) {
+        payment.splits.forEach((split) => {
+          pdf.text(
+            `${getPaymentMethodLabel(split.payment_method)}: ${formatCurrency(split.amount)}`,
+            margin + 5,
+            yPosition
+          );
+          yPosition += 5;
+        });
+      } else {
+        pdf.text(
+          `${getPaymentMethodLabel(payment.payment_method)}: ${formatCurrency(payment.amount)}`,
+          margin + 5,
+          yPosition
+        );
+      }
+
+      yPosition += 10;
+      
+      // Footer
+      pdf.setFontSize(8);
+      pdf.text("¡Gracias por su compra!", pageWidth / 2, yPosition, { align: "center" });
+      yPosition += 4;
+      pdf.text("Software: PotetosApp", pageWidth / 2, yPosition, { align: "center" });
+
+      // Guardar PDF
+      const fileName = `Ticket_${payment.order?.order_number}.pdf`;
+      pdf.save(fileName);
+
+    } catch (error) {
+      console.error("Error generating POS ticket:", error);
+      alert("Error al generar ticket POS");
+    }
+  };
+
   const handleDownloadPDF = async () => {
     try {
       const pdf = new jsPDF({
@@ -61,13 +314,24 @@ export default function InvoiceModal({ payment, onClose }) {
 
       let yPosition = 15;
 
-      // Header - POTETOS
-      pdf.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
-      pdf.setFontSize(24);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("POTETOS", 105, yPosition, { align: "center" });
+      // Header - LOGO
+      try {
+        const logoBase64 = await getImageBase64(logo);
+        // Centrar logo: A4 width es 210mm.
+        // Asumimos un ancho de logo de 40mm.
+        // x = (210 - 40) / 2 = 85
+        pdf.addImage(logoBase64, "PNG", 85, yPosition, 40, 40); // x, y, w, h
+        yPosition += 45; // Espacio para el logo
+      } catch (error) {
+        console.error("Error loading logo for PDF:", error);
+        // Fallback text si falla el logo
+        pdf.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+        pdf.setFontSize(24);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("POTETOS", 105, yPosition + 10, { align: "center" });
+        yPosition += 20;
+      }
 
-      yPosition += 8;
       pdf.setFontSize(10);
       pdf.setFont("helvetica", "normal");
       pdf.setTextColor(grayText[0], grayText[1], grayText[2]);
@@ -269,9 +533,17 @@ export default function InvoiceModal({ payment, onClose }) {
                 <Printer className="w-5 h-5" />
               </button>
               <button
+                onClick={handleDownloadPOS}
+                className="p-2 bg-white/20 hover:bg-white/30 rounded-xl transition flex items-center gap-1"
+                title="Ticket POS"
+              >
+                <Receipt className="w-5 h-5" />
+                <span className="text-xs font-bold hidden sm:inline">POS</span>
+              </button>
+              <button
                 onClick={handleDownloadPDF}
                 className="p-2 bg-white/20 hover:bg-white/30 rounded-xl transition"
-                title="Descargar PDF"
+                title="Descargar PDF A4"
               >
                 <Download className="w-5 h-5" />
               </button>
@@ -290,7 +562,7 @@ export default function InvoiceModal({ payment, onClose }) {
         <div id="invoice-content" className="p-8">
           {/* Header */}
           <div className="border-b-2 border-gray-300 pb-6 mb-6 text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-1">POTETOS</h1>
+            <img src={logo} alt="Potetos Logo" className="h-24 mx-auto mb-4 object-contain" />
             <p className="text-gray-600">Restaurante & Bar</p>
             <p className="text-gray-600 text-sm">Factura de Pago</p>
           </div>

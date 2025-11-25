@@ -81,11 +81,7 @@ exports.processPayment = async (req, res) => {
     const change = amountPaid - finalTotal;
 
     // Actualizar orden
-    console.log(`💰 Procesando pago para orden ${order.order_number}`);
-    console.log(`   Método de pago: ${payment_method}`);
-    console.log(`   Usuario autenticado: ${req.user?.name || 'NO DISPONIBLE'} (ID: ${req.user?.id || 'NO DISPONIBLE'})`);
-    console.log(`   Rol del usuario: ${req.user?.role || 'NO DISPONIBLE'}`);
-    console.log(`   Nombre del cliente: ${customer_name || 'No especificado'}`);
+
     
     // Verificar que req.user existe
     if (!req.user || !req.user.id) {
@@ -112,9 +108,7 @@ exports.processPayment = async (req, res) => {
     
     await order.update(updateData);
     
-    console.log(`   payment_method guardado: ${order.payment_method}`);
-    console.log(`   cashier_id guardado: ${order.cashier_id}`);
-    console.log(`   customer_name guardado: ${order.customer_name || 'N/A'}`);
+
 
     // Recargar la orden con todas las relaciones
     await order.reload({
@@ -131,7 +125,7 @@ exports.processPayment = async (req, res) => {
 
     // Liberar mesa SIEMPRE que exista (el pago completa la orden)
     if (order.table_id) {
-      console.log(`🔓 Liberando mesa ${order.table?.table_number || order.table_id}`);
+
       await Table.update(
         { status: "available", current_order_id: null },
         { where: { id: order.table_id } }
@@ -550,8 +544,7 @@ exports.processPartialPayment = async (req, res) => {
       });
     }
 
-    console.log(`💰 Procesando pago parcial ${personNumber}/${totalPeople} para orden ${order.order_number}`);
-    console.log(`   Cajero: ${req.user.name} (ID: ${req.user.id})`);
+
 
     // Registrar el pago parcial en metadata (puedes crear una tabla separada si prefieres)
     const partialPayments = order.metadata?.partialPayments || [];
@@ -573,8 +566,7 @@ exports.processPartialPayment = async (req, res) => {
       const totalPaid = partialPayments.reduce((sum, p) => sum + p.amount, 0);
       const totalTips = partialPayments.reduce((sum, p) => sum + p.tip, 0);
 
-      console.log(`✅ Completando pago dividido para orden ${order.order_number}`);
-      console.log(`   Cajero final: ${req.user.name} (ID: ${req.user.id})`);
+
 
       // Actualizar orden a pagada
       await order.update({
@@ -586,7 +578,7 @@ exports.processPartialPayment = async (req, res) => {
         metadata: { partialPayments },
       });
       
-      console.log(`   cashier_id guardado: ${order.cashier_id}`);
+
 
       // Recargar con relaciones
       await order.reload({

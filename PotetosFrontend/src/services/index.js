@@ -400,9 +400,7 @@ export const cashierService = {
 
   // Procesar pago de una orden
   processPayment: async (orderId, data) => {
-    console.log("💳 [Cashier] Procesando pago para orden:", orderId);
     const response = await api.post(`/cashier/payment/${orderId}/process`, data);
-    console.log("✅ [Cashier] Pago procesado, respuesta recibida:", response.data);
     return response.data;
   },
 

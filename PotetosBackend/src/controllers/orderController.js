@@ -311,12 +311,7 @@ exports.updateOrderStatus = async (req, res) => {
     const oldStatus = order.status;
     
     // Log para rastrear payment_method
-    console.log(`🔄 Actualizando orden ${order.order_number} de ${oldStatus} a ${status}`);
-    console.log(`   payment_method antes: ${order.payment_method || 'null'}`);
-    
-    await order.update({ status });
-    
-    console.log(`   payment_method después: ${order.payment_method || 'null'}`);
+
 
     // Liberar mesa solo cuando la orden está completada (pagada Y entregada)
     if (status === "paid" && order.table_id) {
