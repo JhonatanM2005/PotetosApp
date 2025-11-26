@@ -34,7 +34,7 @@ export default function TablesPage() {
     
     // Escuchar eventos de Socket.io para actualizaciones de mesas
     const handleTableUpdated = (data) => {
-      console.log("📡 Evento table:updated recibido:", data);
+      console.log("Evento table:updated recibido:", data);
       fetchTables(); // Recargar mesas cuando se actualiza una
     };
 

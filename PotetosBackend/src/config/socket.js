@@ -34,7 +34,7 @@ module.exports = (server) => {
   io.on("connection", (socket) => {
     // Guardar mapeo de token a socket ID
     tokenToSocketMap.set(socket.token, socket.id);
-    console.log(`✅ Socket connected: ${socket.id} for user ${socket.user.email}`);
+    console.log(`Socket connected: ${socket.id} for user ${socket.user.email}`);
 
     // Unir a sala según rol
     if (socket.user.role === "chef") {
@@ -47,7 +47,7 @@ module.exports = (server) => {
 
     if (socket.user.role === "cajero" || socket.user.role === "admin") {
       socket.join("cashier");
-      console.log(`💳 Cashier joined cashier room`);
+      console.log(`Cashier joined cashier room`);
     }
 
     // Evento: Nuevo pedido creado
@@ -71,7 +71,7 @@ module.exports = (server) => {
     socket.on("disconnect", () => {
       // Limpiar mapeo cuando el socket se desconecta
       tokenToSocketMap.delete(socket.token);
-      console.log(`❌ Socket disconnected: ${socket.id}`);
+      console.log(`Socket disconnected: ${socket.id}`);
     });
   });
 
@@ -85,7 +85,7 @@ module.exports = (server) => {
           message ||
           "Tu sesión ha sido cerrada porque iniciaste sesión en otro dispositivo",
       });
-      console.log(`🔒 Session closed remotely for socket: ${socketId}`);
+      console.log(`Session closed remotely for socket: ${socketId}`);
     }
   };
 

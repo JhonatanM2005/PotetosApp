@@ -16,17 +16,17 @@ const io = socketConfig(server);
 sequelize
   .authenticate()
   .then(() => {
-    console.log("✅ Database connected successfully");
+    console.log("Database connected successfully");
     return sequelize.sync({ alter: false }); // Cambiar a 'true' solo en desarrollo
   })
   .then(() => {
     server.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📡 Socket.io ready for real-time connections`);
+      console.log(`Server running on port ${PORT}`);
+      console.log(`Socket.io ready for real-time connections`);
     });
   })
   .catch((err) => {
-    console.error("❌ Unable to connect to database:", err);
+    console.error("Unable to connect to database:", err);
     process.exit(1);
   });
 // trigger

@@ -65,6 +65,12 @@ const CashierReports = () => {
     }
   };
 
+  // Helper para parsear fechas ISO como locales (evita problemas de zona horaria)
+  const parseLocalDate = (dateString) => {
+    const [year, month, day] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString("es-ES", {
       year: "numeric",
@@ -92,7 +98,7 @@ const CashierReports = () => {
     // Fecha
     doc.setFontSize(12);
     doc.setFont(undefined, "normal");
-    const formattedDate = new Date(cashClosing.date).toLocaleDateString(
+    const formattedDate = parseLocalDate(cashClosing.date).toLocaleDateString(
       "es-ES",
       {
         weekday: "long",
@@ -299,7 +305,7 @@ const CashierReports = () => {
                 </h2>
                 <p className="text-gray-600">
                   Fecha:{" "}
-                  {new Date(cashClosing.date).toLocaleDateString("es-ES", {
+                  {parseLocalDate(cashClosing.date).toLocaleDateString("es-ES", {
                     weekday: "long",
                     year: "numeric",
                     month: "long",

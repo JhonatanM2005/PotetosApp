@@ -8,9 +8,9 @@
  * @param {Object} paymentData - Datos del pago
  */
 exports.emitPaymentProcessed = (paymentData) => {
-  console.log("🔍 [emitPaymentProcessed] Emitiendo pago procesado:", paymentData);
+  console.log("[emitPaymentProcessed] Emitiendo pago procesado:", paymentData);
   if (global.io) {
-    console.log("✅ global.io existe, emitiendo a sala 'cashier'");
+    console.log("global.io existe, emitiendo a sala 'cashier'");
     const event = {
       orderId: paymentData.orderId,
       orderNumber: paymentData.orderNumber,
@@ -20,11 +20,11 @@ exports.emitPaymentProcessed = (paymentData) => {
       status: "paid",
       timestamp: new Date(),
     };
-    console.log("📤 Evento a emitir:", event);
+    console.log("Evento a emitir:", event);
     global.io.to("cashier").emit("cashier:paymentProcessed", event);
-    console.log(`💰 Payment processed notification sent to cashier room`);
+    console.log(`Payment processed notification sent to cashier room`);
   } else {
-    console.error("❌ global.io no existe!");
+    console.error("global.io no existe!");
   }
 };
 
@@ -41,7 +41,7 @@ exports.emitOrderDelivered = (orderData) => {
       tableId: orderData.table_id,
       timestamp: new Date(),
     });
-    console.log(`📦 New delivered order notification sent to cashier room`);
+    console.log(`New delivered order notification sent to cashier room`);
   }
 };
 
@@ -53,7 +53,7 @@ exports.emitOrdersUpdated = () => {
     global.io.to("cashier").emit("cashier:ordersUpdated", {
       timestamp: new Date(),
     });
-    console.log(`🔄 Orders updated notification sent to cashier room`);
+    console.log(`Orders updated notification sent to cashier room`);
   }
 };
 
@@ -67,6 +67,6 @@ exports.emitStatsUpdated = (stats) => {
       stats,
       timestamp: new Date(),
     });
-    console.log(`📊 Stats updated notification sent to cashier room`);
+    console.log(`Stats updated notification sent to cashier room`);
   }
 };

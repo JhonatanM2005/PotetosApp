@@ -206,7 +206,7 @@ const sendPasswordResetCode = async (email, code) => {
     });
     return { success: true, response };
   } catch (error) {
-    console.error("❌ Error al enviar email:", error);
+    console.error("Error al enviar email:", error);
     throw error;
   }
 };
@@ -285,12 +285,12 @@ const sendReservationCreatedEmail = async (reservationData) => {
   try {
     const response = await sendEmailThroughBrevo({
       to: email,
-      subject: "✅ Reserva Recibida - POTETOS Restaurant",
+      subject: "Reserva Recibida - POTETOS Restaurant",
       html,
     });
     return { success: true, response };
   } catch (error) {
-    console.error("❌ Error al enviar email de reserva creada:", error);
+    console.error("Error al enviar email de reserva creada:", error);
     throw error;
   }
 };
@@ -376,7 +376,7 @@ const sendReservationConfirmedEmail = async (reservationData) => {
     });
     return { success: true, response };
   } catch (error) {
-    console.error("❌ Error al enviar email de reserva confirmada:", error);
+    console.error("Error al enviar email de reserva confirmada:", error);
     throw error;
   }
 };
@@ -450,7 +450,7 @@ const sendReservationCancelledEmail = async (reservationData) => {
     });
     return { success: true, response };
   } catch (error) {
-    console.error("❌ Error al enviar email de reserva cancelada:", error);
+    console.error("Error al enviar email de reserva cancelada:", error);
     throw error;
   }
 };

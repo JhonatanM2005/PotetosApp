@@ -2,7 +2,7 @@ const { Sequelize } = require("sequelize");
 
 // Verificar que la URL de la base de datos está configurada
 if (!process.env.DATABASE_URL) {
-  console.error("❌ DATABASE_URL no está definida en .env");
+  console.error("DATABASE_URL no está definida en .env");
   process.exit(1);
 }
 

@@ -85,7 +85,7 @@ exports.processPayment = async (req, res) => {
     
     // Verificar que req.user existe
     if (!req.user || !req.user.id) {
-      console.error('❌ ERROR: req.user no está disponible en processPayment');
+      console.error('ERROR: req.user no está disponible en processPayment');
       return res.status(500).json({ 
         message: "Error de autenticación: usuario no disponible",
         error: "req.user is undefined" 
@@ -147,7 +147,7 @@ exports.processPayment = async (req, res) => {
 
       // Evento de mesa actualizada (para que los meseros vean la mesa disponible)
       if (order.table_id) {
-        console.log(`📡 Emitiendo evento table:updated para mesa ${order.table_id}`);
+        console.log(`Emitiendo evento table:updated para mesa ${order.table_id}`);
         global.io.emit("table:updated", {
           tableId: order.table_id,
           status: "available",
@@ -537,7 +537,7 @@ exports.processPartialPayment = async (req, res) => {
 
     // Verificar que req.user existe
     if (!req.user || !req.user.id) {
-      console.error('❌ ERROR: req.user no está disponible en processPartialPayment');
+      console.error('ERROR: req.user no está disponible en processPartialPayment');
       return res.status(500).json({ 
         message: "Error de autenticación: usuario no disponible",
         error: "req.user is undefined" 

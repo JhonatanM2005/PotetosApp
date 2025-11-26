@@ -1,4 +1,4 @@
-import { X, Printer, Download, Receipt } from "lucide-react";
+import { X, Download, Receipt } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logo from "../../assets/images/logo.png";
@@ -39,15 +39,7 @@ export default function InvoiceModal({ payment, onClose }) {
     }
   };
 
-  const handlePrint = () => {
-    const printContent = document.getElementById("invoice-content");
-    const originalContents = document.body.innerHTML;
-    
-    document.body.innerHTML = printContent.innerHTML;
-    window.print();
-    document.body.innerHTML = originalContents;
-    window.location.reload(); // Reload to restore event listeners
-  };
+
 
   const getImageBase64 = (url) => {
     return new Promise((resolve, reject) => {
@@ -525,13 +517,6 @@ export default function InvoiceModal({ payment, onClose }) {
               <p className="text-white/80">Factura #{payment.id}</p>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={handlePrint}
-                className="p-2 bg-white/20 hover:bg-white/30 rounded-xl transition"
-                title="Imprimir"
-              >
-                <Printer className="w-5 h-5" />
-              </button>
               <button
                 onClick={handleDownloadPOS}
                 className="p-2 bg-white/20 hover:bg-white/30 rounded-xl transition flex items-center gap-1"
