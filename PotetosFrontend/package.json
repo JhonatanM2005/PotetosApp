@@ -1,7 +1,18 @@
 {
   "name": "potetosfrontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Frontend para Sistema de Gestión de Restaurantes POTETOS",
+  "author": "Jhonatan Mendez <mendezjhonatan00@gmail.com> (https://github.com/JhonatanM2005)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JhonatanM2005/PotetosApp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JhonatanM2005/PotetosApp/issues"
+  },
+  "homepage": "https://github.com/JhonatanM2005/PotetosApp#readme",
   "type": "module",
   "scripts": {
     "dev": "vite",

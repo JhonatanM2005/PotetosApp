@@ -1,3 +1,12 @@
+/**
+ * PotetosApp - Sistema de Gestión para Restaurantes
+ *
+ * Copyright (c) 2025 Jhonatan Mendez
+ *
+ * This software is licensed under the MIT License.
+ * See the LICENSE file in the root directory for full license text.
+ */
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -96,14 +105,70 @@ function App() {
         {/* Routes with Layout (Navbar + Footer) - Public Pages */}
         <Route element={<Layout />}>
           {/* Public Routes - Wrapped with PublicRoute */}
-          <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
-          <Route path="/menu" element={<PublicRoute><MenuPage /></PublicRoute>} />
-          <Route path="/reservations" element={<PublicRoute><ReservationsPage /></PublicRoute>} />
-          <Route path="/about" element={<PublicRoute><AboutPage /></PublicRoute>} />
-          <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-          <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
-          <Route path="/verify-code" element={<PublicRoute><VerifyCodePage /></PublicRoute>} />
-          <Route path="/reset-password" element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
+          <Route
+            path="/"
+            element={
+              <PublicRoute>
+                <Home />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/menu"
+            element={
+              <PublicRoute>
+                <MenuPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/reservations"
+            element={
+              <PublicRoute>
+                <ReservationsPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <PublicRoute>
+                <AboutPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicRoute>
+                <ForgotPasswordPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/verify-code"
+            element={
+              <PublicRoute>
+                <VerifyCodePage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <PublicRoute>
+                <ResetPasswordPage />
+              </PublicRoute>
+            }
+          />
         </Route>
 
         {/* Protected Routes - Without Layout (Dashboard has its own sidebar) */}
@@ -133,8 +198,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-
 
         <Route
           path="/dashboard/users"

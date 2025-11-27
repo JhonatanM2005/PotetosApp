@@ -13,8 +13,16 @@
     "erp",
     "api"
   ],
-  "author": "",
+  "author": "Jhonatan Mendez <mendezjhonatan00@gmail.com> (https://github.com/JhonatanM2005)",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JhonatanM2005/PotetosApp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JhonatanM2005/PotetosApp/issues"
+  },
+  "homepage": "https://github.com/JhonatanM2005/PotetosApp#readme",
   "type": "commonjs",
   "dependencies": {
     "bcryptjs": "^3.0.3",

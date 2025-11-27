@@ -1,4 +1,22 @@
 {
+  "name": "potetosapp",
+  "version": "1.0.0",
+  "description": "Sistema de Gestión Integral para Restaurantes",
+  "author": "Jhonatan Mendez <mendezjhonatan00@gmail.com> (https://github.com/JhonatanM2005)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JhonatanM2005/PotetosApp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JhonatanM2005/PotetosApp/issues"
+  },
+  "homepage": "https://github.com/JhonatanM2005/PotetosApp#readme",
+  "private": true,
+  "workspaces": [
+    "PotetosBackend",
+    "PotetosFrontend"
+  ],
   "dependencies": {
     "jspdf-autotable": "^5.0.2"
   }
