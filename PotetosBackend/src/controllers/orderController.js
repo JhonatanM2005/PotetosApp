@@ -121,12 +121,14 @@ exports.getAllOrders = async (req, res) => {
     // Serializar correctamente los datos
     const serializedOrders = orders.map((order) => {
       const orderData = order.toJSON();
-      
+
       // Log para verificar payment_method
-      if (orderData.status === 'paid' && !orderData.payment_method) {
-        console.warn(`⚠️ Orden ${orderData.order_number} está pagada pero no tiene payment_method`);
+      if (orderData.status === "paid" && !orderData.payment_method) {
+        console.warn(
+          `⚠️ Orden ${orderData.order_number} está pagada pero no tiene payment_method`
+        );
       }
-      
+
       // Asegurar que los items tengan todos los campos necesarios
       if (orderData.items) {
         orderData.items = orderData.items.map((item) => ({
@@ -309,7 +311,7 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     const oldStatus = order.status;
-    
+
     // Actualizar el estado de la orden primero
     await order.update({ status });
 
