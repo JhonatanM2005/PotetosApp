@@ -6,7 +6,7 @@ Sistema de gestión integral para restaurantes con gestión de órdenes, cocina,
 ![React](https://img.shields.io/badge/React-18.3-blue)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-blue)
 ![Socket.io](https://img.shields.io/badge/Socket.io-4.0+-purple)
-![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-06B6D4)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.1-06B6D4)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## 📑 Tabla de Contenido
