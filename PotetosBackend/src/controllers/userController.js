@@ -1,5 +1,6 @@
 const { User, Order } = require("../models");
 const { Op } = require("sequelize");
+const bcrypt = require("bcryptjs");
 
 // Función de validación de contraseña segura
 const validatePassword = (password) => {
@@ -171,8 +172,8 @@ exports.createUser = async (req, res) => {
       });
     }
 
-    // Verificar si el email ya existe
-    const existingUser = await User.findOne({ where: { email } });
+    // Verificar si el email ya existe (insensible a mayúsculas)
+    const existingUser = await User.findOne({ where: { email: { [Op.iLike]: email } } });
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
     }
@@ -216,9 +217,9 @@ exports.updateUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Verificar si el email ya existe (en otro usuario)
-    if (email && email !== user.email) {
-      const existingUser = await User.findOne({ where: { email } });
+    // Verificar si el email ya existe (en otro usuario, insensible a mayúsculas)
+    if (email && email.toLowerCase() !== user.email.toLowerCase()) {
+      const existingUser = await User.findOne({ where: { email: { [Op.iLike]: email } } });
       if (existingUser) {
         return res.status(400).json({ message: "Email already exists" });
       }
@@ -256,13 +257,17 @@ exports.deleteUser = async (req, res) => {
     const { id } = req.params;
 
     // No permitir eliminar al usuario actual
-    if (req.user.id === parseInt(id)) {
+    const userId = parseInt(id, 10);
+    if (isNaN(userId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+    if (req.user.id === userId) {
       return res
         .status(400)
         .json({ message: "Cannot delete your own account" });
     }
 
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(userId);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -313,7 +318,6 @@ exports.changePassword = async (req, res) => {
 
     // Verificar que no esté en el historial de contraseñas (últimas 3)
     const passwordHistory = user.password_history || [];
-    const bcrypt = require("bcryptjs");
 
     for (const oldPasswordHash of passwordHistory) {
       const isReused = await bcrypt.compare(newPassword, oldPasswordHash);
@@ -345,13 +349,17 @@ exports.toggleUserStatus = async (req, res) => {
     const { id } = req.params;
 
     // No permitir desactivar al usuario actual
-    if (req.user.id === parseInt(id)) {
+    const userId = parseInt(id, 10);
+    if (isNaN(userId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+    if (req.user.id === userId) {
       return res
         .status(400)
         .json({ message: "Cannot deactivate your own account" });
     }
 
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(userId);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

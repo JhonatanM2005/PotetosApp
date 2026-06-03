@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const { User, PasswordReset } = require("../models");
 const { sendPasswordResetCode } = require("../services/emailService");
 const { Op } = require("sequelize");
@@ -45,10 +46,10 @@ exports.login = async (req, res) => {
     }
 
     // Buscar usuario (búsqueda insensible a mayúsculas usando Op.iLike)
-    const user = await User.findOne({ 
-      where: { 
-        email: { [Op.iLike]: email } 
-      } 
+    const user = await User.findOne({
+      where: {
+        email: { [Op.iLike]: email }
+      }
     });
 
     if (!user || !user.is_active) {
@@ -151,10 +152,10 @@ exports.updateProfile = async (req, res) => {
     // Verificar si el email ya existe (en otro usuario)
     // Usar Op.iLike para comparación insensible a mayúsculas
     if (email && email.toLowerCase() !== user.email.toLowerCase()) {
-      const existingUser = await User.findOne({ 
-        where: { 
-          email: { [Op.iLike]: email } 
-        } 
+      const existingUser = await User.findOne({
+        where: {
+          email: { [Op.iLike]: email }
+        }
       });
       if (existingUser) {
         return res.status(400).json({ message: "Email already exists" });
@@ -230,7 +231,6 @@ exports.changePassword = async (req, res) => {
 
     // Verificar que no esté en el historial de contraseñas (últimas 3)
     const passwordHistory = user.password_history || [];
-    const bcrypt = require("bcryptjs");
 
     for (const oldPasswordHash of passwordHistory) {
       const isReused = await bcrypt.compare(newPassword, oldPasswordHash);
@@ -267,10 +267,10 @@ exports.forgotPassword = async (req, res) => {
     }
 
     // Verificar que el usuario existe (búsqueda insensible a mayúsculas)
-    const user = await User.findOne({ 
-      where: { 
-        email: { [Op.iLike]: email } 
-      } 
+    const user = await User.findOne({
+      where: {
+        email: { [Op.iLike]: email }
+      }
     });
 
     if (!user) {
@@ -346,7 +346,7 @@ exports.verifyResetCode = async (req, res) => {
       });
     }
 
-    // Verificar intentos
+    // Verificar intentos antes de validar
     if (resetCode.attempts >= 3) {
       await resetCode.update({ used: true });
       return res.status(400).json({
@@ -354,13 +354,20 @@ exports.verifyResetCode = async (req, res) => {
       });
     }
 
-    // Incrementar intentos si el código no coincide
+    // Incrementar intentos y verificar código
+    await resetCode.increment("attempts");
+    await resetCode.reload();
+
     if (resetCode.code !== code) {
-      await resetCode.increment("attempts");
+      const remaining = 3 - resetCode.attempts;
+      if (remaining <= 0) {
+        await resetCode.update({ used: true });
+        return res.status(400).json({
+          message: "Maximum attempts exceeded. Please request a new code",
+        });
+      }
       return res.status(400).json({
-        message: `Invalid code. ${
-          3 - (resetCode.attempts + 1)
-        } attempts remaining`,
+        message: `Invalid code. ${remaining} attempts remaining`,
       });
     }
 
@@ -421,10 +428,10 @@ exports.resetPassword = async (req, res) => {
     }
 
     // Buscar usuario (búsqueda insensible a mayúsculas)
-    const user = await User.findOne({ 
-      where: { 
-        email: { [Op.iLike]: email } 
-      } 
+    const user = await User.findOne({
+      where: {
+        email: { [Op.iLike]: email }
+      }
     });
 
     if (!user) {
@@ -442,7 +449,6 @@ exports.resetPassword = async (req, res) => {
 
     // Verificar que no esté en el historial de contraseñas (últimas 3)
     const passwordHistory = user.password_history || [];
-    const bcrypt = require("bcryptjs");
 
     for (const oldPasswordHash of passwordHistory) {
       const isReused = await bcrypt.compare(newPassword, oldPasswordHash);

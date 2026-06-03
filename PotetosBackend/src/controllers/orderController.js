@@ -374,15 +374,31 @@ exports.updateOrderStatus = async (req, res) => {
 // Obtener estadísticas de órdenes
 exports.getOrderStats = async (req, res) => {
   try {
+    const { sequelize } = require("../models");
+    const rows = await Order.findAll({
+      attributes: [
+        "status",
+        [sequelize.fn("COUNT", sequelize.col("id")), "count"],
+      ],
+      group: ["status"],
+      raw: true,
+    });
+
     const stats = {
-      total: await Order.count(),
-      pending: await Order.count({ where: { status: "pending" } }),
-      preparing: await Order.count({ where: { status: "preparing" } }),
-      ready: await Order.count({ where: { status: "ready" } }),
-      delivered: await Order.count({ where: { status: "delivered" } }),
-      paid: await Order.count({ where: { status: "paid" } }),
-      cancelled: await Order.count({ where: { status: "cancelled" } }),
+      total: 0,
+      pending: 0,
+      preparing: 0,
+      ready: 0,
+      delivered: 0,
+      paid: 0,
+      cancelled: 0,
     };
+
+    rows.forEach(({ status, count }) => {
+      const n = parseInt(count, 10);
+      if (status in stats) stats[status] = n;
+      stats.total += n;
+    });
 
     res.json({ stats });
   } catch (error) {

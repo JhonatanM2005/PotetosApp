@@ -82,10 +82,10 @@ const Order = sequelize.define(
     updatedAt: "updated_at",
     hooks: {
       beforeCreate: async (order) => {
-        // Generar número de orden único
-        const date = new Date();
-        const timestamp = date.getTime().toString().slice(-6);
-        order.order_number = `ORD-${timestamp}`;
+        // Generar número de orden único usando timestamp + random para evitar colisiones
+        const timestamp = Date.now().toString(36).toUpperCase();
+        const random = Math.random().toString(36).slice(2, 5).toUpperCase();
+        order.order_number = `ORD-${timestamp}-${random}`;
       },
     },
   }

@@ -345,7 +345,7 @@ exports.getExportData = async (req, res) => {
         // Obtener datos agregados sin incluir relaciones en el GROUP BY
         const productsRaw = await sequelize.query(
           `
-          SELECT 
+          SELECT
             oi.dish_id,
             oi.dish_name,
             SUM(oi.quantity) as "totalVendido",
@@ -354,17 +354,17 @@ exports.getExportData = async (req, res) => {
           FROM order_items oi
           INNER JOIN orders o ON oi.order_id = o.id
           WHERE o.status = 'paid'
-          ${
-            startDate && endDate
-              ? `AND o.created_at BETWEEN '${new Date(
-                  startDate
-                ).toISOString()}' AND '${new Date(endDate).toISOString()}'`
-              : ""
-          }
+          ${startDate && endDate ? "AND o.created_at BETWEEN :startDate AND :endDate" : ""}
           GROUP BY oi.dish_id, oi.dish_name
           ORDER BY SUM(oi.quantity) DESC
         `,
-          { type: sequelize.QueryTypes.SELECT }
+          {
+            type: sequelize.QueryTypes.SELECT,
+            replacements:
+              startDate && endDate
+                ? { startDate: new Date(startDate), endDate: new Date(endDate) }
+                : {},
+          }
         );
 
         // Obtener las categorías por separado
