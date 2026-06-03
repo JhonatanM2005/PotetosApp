@@ -60,6 +60,14 @@ exports.updateItemStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
+    const validItemStatuses = ["pending", "preparing", "ready", "delivered"];
+    if (!status || !validItemStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Estado inválido",
+        validStatuses: validItemStatuses,
+      });
+    }
+
     const item = await OrderItem.findByPk(id, {
       include: [{ model: Order, as: "order" }],
     });

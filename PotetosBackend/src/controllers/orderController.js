@@ -310,6 +310,24 @@ exports.updateOrderStatus = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    // Validar transiciones de estado permitidas
+    const validTransitions = {
+      pending:   ["preparing", "cancelled"],
+      preparing: ["ready", "cancelled"],
+      ready:     ["delivered", "cancelled"],
+      delivered: ["paid", "cancelled"],
+      paid:      [],
+      cancelled: [],
+    };
+
+    const allowed = validTransitions[order.status] || [];
+    if (!allowed.includes(status)) {
+      return res.status(400).json({
+        message: `Transición de estado inválida: '${order.status}' → '${status}'`,
+        allowedTransitions: allowed,
+      });
+    }
+
     const oldStatus = order.status;
 
     // Actualizar el estado de la orden primero
