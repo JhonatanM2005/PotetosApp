@@ -1,0 +1,37 @@
+# PotetosApp .npmignore
+# Archivos que NO deben ser ignorados (siempre incluidos)
+
+# Asegurar que los archivos de licencia siempre se incluyan
+!LICENSE
+!NOTICE
+!README.md
+
+# Ignorar archivos de desarrollo
+.env
+.env.*
+.git
+.gitignore
+.vscode
+.idea
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignorar archivos de prueba y desarrollo
+test/
+tests/
+*.test.js
+*.spec.js
+coverage/
+.nyc_output/
+
+# Ignorar archivos de sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Ignorar node_modules (se instalarán automáticamente)
+node_modules/

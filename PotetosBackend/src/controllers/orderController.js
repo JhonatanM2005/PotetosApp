@@ -121,12 +121,14 @@ exports.getAllOrders = async (req, res) => {
     // Serializar correctamente los datos
     const serializedOrders = orders.map((order) => {
       const orderData = order.toJSON();
-      
+
       // Log para verificar payment_method
-      if (orderData.status === 'paid' && !orderData.payment_method) {
-        console.warn(`⚠️ Orden ${orderData.order_number} está pagada pero no tiene payment_method`);
+      if (orderData.status === "paid" && !orderData.payment_method) {
+        console.warn(
+          `⚠️ Orden ${orderData.order_number} está pagada pero no tiene payment_method`
+        );
       }
-      
+
       // Asegurar que los items tengan todos los campos necesarios
       if (orderData.items) {
         orderData.items = orderData.items.map((item) => ({
@@ -309,26 +311,20 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     const oldStatus = order.status;
-    
-    // Log para rastrear payment_method
 
+    // Actualizar el estado de la orden primero
+    await order.update({ status });
 
-    // Liberar mesa solo cuando la orden está completada (pagada Y entregada)
+    // Liberar mesa cuando la orden se marca como pagada
     if (status === "paid" && order.table_id) {
-      // Solo liberar si ya fue entregada o si se marca como paid después de delivered
-      if (oldStatus === "delivered") {
-        await Table.update(
-          { status: "available", current_order_id: null },
-          { where: { id: order.table_id } }
-        );
-        await order.update({ completed_at: new Date() });
-      } else {
-        // Solo marcar como pagada pero mantener mesa ocupada hasta que se entregue
-        await order.update({ completed_at: new Date() });
-      }
+      await Table.update(
+        { status: "available", current_order_id: null },
+        { where: { id: order.table_id } }
+      );
+      await order.update({ completed_at: new Date() });
     }
 
-    // Si se entrega después de pagar, liberar la mesa
+    // Si se entrega después de pagar, asegurar que la mesa se libere
     if (status === "delivered" && order.table_id) {
       const isPaid = oldStatus === "paid" || order.status === "paid";
       if (isPaid) {
@@ -347,6 +343,14 @@ exports.updateOrderStatus = async (req, res) => {
           orderId: order.id,
           orderNumber: order.order_number,
           tableId: order.table_id,
+        });
+      }
+
+      // Notificar cambio de estado de mesa si se liberó
+      if (status === "paid" && order.table_id) {
+        global.io.emit("table:updated", {
+          tableId: order.table_id,
+          status: "available",
         });
       }
 

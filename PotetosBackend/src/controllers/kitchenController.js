@@ -99,7 +99,7 @@ exports.updateItemStatus = async (req, res) => {
       // Usar método de instancia para preservar todos los campos (incluido payment_method)
       const order = await Order.findByPk(item.order_id);
       if (order) {
-
+        await order.update({ status: newOrderStatus });
       }
 
       // Emitir eventos

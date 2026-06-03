@@ -1,0 +1,51 @@
+# PotetosApp - Sistema de Gestión Integral para Restaurantes
+
+Copyright (c) 2025 Jhonatan Mendez
+
+Este proyecto está licenciado bajo la Licencia MIT.
+Consulte el archivo LICENSE para obtener el texto completo de la licencia.
+
+## AVISO DE TERCEROS
+
+Este software utiliza las siguientes bibliotecas y frameworks de código abierto:
+
+Backend:
+
+- Express.js (MIT License)
+- Sequelize (MIT License)
+- Socket.io (MIT License)
+- jsonwebtoken (MIT License)
+- bcryptjs (MIT License)
+- PostgreSQL (PostgreSQL License)
+
+Frontend:
+
+- React (MIT License)
+- Vite (MIT License)
+- TailwindCSS (MIT License)
+- Zustand (MIT License)
+- React Router (MIT License)
+- Axios (MIT License)
+- Lucide React (ISC License)
+- React Hot Toast (MIT License)
+
+## ATRIBUCIÓN
+
+Desarrollado por: Jhonatan Mendez
+GitHub: https://github.com/JhonatanM2005
+Email: mendezjhonatan00@gmail.com
+
+## CONTRIBUCIONES
+
+Las contribuciones a este proyecto están sujetas a los términos de la Licencia MIT.
+Al enviar una contribución, usted acepta que su código se distribuya bajo esta licencia.
+
+## DESCARGO DE RESPONSABILIDAD
+
+ESTE SOFTWARE SE PROPORCIONA "TAL CUAL", SIN GARANTÍA DE NINGÚN TIPO, EXPRESA O
+IMPLÍCITA, INCLUYENDO PERO NO LIMITADO A GARANTÍAS DE COMERCIABILIDAD, IDONEIDAD
+PARA UN PROPÓSITO PARTICULAR Y NO INFRACCIÓN. EN NINGÚN CASO LOS AUTORES O
+TITULARES DE LOS DERECHOS DE AUTOR SERÁN RESPONSABLES DE NINGÚN RECLAMO, DAÑO U
+OTRA RESPONSABILIDAD, YA SEA EN UNA ACCIÓN DE CONTRATO, AGRAVIO O DE OTRO TIPO,
+QUE SURJA DE, FUERA DE O EN CONEXIÓN CON EL SOFTWARE O EL USO U OTROS TRATOS EN
+EL SOFTWARE.

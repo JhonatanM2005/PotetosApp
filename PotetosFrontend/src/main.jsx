@@ -1,3 +1,12 @@
+/**
+ * PotetosApp - Sistema de Gestión para Restaurantes
+ *
+ * Copyright (c) 2025 Jhonatan Mendez
+ *
+ * This software is licensed under the MIT License.
+ * See the LICENSE file in the root directory for full license text.
+ */
+
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Toaster } from "react-hot-toast";
