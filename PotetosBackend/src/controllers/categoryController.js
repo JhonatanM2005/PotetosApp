@@ -116,7 +116,7 @@ exports.createCategory = async (req, res) => {
     });
   } catch (error) {
     console.error("Create category error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };
 
@@ -158,7 +158,7 @@ exports.updateCategory = async (req, res) => {
     });
   } catch (error) {
     console.error("Update category error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };
 

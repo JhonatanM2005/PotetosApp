@@ -70,8 +70,7 @@ exports.createReservation = async (req, res) => {
     console.error("Error al crear reserva:", error);
     res.status(500).json({
       success: false,
-      message: "Error al crear la reserva",
-      error: error.message,
+      message: "Error al crear la reserva", ...(process.env.NODE_ENV === "development" && { error: error.message }),
     });
   }
 };
@@ -117,8 +116,7 @@ exports.getAllReservations = async (req, res) => {
     console.error("Error al obtener reservas:", error);
     res.status(500).json({
       success: false,
-      message: "Error al obtener las reservas",
-      error: error.message,
+      message: "Error al obtener las reservas", ...(process.env.NODE_ENV === "development" && { error: error.message }),
     });
   }
 };
@@ -137,8 +135,7 @@ exports.getTodayReservations = async (req, res) => {
     console.error("Error al obtener reservas del día:", error);
     res.status(500).json({
       success: false,
-      message: "Error al obtener las reservas del día",
-      error: error.message,
+      message: "Error al obtener las reservas del día", ...(process.env.NODE_ENV === "development" && { error: error.message }),
     });
   }
 };
@@ -157,8 +154,7 @@ exports.getUpcomingReservations = async (req, res) => {
     console.error("Error al obtener próximas reservas:", error);
     res.status(500).json({
       success: false,
-      message: "Error al obtener las próximas reservas",
-      error: error.message,
+      message: "Error al obtener las próximas reservas", ...(process.env.NODE_ENV === "development" && { error: error.message }),
     });
   }
 };
@@ -185,8 +181,7 @@ exports.getReservationById = async (req, res) => {
     console.error("Error al obtener reserva:", error);
     res.status(500).json({
       success: false,
-      message: "Error al obtener la reserva",
-      error: error.message,
+      message: "Error al obtener la reserva", ...(process.env.NODE_ENV === "development" && { error: error.message }),
     });
   }
 };
@@ -256,8 +251,7 @@ exports.updateReservationStatus = async (req, res) => {
     console.error("Error al actualizar estado de reserva:", error);
     res.status(500).json({
       success: false,
-      message: "Error al actualizar el estado de la reserva",
-      error: error.message,
+      message: "Error al actualizar el estado de la reserva", ...(process.env.NODE_ENV === "development" && { error: error.message }),
     });
   }
 };
@@ -286,8 +280,7 @@ exports.deleteReservation = async (req, res) => {
     console.error("Error al eliminar reserva:", error);
     res.status(500).json({
       success: false,
-      message: "Error al eliminar la reserva",
-      error: error.message,
+      message: "Error al eliminar la reserva", ...(process.env.NODE_ENV === "development" && { error: error.message }),
     });
   }
 };
@@ -336,8 +329,7 @@ exports.getReservationStats = async (req, res) => {
     console.error("Error al obtener estadísticas:", error);
     res.status(500).json({
       success: false,
-      message: "Error al obtener estadísticas",
-      error: error.message,
+      message: "Error al obtener estadísticas", ...(process.env.NODE_ENV === "development" && { error: error.message }),
     });
   }
 };

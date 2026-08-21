@@ -132,7 +132,7 @@ exports.createDish = async (req, res) => {
     });
   } catch (error) {
     console.error("Create dish error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };
 
@@ -191,7 +191,7 @@ exports.updateDish = async (req, res) => {
     });
   } catch (error) {
     console.error("Update dish error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };
 

@@ -103,7 +103,7 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };
 
@@ -133,7 +133,7 @@ exports.logout = async (req, res) => {
     res.json({ message: "Logout successful" });
   } catch (error) {
     console.error("Logout error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };
 
@@ -181,7 +181,7 @@ exports.updateProfile = async (req, res) => {
     });
   } catch (error) {
     console.error("Update profile error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };
 
@@ -253,7 +253,7 @@ exports.changePassword = async (req, res) => {
     res.json({ message: "Password changed successfully" });
   } catch (error) {
     console.error("Change password error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };
 
@@ -317,7 +317,7 @@ exports.forgotPassword = async (req, res) => {
     });
   } catch (error) {
     console.error("Forgot password error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };
 
@@ -384,7 +384,7 @@ exports.verifyResetCode = async (req, res) => {
     });
   } catch (error) {
     console.error("Verify code error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };
 
@@ -474,6 +474,6 @@ exports.resetPassword = async (req, res) => {
     res.json({ message: "Password reset successfully" });
   } catch (error) {
     console.error("Reset password error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };

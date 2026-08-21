@@ -120,7 +120,7 @@ exports.getUserStats = async (req, res) => {
 exports.getUsers = async (req, res) => {
   try {
     const users = await User.findAll({
-      attributes: { exclude: ["password"] },
+      attributes: { exclude: ["password", "password_history", "session_token"] },
       order: [["created_at", "DESC"]],
     });
 
@@ -137,7 +137,7 @@ exports.getUserById = async (req, res) => {
     const { id } = req.params;
 
     const user = await User.findByPk(id, {
-      attributes: { exclude: ["password"] },
+      attributes: { exclude: ["password", "password_history", "session_token"] },
     });
 
     if (!user) {
@@ -201,7 +201,7 @@ exports.createUser = async (req, res) => {
     });
   } catch (error) {
     console.error("Create user error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };
 
@@ -247,7 +247,7 @@ exports.updateUser = async (req, res) => {
     });
   } catch (error) {
     console.error("Update user error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };
 

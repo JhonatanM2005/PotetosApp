@@ -132,7 +132,7 @@ exports.createTable = async (req, res) => {
     });
   } catch (error) {
     console.error("Create table error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };
 
@@ -170,7 +170,7 @@ exports.updateTable = async (req, res) => {
     });
   } catch (error) {
     console.error("Update table error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };
 
@@ -230,8 +230,7 @@ exports.deleteTable = async (req, res) => {
     }
 
     res.status(500).json({
-      message: "Error del servidor al eliminar la mesa",
-      error: error.message,
+      message: "Error del servidor al eliminar la mesa", ...(process.env.NODE_ENV === "development" && { error: error.message }),
     });
   }
 };

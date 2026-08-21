@@ -11,7 +11,7 @@ const authMiddleware = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findByPk(decoded.id, {
-      attributes: { exclude: ["password"] },
+      attributes: { exclude: ["password", "password_history", "session_token"] },
     });
 
     if (!user || !user.is_active) {

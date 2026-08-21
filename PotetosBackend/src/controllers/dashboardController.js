@@ -191,8 +191,7 @@ exports.getDashboardStats = async (req, res) => {
   } catch (error) {
     console.error("Get dashboard stats error:", error);
     res.status(500).json({
-      message: "Server error",
-      error: error.message,
+      message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }),
     });
   }
 };
@@ -261,7 +260,7 @@ exports.getTodayStats = async (req, res) => {
     });
   } catch (error) {
     console.error("Get today stats error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", ...(process.env.NODE_ENV === "development" && { error: error.message }) });
   }
 };
 
@@ -511,8 +510,7 @@ exports.getExportData = async (req, res) => {
   } catch (error) {
     console.error("Get export data error:", error);
     res.status(500).json({
-      message: "Error al obtener datos de exportación",
-      error: error.message,
+      message: "Error al obtener datos de exportación", ...(process.env.NODE_ENV === "development" && { error: error.message }),
     });
   }
 };
@@ -545,8 +543,7 @@ exports.getAdminStats = async (req, res) => {
   } catch (error) {
     console.error("Get admin stats error:", error);
     res.status(500).json({
-      message: "Error al obtener estadísticas del sistema",
-      error: error.message,
+      message: "Error al obtener estadísticas del sistema", ...(process.env.NODE_ENV === "development" && { error: error.message }),
     });
   }
 };
