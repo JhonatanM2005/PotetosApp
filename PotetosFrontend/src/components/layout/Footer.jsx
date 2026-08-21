@@ -100,6 +100,25 @@ export default function Footer() {
             </div>
           </div>
         </div>
+
+        {/* Credits */}
+        <div className="mt-8 pt-8 border-t border-secondary/20 flex flex-col md:flex-row justify-between items-center text-xs text-white/70">
+          <p className="mb-2 md:mb-0">
+            &copy; {new Date().getFullYear()} PotetosApp. Desarrollado por{" "}
+            <span className="font-semibold text-white">Jhonatan A Mendez R</span>
+          </p>
+          <p>
+            Diseño UI/UX y Branding por{" "}
+            <a 
+              href="#" 
+              className="font-semibold text-white hover:text-secondary transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Ana M Samudio T
+            </a>
+          </p>
+        </div>
       </div>
     </footer>
   );
