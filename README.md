@@ -32,73 +32,7 @@ Sistema de gestión integral para restaurantes con gestión de órdenes, cocina,
 
 ## 📋 Descripción
 
-PotetosApp es una solución completa y moderna para la gestión integral de restaurantes. Diseñada con arquite## 🐛 Reporte de Issues
-
-Si encuentras un bug o tienes una sugerencia:
-
-1. Verifica que no exista un issue similar
-2. Crea un nuevo issue con una descripción clara
-3. Incluye pasos para reproducir el problema
-4. Agrega capturas de pantalla si es relevante
-
-## 🔧 Troubleshooting
-
-### Problemas comunes
-
-**1. Error de conexión a la base de datos**
-
-```bash
-# Verifica que PostgreSQL esté corriendo
-# Windows: Servicios > PostgreSQL
-# Linux/Mac: sudo systemctl status postgresql
-```
-
-**2. Socket.io no conecta**
-
-- Verifica que `VITE_SOCKET_URL` apunte al servidor backend correcto
-- Asegúrate de que CORS esté configurado correctamente en el backend
-- Revisa la consola del navegador para errores de conexión
-
-**3. Los emails no se envían**
-
-- Verifica tu `BREVO_API_KEY` en el archivo `.env`
-- Confirma que el email remitente esté verificado en Brevo
-- Revisa los logs del servidor para errores de email
-
-**4. Error "JWT malformed"**
-
-- Limpia el localStorage del navegador
-- Verifica que `JWT_SECRET` sea el mismo en desarrollo y producción
-- Vuelve a iniciar sesión
-
-**5. La aplicación no carga después del build**
-
-- Verifica las rutas en `vite.config.js`
-- Revisa la configuración de Nginx
-- Comprueba los logs del contenedor Docker
-
-### FAQ
-
-**¿Puedo usar MySQL en lugar de PostgreSQL?**
-Sí, pero deberás modificar la configuración de Sequelize y ajustar los tipos de datos.
-
-**¿Cómo cambio el puerto del backend?**
-Modifica la variable `PORT` en el archivo `.env` del backend.
-
-**¿Cómo agrego nuevos roles?**
-
-1. Actualiza el modelo `User.js` con el nuevo rol
-2. Modifica `roleMiddleware.js` para incluir permisos
-3. Actualiza el frontend para mostrar opciones según el rol
-
-**¿Puedo usar otro servicio de email?**
-Sí, modifica `emailService.js` para usar Nodemailer con otro proveedor (Gmail, SendGrid, etc.)
-
-**¿Cómo escalo la aplicación?**
-
-- Usa un balanceador de carga para múltiples instancias del backend
-- Implementa Redis para sesiones compartidas
-- Configura clustering de Socket.io con Redis Adapteriente-servidor y comunicación en tiempo real, permite optimizar los procesos operativos del restaurante desde la toma de pedidos hasta el cobro final.
+PotetosApp es una solución completa y moderna para la gestión integral de restaurantes. Diseñada con arquitectura cliente-servidor y comunicación en tiempo real, permite optimizar los procesos operativos del restaurante desde la toma de pedidos hasta el cobro final.
 
 ## ✨ Características Principales
 
@@ -730,7 +664,7 @@ Las contribuciones son bienvenidas y apreciadas. Para contribuir:
 - `Docs:` - Cambios en documentación
 - `Style:` - Cambios de formato/estilo
 
-## � Reporte de Issues
+## 🐛 Reporte de Issues
 
 Si encuentras un bug o tienes una sugerencia:
 
@@ -739,7 +673,7 @@ Si encuentras un bug o tienes una sugerencia:
 3. Incluye pasos para reproducir el problema
 4. Agrega capturas de pantalla si es relevante
 
-## �📝 Licencia
+## 📝 Licencia
 
 Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
 
@@ -760,9 +694,16 @@ Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE)
 - [ ] 📈 Analytics y métricas de negocio
 - [ ] 🔔 Notificaciones push móviles
 
+## 🎨 Diseño UX/UI y Branding
+
+El diseño de la interfaz de usuario, experiencia de usuario (wireframes, mockups) y toda la identidad visual de la marca Potetos (incluyendo logos e ilustraciones) fue creado por **Ana M Samudio T**
+
+- **Portafolio:** 
+- **Rol en el proyecto:** Lead UI/UX Designer & Graphic Designer
+
 ## 👨‍💻 Autor
 
-**Jhonatan M**
+**Jhonatan A Mendez R**
 
 ## 🙏 Agradecimientos
 
